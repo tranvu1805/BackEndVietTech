@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const DOCUMEBT_NAME = 'account'
+const DOCUMENT_NAME = 'account'
 const COLLECTION_NAME = 'accounts'
 const AccountSchema = new mongoose.Schema(
     {
@@ -17,4 +17,4 @@ const AccountSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model(DOCUMEBT_NAME, AccountSchema);
+module.exports = mongoose.model(DOCUMENT_NAME, AccountSchema);
