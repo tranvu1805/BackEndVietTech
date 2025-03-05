@@ -2,7 +2,7 @@
 const mongoose = require("mongoose");
 const {
   db: { host, port, name },
-} = require("../configs/config.mongodb");
+} = require("../configs/configMongoDb");
 const dbUrl = `mongodb://${host}:${port}/${name}`;
 
 class Database {
