@@ -6,7 +6,7 @@ const accountRoutes = require("./account/index");
 
 // API versioning
 router.use("/v1/api", accountRoutes);
-router.use("/shop", require("./shop"));
+router.use("/v1/shop", require("./shop"));
 
 // Route mặc định (Home Page)
 router.get("/", (req, res) => {
