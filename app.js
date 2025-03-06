@@ -26,5 +26,7 @@ require('./src/dbs/init.mongodb')
 // checkOverload ()
 // //init routes
 app.use('/',require('./src/routes/index'))
+const shopRoutes = require("./src/routes/");
+app.use("/api", shopRoutes);
 //handing error
 module.exports = app
