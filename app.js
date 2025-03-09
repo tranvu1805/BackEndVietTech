@@ -9,7 +9,7 @@ const app = express();
 // console.log(`Process::`,process.env);
 app.use(express.json()); // 🛠 Middleware giúp đọc request body JSON
 app.use(express.urlencoded({ extended: true })); // 🛠 Hỗ trợ form-data
-app.use('/', require('./src/routes/index'))
+app.use("/", require("./src/routes/index"));
 
 // init middlewares
 app.use(morgan("dev"));
@@ -34,15 +34,15 @@ app.use((req, res, next) => {
   error.status = 404;
   next(error);
 });
-app.use((error, req, res, next) => {
-  const statusCode = error.status || 500;
-  return res.status(statusCode).json({
-    error: {
-      status: "error",
-      code: statusCode,
-      message: error.message || "Internal Server Error",
-    },
-  });
-});
+// app.use((error, req, res, next) => {
+//   const statusCode = error.status || 500;
+//   return res.status(statusCode).json({
+//     error: {
+//       status: "error",
+//       code: statusCode,
+//       message: error.message || "Internal Server Error",
+//     },
+//   });
+// });
 
 module.exports = app;
