@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const DOCUMEBT_NAME = 'ApiKey'
-const COLLECTION_NAME = 'ApiKeys'
+const DOCUMEBT_NAME = 'apikey'
+const COLLECTION_NAME = 'apikeys'
 const apiKeySchema = new mongoose.Schema(
     {
         key: {

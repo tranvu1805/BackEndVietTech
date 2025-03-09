@@ -9,6 +9,7 @@ const app = express();
 // console.log(`Process::`,process.env);
 app.use(express.json()); // 🛠 Middleware giúp đọc request body JSON
 app.use(express.urlencoded({ extended: true })); // 🛠 Hỗ trợ form-data
+app.use("/", require("./src/routes/index"));
 
 // init middlewares
 app.use(morgan("dev"));
@@ -25,6 +26,8 @@ require("./src/dbs/init.mongodb");
 // checkOverload ()
 // //init routes
 app.use("/", require("./src/routes/index"));
+const shopRoutes = require("./src/routes/");
+app.use("/api", shopRoutes);
 //handing error
 app.use((req, res, next) => {
   const error = new Error("Not found");
