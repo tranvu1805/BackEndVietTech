@@ -4,9 +4,12 @@ const router = express.Router();
 // Import tất cả route con
 const accountRoutes = require("./account/index");
 const accessRoutes = require("./access/index");
+const ShopRoutes = require("./shop/index")
 
 // API versioning
-router.use("/v1/api", accountRoutes);
+router.use("/v1/api/access", accessRoutes);
+router.use('/v1/api/account', accountRoutes)
+router.use("/v1/api/shop", ShopRoutes);
 
 // Route mặc định (Home Page)
 router.get("/", (req, res) => {
