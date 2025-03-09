@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const AccountService = require("../services/account.service");
 const mongoose = require("mongoose");
 
@@ -18,8 +19,34 @@ class AccountController {
         } catch (error) {
             return next(error);
         }
-    }
+=======
+const AccessService = require("../services/account.service");
+// const {OK, CREATED} = require("../core/success.response");
+class AccountController {
+  // Đăng ký tài khoản
+  async signUp(req, res, next) {
+    //Todo: bỏ try catch, vì đã bọc trong asyncHandle
+    try {
+      console.log(`[P]:: signUp::`, req.body);
 
+      // Gọi Service để xử lý đăng ký
+      const result = await AccessService.signUp(req.body);
+      //   new CREATED({
+      //     message: "Tài khoản đã tạo thành công",
+      //     metadata: await AccessService.signUp(req.body),
+      //     options: {
+      //         limit: 10000
+      //     }
+      //   }).send(res);
+      //bỏ return
+      return res.status(result.code).json(result);
+    } catch (error) {
+      next(error); // Đẩy lỗi vào middleware xử lý lỗi của Express
+>>>>>>> main
+    }
+  }
+
+<<<<<<< HEAD
     // ✅ Cập nhật tài khoản theo ID
     async updateAccount(req, res, next) {
         try {
@@ -44,6 +71,20 @@ class AccountController {
         const result = await AccountService.updateAccountStatus(id, status);
         return res.status(result.code).json(result);
     }
+=======
+  // Đăng nhập tài khoản
+  async login(req, res, next) {
+    try {
+      console.log(`[P]:: login::`, req.body);
+
+      const result = await AccessService.login(req.body);
+
+      return res.status(result.code).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+>>>>>>> main
 }
 
 

@@ -1,85 +1,97 @@
 const accountModel = require("../models/account.model");
 const roleModel = require("../models/role.model");
 const bcrypt = require("bcrypt");
-const crypto = require("crypto");
-const keyTokenModel = require("../models/keytoken.model");
+const crypto = require("node:crypto");
+// const keytokenModel = require("../models/keytoken.model");
+// const KeyTokenService = require("../services/keytoken.service");
 const { getInfoData } = require("../utils");
-const { createToKenPair } = require("../auth/authUntils");
+// const { createToKenPair } = require("../auth/authUntils");
 
-class AccountService {
-
-    // ✅ Lấy thông tin tài khoản theo ID
-    static async getAccountById(accountId) {
+class AccessService {
+    static signUp = async ({ name, email, password, phone, address, role = "Customer" }) => {
         try {
-            console.log("📌 Lấy thông tin tài khoản ID:", accountId);
+            console.log("Received:", { name, email, password, phone, address, role });
 
-            // Tìm tài khoản theo ID
-            const account = await accountModel.findById(accountId).select("-password");
-            if (!account) {
-                return { code: 404, message: "Account not found!", status: "error" };
+            // Step 1: Kiểm tra dữ liệu đầu vào
+            if (!email || !password || !name || !phone || !address) {
+                return {
+                    code: 400,
+                    message: "All fields are required!",
+                    status: "error",
+                };
             }
 
-            return { code: 200, message: "Account found!", status: "success", data: account };
+            // Step 2: Kiểm tra email đã tồn tại chưa
+            const existingAccount = await accountModel.findOne({ email }).lean();
+            if (existingAccount) {
+                return {
+                    code: 400,
+                    message: "Account already registered!",
+                    status: "error",
+                };
+            }
+
+            // Step 3: Lấy role_id từ collection `roles`
+            const roleData = await roleModel.findOne({ name: role }).lean();
+            if (!roleData) {
+                return {
+                    code: 400,
+                    message: "Invalid role!",
+                    status: "error",
+                };
+            }
+
+            // Step 4: Hash mật khẩu
+            const passwordHash = await bcrypt.hash(password, 10);
+            console.log("Hashed Password:", passwordHash);
+
+            // Step 5: Tạo tài khoản mới
+            const newAccount = await accountModel.create({
+                username: email.split("@")[0], // Tạo username từ email
+                full_name: name,
+                phone,
+                address,
+                email,
+                password: passwordHash,
+                role_id: roleData._id,
+            });
+
+            if (newAccount) {
+                // Step 6: Tạo privateKey & publicKey
+                const privateKey = crypto.randomBytes(64).toString("hex");
+                const publicKey = crypto.randomBytes(64).toString("hex");
+                console.log({ privateKey, publicKey });
+
+                // Step 7: Lưu privateKey & publicKey vào MongoDB
+                const keyStore = await KeyTokenService.createKeyToken({
+                    userId: newAccount._id,
+                    publicKey,
+                    privateKey,
+                });
+
+                // Step 8: Tạo token pair
+                const tokens = await createToKenPair({ userId: newAccount._id, email }, publicKey, privateKey);
+                console.log(`Create token success::`, tokens);
+
+                return {
+                    code: 201,
+                    message: "Account registered successfully!",
+                    status: "success",
+                    metadata: {
+                        account: getInfoData({ fields: ["_id", "username", "full_name", "email"], object: newAccount }),
+                        tokens,
+                    },
+                };
+            }
         } catch (error) {
-            console.error("❌ Lỗi khi lấy tài khoản:", error);
-            return { code: 500, message: "Internal Server Error", status: "error" };
+            console.error(error);
+            return {
+                code: 500,
+                message: error.message,
+                status: "error",
+            };
         }
-    }
-
-    // ✅ Cập nhật thông tin tài khoản
-    static async updateAccount(accountId, updateData) {
-        try {
-            console.log("📌 Cập nhật tài khoản ID:", accountId, "Dữ liệu mới:", updateData);
-
-            // Nếu có cập nhật mật khẩu, mã hóa lại trước khi lưu
-            if (updateData.password) {
-                updateData.password = await bcrypt.hash(updateData.password, 10);
-            }
-
-            // Cập nhật tài khoản
-            const updatedAccount = await accountModel.findByIdAndUpdate(accountId, updateData, { new: true }).select("-password");
-            if (!updatedAccount) {
-                return { code: 404, message: "Account not found!", status: "error" };
-            }
-
-            return { code: 200, message: "Account updated successfully!", status: "success", data: updatedAccount };
-        } catch (error) {
-            console.error("❌ Lỗi khi cập nhật tài khoản:", error);
-            return { code: 500, message: "Internal Server Error", status: "error" };
-        }
-    }
-    // ✅ Cập nhật trạng thái tài khoản
-    static async updateAccountStatus(accountId, newStatus) {
-        try {
-            console.log("📌 Bắt đầu cập nhật trạng thái tài khoản:", accountId, "=>", newStatus);
-    
-            // Kiểm tra trạng thái hợp lệ
-            const validStatuses = ["active", "inactive", "banned"];
-            if (!validStatuses.includes(newStatus)) {
-                console.warn("⚠️ Trạng thái không hợp lệ:", newStatus);
-                return { code: 400, message: "Invalid status!", status: "error" };
-            }
-    
-            // Cập nhật trạng thái tài khoản
-            const updatedAccount = await accountModel.findByIdAndUpdate(
-                accountId, 
-                { status: newStatus }, 
-                { new: true }
-            ).select("-password");
-    
-            if (!updatedAccount) {
-                console.warn("⚠️ Không tìm thấy tài khoản ID:", accountId);
-                return { code: 404, message: "Account not found!", status: "error" };
-            }
-    
-            console.log("✅ Cập nhật trạng thái thành công! ID:", accountId, "Trạng thái mới:", newStatus);
-            return { code: 200, message: "Account status updated successfully!", status: "success", data: updatedAccount };
-        } catch (error) {
-            console.error("❌ Lỗi khi cập nhật trạng thái tài khoản:", error);
-            return { code: 500, message: "Internal Server Error", status: "error" };
-        }
-    }
-    
+    };
 }
 
 module.exports = AccountService;
