@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 // Import tất cả route con
 const accountRoutes = require("./account/index");
 
@@ -14,6 +13,7 @@ router.get("/", (req, res) => {
   });
 });
 
+router.use("/v1/api/cart", require("./cart"));
 // Middleware xử lý lỗi 404 nếu không tìm thấy route nào phù hợp
 router.use((req, res) => {
   res.status(404).json({
