@@ -107,7 +107,6 @@ class AccountService {
       return { code: 500, message: "Internal Server Error", status: "error" };
     }
   }
->>>>>>> 47c1c0a08b62d3b84b0ef3ce54067ca9988ff62a
 }
 
 module.exports = AccountService;
