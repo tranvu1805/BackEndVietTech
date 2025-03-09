@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const keyTokenModel = require("../models/keytoken.model");
 const { getInfoData } = require("../utils");
-const { createToKenPair } = require("../auth/authUntils");
+const { createToKenPair } = require("../auth/authUtils");
 
 class AccountService {
   // ✅ Lấy thông tin tài khoản theo ID

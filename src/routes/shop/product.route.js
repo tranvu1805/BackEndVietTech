@@ -1,12 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct } = require("../../controllers/product.controller");
-const { authentication } = require("../../auth/authUntils");
-
+const {
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+} = require("../../controllers/product.controller");
+const { authentication } = require("../../auth/authUtils");
 
 router.get("/", getAllProducts);
 router.get("/:id", getProductById);
-
 
 // router.use(authentication)
 
