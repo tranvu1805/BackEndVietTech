@@ -5,6 +5,7 @@ const {
   NotFoundError,
 } = require("../core/error.response");
 const { cart } = require("../models/cart.model");
+const { billRepo } = require("../models/bill.model");
 class CartService {
   //Start Repo
 
@@ -45,6 +46,40 @@ class CartService {
   }
 
   //End Repo
+
+   // thanh toán
+   static async checkout({ userId, address }) {
+    const currentCart = await cart.findOne({
+      cart_userId: userId,
+      cart_state: "active",
+    });
+    if (!currentCart) {
+      return {
+        code: 400,
+        message: "Cart not found",
+        status: "error",
+      };
+    }
+
+    let total = 0
+    currentCart.cart_products.forEach(e => total += e.price * e.quantity)
+
+    const shippingFee = 35;
+    total+=shippingFee
+
+    const newBill = await billRepo.create({
+      user_id: currentCart.cart_userId,
+      products: currentCart.cart_products,
+      address: address,
+      total: total,
+      shipping_fee: shippingFee, // Lưu phí ship vào DB
+      status: 'pending'
+    })
+    // await currentCart.deleteOne()
+    return newBill
+  }
+
+  
 
   static async addToCart({ userId, product = {} }) {
     const productInCart = await CartService.checkProductInCart({

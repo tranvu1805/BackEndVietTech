@@ -5,10 +5,14 @@ const accountRoutes = require("./account/index");
 const accessRoutes = require("./access/index");
 const ShopRoutes = require("./shop/index")
 
+const BillRoutes = require("./bill/index")
+
 // API versioning
 router.use("/v1/api/access", accessRoutes);
 router.use('/v1/api/account', accountRoutes)
 router.use("/v1/api/shop", ShopRoutes);
+
+router.use("/v1/api/bill", BillRoutes);
 
 // Route mặc định (Home Page)
 router.get("/", (req, res) => {
