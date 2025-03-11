@@ -32,10 +32,10 @@ class CartService {
   static async updateUserCartQuantity({ userId, product }) {
     const { productId, quantity } = product;
     const query = {
-      cart_userId: userId,
-      cart_state: "active",
-      "cart_products.productId": productId,
-    },
+        cart_userId: userId,
+        cart_state: "active",
+        "cart_products.productId": productId,
+      },
       updateSet = {
         $inc: {
           "cart_products.$.quantity": quantity,
@@ -48,7 +48,13 @@ class CartService {
   //End Repo
 
   // thanh toán
-  static async checkout({ userId, address, phone_number, receiver_name, payment_method }) {
+  static async checkout({
+    userId,
+    address,
+    phone_number,
+    receiver_name,
+    payment_method,
+  }) {
     const currentCart = await cart.findOne({
       cart_userId: userId,
       cart_state: "active",
@@ -63,18 +69,17 @@ class CartService {
 
     if (!currentCart.cart_products || currentCart.cart_products.length === 0) {
       return {
-          code: 400,
-          message: "Cart is empty. Cannot proceed to checkout.",
-          status: "error",
+        code: 400,
+        message: "Cart is empty. Cannot proceed to checkout.",
+        status: "error",
       };
-  }
+    }
 
-
-    let total = 0
-    currentCart.cart_products.forEach(e => total += e.price * e.quantity)
+    let total = 0;
+    currentCart.cart_products.forEach((e) => (total += e.price * e.quantity));
 
     const shippingFee = 35;
-    total += shippingFee
+    total += shippingFee;
 
     // Sinh mã đơn hàng ngẫu nhiên 5 chữ số
     const orderCode = Math.floor(10000 + Math.random() * 90000);
@@ -88,15 +93,12 @@ class CartService {
       shipping_fee: shippingFee,
       phone_number: phone_number, // Lưu phí ship vào DB
       receiver_name: receiver_name,
-      status: 'pending',
-      payment_method: payment_method || 'tm'
-
-    })
+      status: "pending",
+      payment_method: payment_method || "tm",
+    });
     // await currentCart.deleteOne()
-    return newBill
+    return newBill;
   }
-
-
 
   static async addToCart({ userId, product = {} }) {
     const productInCart = await CartService.checkProductInCart({
@@ -123,11 +125,15 @@ class CartService {
   //update cart
   static async updateUserCart({ userId, product }) {
     const { productId, quantity } = product;
+
+    if (quantity === 0) {
+      return await this.deleteUserCart({ userId, productId });
+    }
     const query = {
-      cart_userId: userId,
-      cart_state: "active",
-      "cart_products.productId": productId,
-    },
+        cart_userId: userId,
+        cart_state: "active",
+        "cart_products.productId": productId,
+      },
       updateSet = {
         $set: {
           "cart_products.$.quantity": quantity,
@@ -139,9 +145,9 @@ class CartService {
   //delete cart
   static async deleteUserCart({ userId, productId }) {
     const query = {
-      cart_userId: userId,
-      cart_state: "active",
-    },
+        cart_userId: userId,
+        cart_state: "active",
+      },
       updateSet = {
         $pull: {
           cart_products: { productId },
