@@ -34,14 +34,12 @@ class KeyTokenService {
     };
 
     static findUserById = async (userId) => {
-        try {
-            const keyToken = await keytokenModel.findOne({ user: Types.ObjectId(userId) });
-            return keyToken;
-        } catch (error) {
-            console.error("❌ [ERROR] findByUserId:", error);
-            return { error: error.message };
+        if (!Types.ObjectId.isValid(userId)) {  // Kiểm tra xem userId có hợp lệ không
+            throw new Error("Invalid userId");
         }
-    }
+        return await keytokenModel.findOne({ user: new Types.ObjectId(userId) }).lean();
+    };
+    
 
     static async removeKeyToken(userId) {
         try {

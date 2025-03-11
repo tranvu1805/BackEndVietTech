@@ -14,7 +14,7 @@ const products = [
         "product_description": "Flagship smartphone with A16 Bionic chip.",
         "product_price": 1099.99,
         "product_stock": 100,
-        "category": "67c7364bfe33f580e7b1d3a1", // Điện thoại
+        "category": "67c9c927de7f8ec2801605ae", // Điện thoại
         "product_attributes": {
             "battery_life": "23 hours",
             "camera_quality": "48MP",
@@ -75,7 +75,7 @@ const products = [
         "product_description": "Foldable smartphone with 5G and AMOLED screen.",
         "product_price": 1799.99,
         "product_stock": 30,
-        "category": "67c7364bfe33f580e7b1d3a1", // Điện thoại
+        "category": "67c9c927de7f8ec2801605ae", // Điện thoại
         "product_attributes": {
             "battery_life": "22 hours",
             "camera_quality": "50MP",
@@ -122,7 +122,7 @@ const products = [
         "product_description": "Next-gen gaming console with ultra-fast SSD.",
         "product_price": 499.99,
         "product_stock": 150,
-        "category": "67c73673fe33f580e7b1d3ab", // Phụ kiện điện tử
+        "category": "67c9c927de7f8ec2801605b1", // Phụ kiện điện tử
         "product_attributes": {
             "processor": "AMD Ryzen",
             "ram": "16GB",
@@ -160,7 +160,7 @@ const products = [
         "product_description": "Powerful MacBook Pro with M2 Pro chip.",
         "product_price": 2499.99,
         "product_stock": 20,
-        "category": "67c73654fe33f580e7b1d3a3", // Laptop
+        "category": "67c9c927de7f8ec2801605af", // Laptop
         "product_attributes": {
             "processor": "Apple M2 Pro",
             "ram": "32GB",
@@ -207,7 +207,7 @@ const products = [
         "product_description": "High-performance mirrorless camera with 33MP sensor.",
         "product_price": 2499.99,
         "product_stock": 12,
-        "category": "67c7368ffe33f580e7b1d3b1", // Máy ảnh
+        "category": "67c9c927de7f8ec2801605b6", // Máy ảnh
         "product_attributes": {
             "resolution": "33MP",
             "zoom": "Optical Zoom 10x",

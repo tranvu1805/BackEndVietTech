@@ -4,7 +4,7 @@ const categoryModel = require("../models/category.model");
 // 🟢 1. Tạo sản phẩm mới
 const createProduct = async (req, res) => {
     try {
-        const { product_name, product_thumbnail, product_description, product_price, product_stock, category, product_attributes } = req.body;
+        const { product_name, product_thumbnail, product_description, product_price, product_stock, category, product_attributes,variations } = req.body;
 
         console.log(category);
 
@@ -83,6 +83,45 @@ const getAllProducts = async (req, res) => {
     }
 };
 
+const getAllProducts_Admin = async (req, res) => {
+    try {
+        const { category, search, minPrice, maxPrice, page = 1, limit = 10, variant_name, variant_value } = req.query;
+        let filter = {};
+
+        if (category) filter.category = category;
+        if (search) filter.product_name = new RegExp(search, "i");
+        if (minPrice || maxPrice) {
+            filter.product_price = {};
+            if (minPrice) filter.product_price.$gte = parseFloat(minPrice);
+            if (maxPrice) filter.product_price.$lte = parseFloat(maxPrice);
+        }
+        // Lọc theo biến thể
+        if (variant_name && variant_value) {
+            filter.variations = {
+                $elemMatch: {
+                    variant_name: variant_name,
+                    variant_value: variant_value
+                }
+            };
+        }
+
+        const products = await Product.find(filter)
+            .populate("category")
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit));
+
+        
+
+
+        // res.status(200).json({ success: true, products });
+        return products; 
+    } catch (error) {
+        // res.status(500).json({ success: false, message: error.message });
+        console.log(error);
+        
+    }
+};
+
 // 🟢 3. Lấy chi tiết sản phẩm
 const getProductById = async (req, res) => {
     try {
@@ -133,4 +172,4 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-module.exports = { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct };
+module.exports = { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct,getAllProducts_Admin };

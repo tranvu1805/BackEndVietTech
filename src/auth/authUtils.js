@@ -1,6 +1,7 @@
 const JWT = require('jsonwebtoken')
 const asyncHandler = require('../helpers/asyncHandler')
 const { findUserById } = require('../services/keytoken.service')
+const { log } = require('console')
 
 const HEADER = {
     API_KEY: 'x-api-key',
@@ -39,12 +40,15 @@ const authentication = asyncHandler(async (req, res, next) => {
     const userId = req.headers[HEADER.CLIENT_ID];  // Lấy userId từ headers
 
     // Kiểm tra nếu userId không có trong header
+    log('userId', userId)
     if (!userId) {
         return res.status(400).json({ success: false, message: 'User ID is missing in request headers' });
     }
 
     // Lấy access token từ header 'authorization'
-    const token = req.headers[HEADER.AUTHORIZATION]?.split(' ')[1];
+    const token = req.headers[HEADER.AUTHORIZATION];
+    console.log('token', token);
+    
     if (!token) {
         return res.status(403).json({ success: false, message: 'Access Token is missing in request headers' });
     }
@@ -57,7 +61,7 @@ const authentication = asyncHandler(async (req, res, next) => {
 
     try {
         // Xác minh access token
-        const decoded = JWT.verify(token, process.env.JWT_PUBLIC_KEY); // Xác minh token bằng public key
+        const decoded = JWT.verify(token, keyStore.publicKey); // Xác minh token bằng public key
 
         // Kiểm tra userId trong payload của token có khớp với userId từ header không
         if (decoded.userId !== userId) {
@@ -67,6 +71,7 @@ const authentication = asyncHandler(async (req, res, next) => {
         // Lưu thông tin keyStore vào req để sử dụng tiếp theo
         req.keyStore = keyStore; 
 
+        console.log('Authentication Successful!');
         return next(); // Tiếp tục đến route tiếp theo nếu xác thực thành công
     } catch (error) {
         console.error('Authentication Error:', error); // In lỗi ra console để kiểm tra
