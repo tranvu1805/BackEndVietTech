@@ -5,6 +5,7 @@ const {
   NotFoundError,
 } = require("../core/error.response");
 const { cart } = require("../models/cart.model");
+const { billRepo } = require("../models/bill.model");
 class CartService {
   //Start Repo
 
@@ -46,6 +47,59 @@ class CartService {
 
   //End Repo
 
+  // thanh toán
+  static async checkout({
+    userId,
+    address,
+    phone_number,
+    receiver_name,
+    payment_method,
+  }) {
+    const currentCart = await cart.findOne({
+      cart_userId: userId,
+      cart_state: "active",
+    });
+    if (!currentCart) {
+      return {
+        code: 400,
+        message: "Cart not found",
+        status: "error",
+      };
+    }
+
+    if (!currentCart.cart_products || currentCart.cart_products.length === 0) {
+      return {
+        code: 400,
+        message: "Cart is empty. Cannot proceed to checkout.",
+        status: "error",
+      };
+    }
+
+    let total = 0;
+    currentCart.cart_products.forEach((e) => (total += e.price * e.quantity));
+
+    const shippingFee = 35;
+    total += shippingFee;
+
+    // Sinh mã đơn hàng ngẫu nhiên 5 chữ số
+    const orderCode = Math.floor(10000 + Math.random() * 90000);
+
+    const newBill = await billRepo.create({
+      user_id: currentCart.cart_userId,
+      products: currentCart.cart_products,
+      order_code: orderCode,
+      address: address,
+      total: total,
+      shipping_fee: shippingFee,
+      phone_number: phone_number, // Lưu phí ship vào DB
+      receiver_name: receiver_name,
+      status: "pending",
+      payment_method: payment_method || "tm",
+    });
+    // await currentCart.deleteOne()
+    return newBill;
+  }
+
   static async addToCart({ userId, product = {} }) {
     const productInCart = await CartService.checkProductInCart({
       userId,
@@ -71,6 +125,10 @@ class CartService {
   //update cart
   static async updateUserCart({ userId, product }) {
     const { productId, quantity } = product;
+
+    if (quantity === 0) {
+      return await this.deleteUserCart({ userId, productId });
+    }
     const query = {
         cart_userId: userId,
         cart_state: "active",

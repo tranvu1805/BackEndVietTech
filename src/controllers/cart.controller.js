@@ -12,6 +12,14 @@ class CartController {
     }).send(res);
   };
 
+  checkout = async (req, res, next) => {
+    new SuccessResponse({
+      message: "Cart checkout successfully",
+      metadata: await CartService.checkout(req.body),
+    }).send(res);
+  };
+
+
   //chưa xong
   update = async (req, res, next) => {
     new SuccessResponse({

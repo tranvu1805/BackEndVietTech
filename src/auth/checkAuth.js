@@ -26,6 +26,7 @@ const apiKey = async (req, res, next) => {
     return next();
   } catch (error) {}
 };
+
 const permissions = (permission) => {
   return (req, res, next) => {
     if (!req.objKey.permissions) {
