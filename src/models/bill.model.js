@@ -22,11 +22,34 @@ const BillSchema = new mongoose.Schema(
             required: true,
             default: 35,
         },
+        address: {
+            type: String,
+            required: true,
+        },
+        phone_number: {
+            type: String,
+            required: true,
+        },
+        receiver_name: {
+            type: String,
+            required: true,
+        },
+        order_code: {
+            type: Number,
+            required: true,
+            unique: true,
+        },
         status: {
             type: String,
             required: true,
             enum: ["active", "completed", "failed", "pending"],
             default: "pending",
+        },
+        payment_method: {
+            type: String,
+            required: true,
+            enum: ["ck", "tm"],
+            default: "ck",
         }
     },
     {
