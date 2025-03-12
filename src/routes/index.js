@@ -3,13 +3,18 @@ const router = express.Router();
 // Import tất cả route con
 const accountRoutes = require("./account/index");
 const accessRoutes = require("./access/index");
+const reviweRoutes = require("./review/index");
+const reviweReportRoutes = require("./review_report/index");
 const ShopRoutes = require("./shop/index")
 
 const BillRoutes = require("./bill/index")
 
 // API versioning
 router.use("/v1/api/access", accessRoutes);
-router.use('/v1/api/account', accountRoutes)
+router.use('/v1/api/account', accountRoutes);
+router.use("/v1/api/review", reviweRoutes);
+router.use("/v1/api/review_report", reviweReportRoutes);
+
 router.use("/v1/api/shop", ShopRoutes);
 
 router.use("/v1/api/bill", BillRoutes);
