@@ -8,4 +8,8 @@ router.post("", asyncHandler(cartController.addToCart));
 router.delete("", asyncHandler(cartController.delete));
 router.put("", asyncHandler(cartController.update));
 router.get("", asyncHandler(cartController.listToCart));
+
+router.post("/checkout", asyncHandler(cartController.checkout));
+
+
 module.exports = router;
