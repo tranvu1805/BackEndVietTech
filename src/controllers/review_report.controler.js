@@ -5,8 +5,8 @@ class ReviewReportController {
     static async addReviewReport(req, res) {
         try {
             const { review_id, reason } = req.body;
-            const user_id = req.user.id; // Lấy ID user từ token
-            const report = await ReviewReportService.addReviewReport(review_id, user_id, reason);
+            const account_id = req.body.account_id; // Lấy ID user từ token
+            const report = await ReviewReportService.addReviewReport(review_id, account_id, reason);
             res.json({ success: true, message: "Báo cáo review thành công", report });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
@@ -28,15 +28,18 @@ class ReviewReportController {
         try {
             const { status } = req.body;
             const { id } = req.params;
-            if (!["pending", "resolved", "rejected"].includes(status)) {
+
+            if (!["active", "reported"].includes(status)) {
                 return res.status(400).json({ success: false, message: "Trạng thái không hợp lệ" });
             }
-            const report = await ReviewReportService.updateReportStatus(id, status);
-            res.json({ success: true, message: "Cập nhật trạng thái thành công", report });
+
+            const result = await ReviewReportService.updateReportStatus(id, status);
+            res.json({ success: true, message: result.message, status: result.status });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
         }
     }
 }
+
 
 module.exports = ReviewReportController;

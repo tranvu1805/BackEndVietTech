@@ -6,6 +6,6 @@ const { apiKey, permissions } = require("../../auth/checkAuth");
 // Routes
 router.post("/add", ReviewReportController.addReviewReport);
 router.get("/list", ReviewReportController.getAllReports);
-router.put("/status/:id", ReviewReportController.updateReportStatus);
+router.patch("/status/:id", ReviewReportController.updateReportStatus);
 
 module.exports = router;
