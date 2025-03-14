@@ -6,6 +6,7 @@ const {
 } = require("../core/error.response");
 const { cart } = require("../models/cart.model");
 const { billRepo } = require("../models/bill.model");
+const { discountRepo } = require("../models/disscount.model");
 class CartService {
   //Start Repo
 
@@ -48,7 +49,7 @@ class CartService {
   //End Repo
 
   // thanh toán
-  static async checkout({ userId, address, phone_number, receiver_name, payment_method }) {
+  static async checkout({ userId, address, phone_number, receiver_name, payment_method, discount_code }) {
     const currentCart = await cart.findOne({
       cart_userId: userId,
       cart_state: "active",
@@ -63,11 +64,11 @@ class CartService {
 
     if (!currentCart.cart_products || currentCart.cart_products.length === 0) {
       return {
-          code: 400,
-          message: "Cart is empty. Cannot proceed to checkout.",
-          status: "error",
+        code: 400,
+        message: "Cart is empty. Cannot proceed to checkout.",
+        status: "error",
       };
-  }
+    }
 
 
     let total = 0
@@ -75,6 +76,17 @@ class CartService {
 
     const shippingFee = 35;
     total += shippingFee
+
+    // Kiểm tra mã giảm giá
+    let discountAmount = 0;
+    const discount = await discountRepo.findOne({
+      code: discount_code,
+      is_active: true,
+      expiration_date: { $gte: new Date() } // Kiểm tra chưa hết hạn
+    });
+
+    discountAmount = discount.discount_amount;
+    total -= discountAmount; // Trừ vào tổng tiền
 
     // Sinh mã đơn hàng ngẫu nhiên 5 chữ số
     const orderCode = Math.floor(10000 + Math.random() * 90000);
@@ -86,11 +98,12 @@ class CartService {
       address: address,
       total: total,
       shipping_fee: shippingFee,
-      phone_number: phone_number, // Lưu phí ship vào DB
+      phone_number: phone_number,
       receiver_name: receiver_name,
       status: 'pending',
-      payment_method: payment_method || 'tm'
-
+      payment_method: payment_method || 'tm',
+      discount_code: discount_code || null,
+      discount_amount: discountAmount // Số tiền đã giảm
     })
     // await currentCart.deleteOne()
     return newBill
