@@ -19,8 +19,6 @@ class CartController {
     }).send(res);
   };
 
-
-  //chưa xong
   update = async (req, res, next) => {
     new SuccessResponse({
       message: "Cart updated successfully",
@@ -35,7 +33,6 @@ class CartController {
   };
 
   listToCart = async (req, res, next) => {
-    // Validate query parameters here
     if (!req.query) return ErrorResponse("userId is required");
     new SuccessResponse({
       message: "Cart list successfully",

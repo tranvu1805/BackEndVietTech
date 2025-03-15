@@ -7,64 +7,42 @@ const accountModel = require("../models/account.model");
 const roleModel = require("../models/role.model");
 
 class AccessService {
-  // ✅ Đăng nhập tài khoản
+  // ✅ Đăng nhập tài khoản - kiểm tra bằng Public Key
   static async login({ email, password }) {
     try {
       console.log(`📌 [LOGIN] Đăng nhập với email: ${email}`);
 
-      // 🔎 1️⃣ Tìm tài khoản theo email
       const account = await accountModel.findOne({ email });
       if (!account) {
         console.error(`❌ [LOGIN ERROR] Email không tồn tại: ${email}`);
-        return {
-          code: 400,
-          message: "Email hoặc mật khẩu không đúng!",
-          status: "error",
-        };
+        return { code: 400, message: "Email hoặc mật khẩu không đúng!", status: "error" };
       }
 
-      // 🔎 2️⃣ Kiểm tra mật khẩu
       const isPasswordValid = await bcrypt.compare(password, account.password);
       if (!isPasswordValid) {
         console.error(`❌ [LOGIN ERROR] Sai mật khẩu cho email: ${email}`);
-        return {
-          code: 400,
-          message: "Email hoặc mật khẩu không đúng!",
-          status: "error",
-        };
+        return { code: 400, message: "Email hoặc mật khẩu không đúng!", status: "error" };
       }
 
-      // 🔑 3️⃣ Tạo privateKey & publicKey mới
       const privateKey = crypto.randomBytes(64).toString("hex");
       const publicKey = crypto.randomBytes(64).toString("hex");
 
-      // 🔐 4️⃣ Tạo token pair (accessToken & refreshToken)
-      const tokens = await createToKenPair(
-        { userId: account._id, email },
-        publicKey,
-        privateKey
-      );
+      const tokens = await createToKenPair({ userId: account._id, email }, publicKey, privateKey);
       console.log(`✅ [TOKEN] Token pair created:`, tokens);
 
-      // 📝 5️⃣ Cập nhật keyToken vào DB (Đảm bảo lưu đúng refreshTokens)
       await KeyTokenService.createKeyToken({
         userId: account._id,
         publicKey,
         privateKey,
-        refreshTokens: tokens.refreshToken, // Đưa refreshToken vào đúng mảng
+        refreshTokens: [tokens.refreshToken],
       });
 
-      // 🚀 6️⃣ Trả về kết quả
-      console.log(`🎉 [SUCCESS] Đăng nhập thành công: ${email}`);
       return {
         code: 200,
         message: "Đăng nhập thành công!",
         status: "success",
         metadata: {
-          account: getInfoData({
-            fields: ["_id", "username", "full_name", "email", "phone"],
-            object: account,
-          }),
+          account: getInfoData({ fields: ["_id", "username", "full_name", "email", "phone"], object: account }),
           tokens,
         },
       };
@@ -73,6 +51,52 @@ class AccessService {
       return { code: 500, message: "Lỗi máy chủ nội bộ", status: "error" };
     }
   }
+  static async logout({ refreshToken }) {
+    try {
+        if (!refreshToken) {
+            console.error("❌ Thiếu refreshToken trong request!");
+            return { code: 400, message: "Missing refresh token!", status: "error" };
+        }
+
+        console.log("🔎 Tìm KeyStore với refreshToken:", refreshToken);
+        const keyToken = await KeyTokenService.findByRefreshToken(refreshToken);
+
+        if (!keyToken) {
+            console.error("❌ Không tìm thấy KeyStore cho refreshToken này!");
+            return { code: 400, message: "Invalid refresh token!", status: "error" };
+        }
+
+        console.log("🛠 Private Key trong DB:", keyToken.privateKey);
+
+        // ✅ Giải mã refreshToken để lấy userId
+        let decoded;
+        try {
+            decoded = JWT.verify(refreshToken, keyToken.privateKey);
+            console.log("✅ Refresh Token verified:", decoded);
+        } catch (error) {
+            console.error("❌ JWT Verification Failed:", error.message);
+            return { code: 401, message: "Invalid or expired refresh token", status: "error" };
+        }
+
+        const userId = decoded.userId;
+        console.log("🛠 UserID từ token:", userId);
+
+        // 🛠 Xóa refreshToken của thiết bị hiện tại
+        console.log("🛠 Đang xóa refreshToken...");
+        const updated = await KeyTokenService.removeRefreshToken(userId, refreshToken);
+
+        if (!updated) {
+            console.error("❌ Không thể xóa refreshToken, có thể đã bị xóa hoặc không tồn tại.");
+            return { code: 400, message: "Logout failed!", status: "error" };
+        }
+
+        console.log("✅ Logout sucess ! RefreshToken đã được xóa thành công!");
+        return { code: 200, message: "Logout successful!", status: "success" };
+    } catch (error) {
+        console.error("❌ [LOGOUT ERROR] Lỗi khi đăng xuất:", error);
+        return { code: 500, message: "Lỗi máy chủ nội bộ", status: "error" };
+    }
+}
 
   // ✅ Đăng ký tài khoản khách hàng
   static async signUp({ body, role = "Customer" }) {
@@ -200,30 +224,7 @@ class AccessService {
       };
     }
   }
-  static async logout(userId) {
-    try {
-      const keyToken = await KeyTokenService.findByRefreshToken(refreshToken);
-      if (!keyToken) {
-        return {
-          code: 400,
-          message: "Invalid refresh token!",
-          status: "error",
-        };
-      }
-      const isDeleted = await KeyTokenService.removeKeyToken(userId);
-
-      if (!isDeleted) {
-        return { code: 400, message: "Đăng xuất thất bại!", status: "error" };
-      } else {
-        console.log(" Logout success !!");
-      }
-
-      return { code: 200, message: "Đăng xuất thành công!", status: "success" };
-    } catch (error) {
-      console.error("❌ [LOGOUT ERROR] Lỗi khi đăng xuất:", error);
-      return { code: 500, message: "Lỗi máy chủ nội bộ", status: "error" };
-    }
-  }
+ 
 }
 
 module.exports = AccessService;

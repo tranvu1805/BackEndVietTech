@@ -2,6 +2,7 @@
 const AccessService = require("../services/access.service");
 const express = require("express");
 const KeyTokenService = require("../services/keytoken.service");
+const JWT = require("jsonwebtoken");
 
 class AccessController {
   // ✅ Đăng nhập tài khoản
@@ -83,21 +84,39 @@ class AccessController {
   };
   logout = async (req, res) => {
     try {
-      const userId = req.body.userId || req.headers["x-user-id"];
-      if (!userId) {
-        return res
-          .status(400)
-          .json({ message: "Bad Request: Missing user ID" });
+
+      const { refreshToken } = req.body;
+      console.log("🛠 Nhận refreshToken từ request:", refreshToken);
+
+      if (!refreshToken) {
+        console.error("❌ refreshToken bị thiếu trong request!");
+        return res.status(400).json({ message: "Missing refresh token!" });
       }
 
-      await KeyTokenService.removeKeyToken(userId);
-      userId;
-      return res.status(200).json({ message: "Logout successful" });
+      // 🔎 Tìm KeyStore chứa refreshToken này
+      const keyToken = await KeyTokenService.findByRefreshToken(refreshToken);
+      if (!keyToken) {
+        console.error("❌ Không tìm thấy KeyStore cho refreshToken này!");
+        return res.status(400).json({ message: "Invalid refresh token!" });
+      }
+
+      console.log("🛠 UserID từ token:", keyToken.user);
+
+      // 🛠 Xóa refreshToken cụ thể khỏi danh sách
+      const result = await KeyTokenService.removeRefreshToken(keyToken.user, refreshToken);
+      if (!result) {
+        console.error("❌ Không thể xóa refreshToken, có thể đã bị xóa hoặc không tồn tại.");
+        return res.status(400).json({ message: "Logout failed!" });
+      }
+
+      console.log("✅ RefreshToken đã được xóa thành công!");
+      return res.status(200).json({ message: "Logout successful!" });
     } catch (error) {
       console.error("❌ [LOGOUT ERROR]:", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   };
+
 }
 
 module.exports = new AccessController();

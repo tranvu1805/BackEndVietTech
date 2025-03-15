@@ -39,7 +39,18 @@ class BillController {
       next(error);
     }
   }
-  
+
+  static async getTotalRevenue(req, res) {
+    try {
+      const { startDate, endDate } = req.query;
+      const result = await BillService.getTotalRevenue({ startDate, endDate });
+      return res.status(200).json(result);
+    } catch (error) {
+      return res.status(500).json({ message: "Internal Server Error", error });
+    }
+  }
+
+
 }
 
 module.exports = BillController;

@@ -2,16 +2,16 @@ const AccountService = require("../services/account.service");
 const mongoose = require("mongoose");
 
 class AccountController {
-  // ✅ Lấy thông tin tài khoản theo ID
   async getAccount(req, res, next) {
     try {
-      const { id } = req.params;
-      console.log("📌 ID nhận từ request:", id);
+      const { id } = req.params;  // Lấy id từ tham số của request
 
+      // Kiểm tra nếu id không hợp lệ
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: "Invalid account ID!" });
       }
-      const account = await AccountService.getAccountById(id);
+
+      const account = await AccountService.getAccountWithRoleById(id);
       return res.status(account.code).json(account);
     } catch (error) {
       return next(error);

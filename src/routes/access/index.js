@@ -1,12 +1,18 @@
 const express = require("express");
 const accessController = require("../../controllers/access.controller");
 const { apiKey } = require("../../auth/checkAuth");
-const router = express.Router();
-//sign up
+const { authentication, verifyRefreshToken } = require("../../auth/authUtils");
 
+const router = express.Router();
 router.post("/staff/signup", apiKey, accessController.signUpEmployee);
-router.post("/custumor/signup", apiKey, accessController.signUp);
-router.post("/login", accessController.login);
-router.post("/logout", accessController.logout);
+router.post("/customer/signup", apiKey, accessController.signUp);
+
+// Đăng nhập - kiểm tra Public Key
+router.post("/login", apiKey, accessController.login);
+
+// Đăng xuất - kiểm tra Refresh Token
+router.post("/logout", verifyRefreshToken, accessController.logout);
+
 
 module.exports = router;
+

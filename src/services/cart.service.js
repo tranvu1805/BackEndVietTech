@@ -6,6 +6,7 @@ const {
 } = require("../core/error.response");
 const { cart } = require("../models/cart.model");
 const { billRepo } = require("../models/bill.model");
+const { discountRepo } = require("../models/disscount.model");
 class CartService {
   //Start Repo
 
@@ -54,6 +55,7 @@ class CartService {
     phone_number,
     receiver_name,
     payment_method,
+    discount_code,
   }) {
     const currentCart = await cart.findOne({
       cart_userId: userId,
@@ -81,6 +83,24 @@ class CartService {
     const shippingFee = 35;
     total += shippingFee;
 
+    // Kiểm tra mã giảm giá
+    let discountAmount = 0;
+    let discount = null;
+
+    if (discount_code) {
+      discount = await discountRepo.findOne({
+        code: discount_code,
+        is_active: true,
+        expiration_date: { $gte: new Date() }, // Kiểm tra chưa hết hạn
+      });
+
+      if (discount) {
+        discountAmount = discount.discount_amount;
+      }
+    }
+
+    total -= discountAmount; // Trừ vào tổng tiền
+
     // Sinh mã đơn hàng ngẫu nhiên 5 chữ số
     const orderCode = Math.floor(10000 + Math.random() * 90000);
 
@@ -91,11 +111,14 @@ class CartService {
       address: address,
       total: total,
       shipping_fee: shippingFee,
-      phone_number: phone_number, // Lưu phí ship vào DB
+      phone_number: phone_number,
       receiver_name: receiver_name,
       status: "pending",
       payment_method: payment_method || "tm",
+      discount_code: discount_code || null,
+      discount_amount: discountAmount || 0, // Số tiền đã giảm
     });
+
     // await currentCart.deleteOne()
     return newBill;
   }
