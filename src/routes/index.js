@@ -13,9 +13,6 @@ const BillRoutes = require("./bill/index");
 
 // API versioning
 router.use("/v1/api/access", accessRoutes);
-
-router.use("/v1/api/account", accountRoutes);
-
 router.use("/v1/api/account", accountRoutes);
 router.use("/v1/api/review", reviweRoutes);
 router.use("/v1/api/review_report", reviweReportRoutes);
