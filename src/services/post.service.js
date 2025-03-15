@@ -13,7 +13,24 @@ class PostService {
   static async createPostRepo({ title, content, account_id, status }) {
     return await post.create({ title, content, account_id, status });
   }
-
+  static async getPostByIdRepo({ postId }) {
+    try {
+      const foundPost = await post
+        .findById(postId)
+        .populate("account_id")
+        .lean();
+      if (!foundPost) {
+        throw new NotFoundError("Post not found");
+      }
+      return foundPost;
+    } catch (error) {
+      if (error.name === "CastError") {
+        throw new NotFoundError("Invalid post ID format");
+      }
+      console.error("Error finding post by ID:", error);
+      throw error;
+    }
+  }
   static async updatePostRepo({ postId, title, content, status, account_id }) {
     const filter = { _id: postId };
     const updateData = {
@@ -150,6 +167,18 @@ class PostService {
       };
     } catch (error) {
       console.error("Error getting all posts:", error);
+      throw error;
+    }
+  }
+  static async getPostById({ postId }) {
+    try {
+      if (!postId) {
+        throw new ErrorResponse("Post ID is required", StatusCodes.BAD_REQUEST);
+      }
+      const postData = await PostService.getPostByIdRepo({ postId });
+      return postData;
+    } catch (error) {
+      console.error("Error getting post by ID:", error);
       throw error;
     }
   }
