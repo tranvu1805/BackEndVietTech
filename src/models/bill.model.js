@@ -50,6 +50,14 @@ const BillSchema = new mongoose.Schema(
             required: true,
             enum: ["ck", "tm"],
             default: "ck",
+        },
+        discount_code: {
+            type: String,
+            default: null, // Lưu mã giảm giá (nếu có)
+        },
+        discount_amount: {
+            type: Number,
+            default: 0, // Lưu số tiền đã giảm
         }
     },
     {
