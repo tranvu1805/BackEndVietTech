@@ -79,13 +79,22 @@ class CartService {
 
     // Kiểm tra mã giảm giá
     let discountAmount = 0;
-    const discount = await discountRepo.findOne({
-      code: discount_code,
-      is_active: true,
-      expiration_date: { $gte: new Date() } // Kiểm tra chưa hết hạn
-    });
+    let discount = null;
 
-    discountAmount = discount.discount_amount;
+    if (discount_code) {
+      discount = await discountRepo.findOne({
+        code: discount_code,
+        is_active: true,
+        expiration_date: { $gte: new Date() } // Kiểm tra chưa hết hạn
+      });
+
+      if (discount) {
+        discountAmount = discount.discount_amount;
+      }
+    }
+
+
+
     total -= discountAmount; // Trừ vào tổng tiền
 
     // Sinh mã đơn hàng ngẫu nhiên 5 chữ số
@@ -103,7 +112,7 @@ class CartService {
       status: 'pending',
       payment_method: payment_method || 'tm',
       discount_code: discount_code || null,
-      discount_amount: discountAmount // Số tiền đã giảm
+      discount_amount: discountAmount || 0 // Số tiền đã giảm
     })
     // await currentCart.deleteOne()
     return newBill

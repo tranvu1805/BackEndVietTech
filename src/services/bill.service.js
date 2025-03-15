@@ -42,7 +42,46 @@ class BillService {
     const bills = await billRepo.find();
     return bills;
   }
-  
+
+
+  static async getTotalRevenue({ startDate, endDate }) {
+    try {
+
+      if (!startDate || !endDate) {
+        return {
+          message: "Thiếu thông tin ngày bắt đầu hoặc ngày kết thúc",
+          totalRevenue: 0
+        };
+      }
+
+      // Chuyển startDate về đầu ngày (00:00:00)
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+
+      // Chuyển endDate về cuối ngày (23:59:59)
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+
+      const result = await billRepo.aggregate([
+        { $match: { createdAt: { $gte: start, $lte: end } } },
+        { $group: { _id: null, totalRevenue: { $sum: "$total" } } }
+      ]);
+
+
+      return {
+        message: "Lấy tổng doanh thu thành công",
+        totalRevenue: result.length > 0 ? result[0].totalRevenue : 0
+      };
+
+    } catch (error) {
+      return {
+        message: "Internal Server Error",
+        error: error.message || "Lỗi không xác định",
+        totalRevenue: 0
+      };
+    }
+  }
+
 
 
 }
