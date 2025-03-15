@@ -34,11 +34,7 @@ class BillController {
   static async getAllBills(req, res, next) {
     try {
       const bills = await BillService.getAllBills();
-      return res.status(200).json({
-        message: "Fetch all bills successfully",
-        statusCode: 200,
-        metadata: bills
-      });
+      return bills;
     } catch (error) {
       next(error);
     }

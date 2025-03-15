@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Quản Trị Hệ Thống - Quản Lý Sản Phẩm</title>
+    <title>Quản Trị Hệ Thống - Quản Lý Danh Mục</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome for icons -->
@@ -30,7 +30,6 @@
             background-color: var(--primary-color);
             min-height: 100vh;
             color: white;
-            /* padding-top: 20px; */
         }
 
         .sidebar .nav-link {
@@ -159,26 +158,23 @@
             color: #6c757d;
         }
         
-        .variation-details {
+        .attribute-details {
             background-color: #f8f9fa;
             border-radius: 4px;
             padding: 10px;
             margin-top: 5px;
         }
 
-        .product-attributes,
-        .product-variations {
+        .category-attributes {
             padding: 8px;
         }
 
-        .attribute-item,
-        .variation-item {
+        .attribute-item {
             border-bottom: 1px solid #eee;
             padding: 8px 0;
         }
 
-        .attribute-item:last-child,
-        .variation-item:last-child {
+        .attribute-item:last-child {
             border-bottom: none;
         }
 
@@ -188,17 +184,17 @@
             border-radius: 12px;
         }
 
-        .stock-high {
+        .item-count-high {
             background-color: #d4edda;
             color: #155724;
         }
 
-        .stock-medium {
+        .item-count-medium {
             background-color: #fff3cd;
             color: #856404;
         }
 
-        .stock-low {
+        .item-count-low {
             background-color: #f8d7da;
             color: #721c24;
         }
@@ -254,9 +250,7 @@
             border-radius: 20px;
             box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
             background-color: #2e2f2f;
-            /* Màu xanh đẹp khi hover */
             transform: translateY(-5px);
-            /* Đẩy lên một chút để tạo hiệu ứng nâng lên */
         }
 
         .mini-container .content {
@@ -264,9 +258,6 @@
             transition: color 0.3s ease;
         }
 
-      
-
-        /* Thêm hiệu ứng khi di chuột vào hình ảnh hoặc icon */
         .mini-container img,
         .mini-container i {
             transition: transform 0.3s ease;
@@ -275,7 +266,24 @@
         .mini-container:hover img,
         .mini-container:hover i {
             transform: scale(1.1);
-            /* Tăng kích thước hình ảnh hoặc icon khi hover */
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .parent-category {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+        
+        .child-category {
+            background-color: #e8f5e9;
+            color: #1b5e20;
         }
     </style>
 </head>
@@ -316,9 +324,9 @@
 
                 <!-- Page Header -->
                 <div class="page-header">
-                    <h4 class="mb-0">Quản lý Sản phẩm</h4>
-                    <a href="/v1/api/admin/create" class="btn btn-success">
-                        <i class="fas fa-plus me-1"></i> Thêm sản phẩm mới
+                    <h4 class="mb-0">Quản lý Danh Mục</h4>
+                    <a href="/v1/api/shop/categories/admin/create" class="btn btn-success">
+                        <i class="fas fa-plus me-1"></i> Thêm danh mục mới
                     </a>
                 </div>
 
@@ -327,7 +335,7 @@
                     <div class="col-md-6">
                         <div class="search-box">
                             <i class="fas fa-search"></i>
-                            <input type="text" class="form-control" placeholder="Tìm kiếm sản phẩm...">
+                            <input type="text" class="form-control" placeholder="Tìm kiếm danh mục...">
                         </div>
                     </div>
                     <div class="col-md-6 d-flex justify-content-end">
@@ -345,104 +353,100 @@
                     </div>
                 </div>
 
-                <!-- Products Table -->
+                <!-- Categories Table -->
                 <div class="card">
                     <div class="card-body p-0">
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
                                     <th class="ps-3">ID</th>
-                                    <th>Tên sản phẩm</th>
-                                    <th>Giá (VNĐ)</th>
-                                    <th>Kho hàng</th>
-                                    <th>Trạng thái</th>
+                                    <th>Tên danh mục</th>
+                                    <th>Loại</th>
+                                    <th>Danh mục cha</th>
+                                    <th>Số thuộc tính</th>
                                     <th>Thông tin chi tiết</th>
                                     <th class="text-end pe-3">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% products.forEach(product => { %>
+                                <% categories.forEach(category => { %>
                                 <tr>
-                                    <td class="ps-3"><small class="text-muted"><%= product._id %></small></td>
+                                    <td class="ps-3"><small class="text-muted"><%= category._id %></small></td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <div class="product-image me-2" style="width: 40px; height: 40px; background-color: #f1f1f1; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-                                                <i class="fas fa-box text-secondary"></i>
+                                            <div class="category-icon me-2" style="width: 40px; height: 40px; background-color: #f1f1f1; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-folder text-secondary"></i>
                                             </div>
-                                            <div><%= product.product_name %></div>
+                                            <div><%= category.name %></div>
                                         </div>
                                     </td>
-                                    <td><%= product.product_price.toLocaleString() %> ₫</td>
                                     <td>
-                                        <% let stockClass = ""; %>
-                                        <% if (product.product_stock > 50) { %>
-                                            <% stockClass = "stock-high"; %>
-                                        <% } else if (product.product_stock > 10) { %>
-                                            <% stockClass = "stock-medium"; %>
+                                        <% if (!category.parent_category) { %>
+                                            <span class="category-badge parent-category">Danh mục chính</span>
                                         <% } else { %>
-                                            <% stockClass = "stock-low"; %>
+                                            <span class="category-badge child-category">Danh mục con</span>
                                         <% } %>
-                                        <span class="status-badge <%= stockClass %>">
-                                            <%= product.product_stock %> sản phẩm
-                                        </span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-success">Đang bán</span>
+                                        <% if (category.parent_category) { %>
+                                            <%= category.parent_category.name %>
+                                        <% } else { %>
+                                            <span class="text-muted">—</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% let countClass = ""; %>
+                                        <% if (category.attributes_template.length > 8) { %>
+                                            <% countClass = "item-count-high"; %>
+                                        <% } else if (category.attributes_template.length > 3) { %>
+                                            <% countClass = "item-count-medium"; %>
+                                        <% } else { %>
+                                            <% countClass = "item-count-low"; %>
+                                        <% } %>
+                                        <span class="status-badge <%= countClass %>">
+                                            <%= category.attributes_template.length %> thuộc tính
+                                        </span>
                                     </td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-secondary" type="button" 
                                                 data-bs-toggle="collapse" 
-                                                data-bs-target="#details<%= product._id %>" 
+                                                data-bs-target="#details<%= category._id %>" 
                                                 aria-expanded="false">
                                             <i class="fas fa-info-circle me-1"></i> Chi tiết
                                         </button>
                                     </td>
                                     <td class="text-end pe-3">
                                         <div class="action-buttons">
-                                            <a href="/admin/products/<%= product._id %>/edit" class="btn btn-sm btn-warning me-1">
+                                            <a href="/admin/categories/<%= category._id %>/edit" class="btn btn-sm btn-warning me-1">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal<%= product._id %>">
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal<%= category._id %>">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
                                 <!-- Details Row -->
-                                <tr class="collapse" id="details<%= product._id %>">
+                                <tr class="collapse" id="details<%= category._id %>">
                                     <td colspan="7" class="p-0">
-                                        <div class="variation-details">
+                                        <div class="attribute-details">
                                             <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="product-attributes">
-                                                        <h6 class="mb-3"><i class="fas fa-list-ul me-2"></i>Thuộc tính sản phẩm</h6>
-                                                        <% if (Object.keys(product.product_attributes).length === 0) { %>
-                                                            <p class="text-muted">Không có thuộc tính</p>
+                                                <div class="col-md-12">
+                                                    <div class="category-attributes">
+                                                        <h6 class="mb-3"><i class="fas fa-list-ul me-2"></i>Thuộc tính danh mục</h6>
+                                                        <% if (category.attributes_template.length === 0) { %>
+                                                            <p class="text-muted">Không có thuộc tính nào được định nghĩa</p>
                                                         <% } else { %>
-                                                            <% Object.keys(product.product_attributes).forEach(attribute => { %>
-                                                                <div class="attribute-item">
-                                                                    <strong><%= attribute %>:</strong> 
-                                                                    <%= product.product_attributes[attribute] %>
-                                                                </div>
-                                                            <% }); %>
-                                                        <% } %>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 border-start">
-                                                    <div class="product-variations">
-                                                        <h6 class="mb-3"><i class="fas fa-random me-2"></i>Biến thể sản phẩm</h6>
-                                                        <% if (product.variations.length === 0) { %>
-                                                            <p class="text-muted">Không có biến thể</p>
-                                                        <% } else { %>
-                                                            <% product.variations.forEach(variation => { %>
-                                                                <div class="variation-item">
-                                                                    <div><strong><%= variation.variant_name %>:</strong> <%= variation.variant_value %></div>
-                                                                    <div class="text-muted small">
-                                                                        Giá: <%= variation.price.toLocaleString() %> ₫ | 
-                                                                        Kho: <%= variation.stock %> sản phẩm
+                                                            <div class="row">
+                                                                <% category.attributes_template.forEach(attribute => { %>
+                                                                    <div class="col-md-3 mb-2">
+                                                                        <div class="attribute-badge p-2 bg-light rounded">
+                                                                            <i class="fas fa-tag me-1 text-secondary"></i>
+                                                                            <%= attribute %>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            <% }); %>
+                                                                <% }); %>
+                                                            </div>
                                                         <% } %>
                                                     </div>
                                                 </div>
@@ -452,7 +456,7 @@
                                 </tr>
                                 
                                 <!-- Delete Confirmation Modal -->
-                                <div class="modal fade" id="deleteModal<%= product._id %>" tabindex="-1">
+                                <div class="modal fade" id="deleteModal<%= category._id %>" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
@@ -460,12 +464,15 @@
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
-                                                <p>Bạn có chắc chắn muốn xóa sản phẩm "<%= product.product_name %>"?</p>
+                                                <p>Bạn có chắc chắn muốn xóa danh mục "<%= category.name %>"?</p>
+                                                <% if (!category.parent_category) { %>
+                                                    <p class="text-danger"><small>Lưu ý: Xóa danh mục này sẽ xóa tất cả các danh mục con của nó.</small></p>
+                                                <% } %>
                                                 <p class="text-danger"><small>Thao tác này không thể hoàn tác.</small></p>
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                                <a href="/admin/products/<%= product._id %>/delete" class="btn btn-danger">Xác nhận xóa</a>
+                                                <a href="/admin/categories/<%= category._id %>/delete" class="btn btn-danger">Xác nhận xóa</a>
                                             </div>
                                         </div>
                                     </div>

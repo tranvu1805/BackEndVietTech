@@ -40,7 +40,7 @@ const authentication = asyncHandler(async (req, res, next) => {
     const userId = req.headers[HEADER.CLIENT_ID];  // Lấy userId từ headers
 
     // Kiểm tra nếu userId không có trong header
-    log('userId', userId)
+    log('userId nek', req.headers[HEADER.CLIENT_ID])
     if (!userId) {
         return res.status(400).json({ success: false, message: 'User ID is missing in request headers' });
     }

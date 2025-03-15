@@ -9,7 +9,7 @@ const app = express();
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // console.log(`Process::`,process.env);
 app.use(express.json()); // 🛠 Middleware giúp đọc request body JSON
@@ -33,9 +33,10 @@ require("./src/dbs/init.mongodb");
 // checkOverload ()
 // //init routes
 app.use('/',require('./src/routes/index'))
+
 const shopRoutes = require("./src/routes/");
 const productRoutes = require("./src/routes/shop/product.route");
-// app.use("/admin", productRoutes);
+app.use("/admin", productRoutes);
 app.use("/api", shopRoutes);
 //handing error
 app.use((req, res, next) => {

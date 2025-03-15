@@ -4,22 +4,28 @@ const router = express.Router();
 const accountRoutes = require("./account/index");
 const accessRoutes = require("./access/index");
 const ShopRoutes = require("./shop/index")
+const ImageRoutes = require("./image/index")
+const adminRoutes = require("./admin/index")
 
-const BillRoutes = require("./bill/index")
+const BillRoutes = require("./bill/index");
+const accessController = require("../controllers/access.controller");
 
 // API versioning
 router.use("/v1/api/access", accessRoutes);
 router.use('/v1/api/account', accountRoutes)
 router.use("/v1/api/shop", ShopRoutes);
+router.use("/v1/api/admin", adminRoutes);
+
 
 router.use("/v1/api/bill", BillRoutes);
+router.use("/v1/api/image", ImageRoutes);
 
 // Route mặc định (Home Page)
 router.get("/", (req, res) => {
-  res.status(200).json({
-    message: "Welcome to account API!",
-  });
+  res.render('home/login');
 });
+
+router.post('/login', accessController.login);
 
 router.use("/v1/api/cart", require("./cart"));
 // Middleware xử lý lỗi 404 nếu không tìm thấy route nào phù hợp
