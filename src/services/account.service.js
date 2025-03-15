@@ -2,17 +2,17 @@ const crypto = require("crypto");
 const keyTokenModel = require("../models/keytoken.model");
 const { getInfoData } = require("../utils");
 const { createToKenPair } = require("../auth/authUtils");
+const accountModel = require('../models/account.model'); 
 
 class AccountService {
-  // ✅ Lấy thông tin tài khoản theo ID
-  static async getAccountById(accountId) {
+  static async getAccountWithRoleById(accountId) {
     try {
-      console.log("📌 Lấy thông tin tài khoản ID:", accountId);
-
-      // Tìm tài khoản theo ID
+      // Tìm tài khoản theo ID và populate thông tin role
       const account = await accountModel
         .findById(accountId)
+        .populate("role_id", "name") // Populate tên quyền (role name)
         .select("-password");
+
       if (!account) {
         return { code: 404, message: "Account not found!", status: "error" };
       }
@@ -21,13 +21,17 @@ class AccountService {
         code: 200,
         message: "Account found!",
         status: "success",
-        data: account,
+        data: {
+          ...account.toObject(),
+          role: account.role_id ? account.role_id.name : "No role", // Trả về tên quyền của tài khoản
+        },
       };
     } catch (error) {
       console.error("❌ Lỗi khi lấy tài khoản:", error);
       return { code: 500, message: "Internal Server Error", status: "error" };
     }
   }
+
 
   // ✅ Cập nhật thông tin tài khoản
   static async updateAccount(accountId, updateData) {
