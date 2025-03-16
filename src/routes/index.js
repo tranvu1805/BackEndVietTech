@@ -12,8 +12,6 @@ const ImageRoutes = require("./image/index");
 const DisscountRoutes = require("./disscount/index");
 const adminRoutes = require("./admin/index");
 
-const ImageRoutes = require("./image/index");
-
 const accessController = require("../controllers/access.controller");
 
 // API versioning
