@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản Trị Hệ Thống - <%= action %> Sản Phẩm</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Style thêm vào */
+        .btn-add-field {
+            margin-top: 0.5rem;
+        }
+
+        .remove-attribute,
+        .remove-variation {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .remove-attribute:hover,
+        .remove-variation:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-md-10 col-lg-10 ms-auto main-content">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-info-circle me-2"></i> Thông tin cơ bản
+                            </div>
+                            <div class="card-body">
+                                <form action="/admin/products/<%= action === 'Edit' ? product._id : '' %>"
+                                    method="POST">
+                                    <div class="form-section">
+                                        <div class="mb-3">
+                                            <label for="product_name" class="form-label">Tên sản phẩm <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="product_name"
+                                                name="product_name" value="<%= product ? product.product_name : '' %>"
+                                                placeholder="Nhập tên sản phẩm" required>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="product_price" class="form-label">Giá (VNĐ) <span
+                                                            class="text-danger">*</span></label>
+                                                    <input type="number" class="form-control" id="product_price"
+                                                        name="product_price"
+                                                        value="<%= product ? product.product_price : '' %>"
+                                                        placeholder="Nhập giá sản phẩm" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="product_stock" class="form-label">Số lượng trong kho
+                                                        <span class="text-danger">*</span></label>
+                                                    <input type="number" class="form-control" id="product_stock"
+                                                        name="product_stock"
+                                                        value="<%= product ? product.product_stock : '' %>"
+                                                        placeholder="Nhập số lượng" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="product_description" class="form-label">Mô tả sản phẩm</label>
+                                            <textarea class="form-control" id="product_description"
+                                                name="product_description" rows="4"
+                                                placeholder="Nhập mô tả chi tiết về sản phẩm"><%= product && product.product_description ? product.product_description : '' %></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Thuộc tính sản phẩm -->
+                                    <div class="form-section">
+                                        <div class="form-section-title">
+                                            <i class="fas fa-list-ul me-2"></i> Thuộc tính sản phẩm
+                                        </div>
+                                        <div id="attributes-container">
+                                            <% if (product && product.product_attributes) { %>
+                                                <% Object.keys(product.product_attributes).forEach((key, index)=> { %>
+                                                    <div class="attribute-row">
+                                                        <div class="row">
+                                                            <div class="col-md-5">
+                                                                <div class="mb-2">
+                                                                    <label class="form-label">Tên thuộc tính</label>
+                                                                    <input type="text" class="form-control"
+                                                                        name="attribute_keys[]" value="<%= key %>"
+                                                                        placeholder="VD: Màu sắc, Kích thước...">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <div class="mb-2">
+                                                                    <label class="form-label">Giá trị</label>
+                                                                    <input type="text" class="form-control"
+                                                                        name="attribute_values[]"
+                                                                        value="<%= product.product_attributes[key] %>"
+                                                                        placeholder="VD: Đỏ, XL...">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-2 d-flex align-items-end">
+                                                                <button type="button"
+                                                                    class="btn btn-outline-danger btn-sm remove-attribute">
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <% }); %>
+                                                        <% } else { %>
+                                                            <div class="attribute-row">
+                                                                <div class="row">
+                                                                    <div class="col-md-5">
+                                                                        <div class="mb-2">
+                                                                            <label class="form-label">Tên thuộc
+                                                                                tính</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="attribute_keys[]"
+                                                                                placeholder="VD: Màu sắc, Kích thước...">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-5">
+                                                                        <div class="mb-2">
+                                                                            <label class="form-label">Giá trị</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="attribute_values[]"
+                                                                                placeholder="VD: Đỏ, XL...">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-2 d-flex align-items-end">
+                                                                        <button type="button"
+                                                                            class="btn btn-outline-danger btn-sm remove-attribute">
+                                                                            <i class="fas fa-times"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <% } %>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-primary btn-sm btn-add-field"
+                                            id="add-attribute">
+                                            <i class="fas fa-plus me-1"></i> Thêm thuộc tính
+                                        </button>
+                                    </div>
+
+                                    <!-- Biến thể sản phẩm -->
+                                    <div class="form-section">
+                                        <div class="form-section-title">
+                                            <i class="fas fa-random me-2"></i> Biến thể sản phẩm
+                                        </div>
+                                        <div id="variations-container">
+                                            <% if (product && product.variations && product.variations.length> 0) { %>
+                                                <% product.variations.forEach((variation, index)=> { %>
+                                                    <div class="variation-row">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <div class="mb-2">
+                                                                    <label class="form-label">Tên biến thể</label>
+                                                                    <input type="text" class="form-control"
+                                                                        name="variant_names[]"
+                                                                        value="<%= variation.variant_name %>"
+                                                                        placeholder="VD: Màu, Size...">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="mb-2">
+                                                                    <label class="form-label">Giá trị</label>
+                                                                    <input type="text" class="form-control"
+                                                                        name="variant_values[]"
+                                                                        value="<%= variation.variant_value %>"
+                                                                        placeholder="VD: Đỏ, M...">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="mb-2">
+                                                                    <label class="form-label">Giá (VNĐ)</label>
+                                                                    <input type="number" class="form-control"
+                                                                        name="variant_prices[]"
+                                                                        value="<%= variation.price %>"
+                                                                        placeholder="Giá biến thể">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <div class="mb-2">
+                                                                    <label class="form-label">Kho</label>
+                                                                    <input type="number" class="form-control"
+                                                                        name="variant_stocks[]"
+                                                                        value="<%= variation.stock %>"
+                                                                        placeholder="Số lượng">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-1 d-flex align-items-end">
+                                                                <button type="button"
+                                                                    class="btn btn-outline-danger btn-sm remove-variation">
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <% }); %>
+                                                        <% } else { %>
+                                                            <div class="variation-row">
+                                                                <div class="row">
+                                                                    <div class="col-md-3">
+                                                                        <div class="mb-2">
+                                                                            <label class="form-label">Tên biến
+                                                                                thể</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="variant_names[]"
+                                                                                placeholder="VD: Màu, Size...">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <div class="mb-2">
+                                                                            <label class="form-label">Giá trị</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="variant_values[]"
+                                                                                placeholder="VD: Đỏ, M...">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <div class="mb-2">
+                                                                            <label class="form-label">Giá (VNĐ)</label>
+                                                                            <input type="number" class="form-control"
+                                                                                name="variant_prices[]"
+                                                                                placeholder="Giá biến thể">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <div class="mb-2">
+                                                                            <label class="form-label">Kho</label>
+                                                                            <input type="number" class="form-control"
+                                                                                name="variant_stocks[]"
+                                                                                placeholder="Số lượng">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-1 d-flex align-items-end">
+                                                                        <button type="button"
+                                                                            class="btn btn-outline-danger btn-sm remove-variation">
+                                                                            <i class="fas fa-times"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <% } %>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-primary btn-sm btn-add-field"
+                                            id="add-variation">
+                                            <i class="fas fa-plus me-1"></i> Thêm biến thể
+                                        </button>
+                                    </div>
+
+                                    <!-- Footer buttons -->
+                                    <div class="form-section d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <a href="/admin/products" class="btn btn-outline-secondary me-2">
+                                            Hủy
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-1"></i> Lưu sản phẩm
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap and other scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Handle adding/removing attributes
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add Attribute
+            document.getElementById('add-attribute').addEventListener('click', function () {
+                const container = document.getElementById('attributes-container');
+                const newRow = document.createElement('div');
+                newRow.className = 'attribute-row';
+                newRow.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="mb-2">
+                                <label class="form-label">Tên thuộc tính</label>
+                                <input type="text" class="form-control" name="attribute_keys[]" placeholder="VD: Màu sắc, Kích thước...">
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="mb-2">
+                                <label class="form-label">Giá trị</label>
+                                <input type="text" class="form-control" name="attribute_values[]" placeholder="VD: Đỏ, XL...">
+                            </div>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-attribute">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(newRow);
+
+                // Add event listener to the new remove button
+                const removeButtons = newRow.querySelectorAll('.remove-attribute');
+                removeButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        this.closest('.attribute-row').remove();
+                    });
+                });
+            });
+
+            // Add Variation
+            document.getElementById('add-variation').addEventListener('click', function () {
+                const container = document.getElementById('variations-container');
+                const newRow = document.createElement('div');
+                newRow.className = 'variation-row';
+                newRow.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-2">
+                                <label class="form-label">Tên biến thể</label>
+                                <input type="text" class="form-control" name="variant_names[]" placeholder="VD: Màu, Size...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-2">
+                                <label class="form-label">Giá trị</label>
+                                <input type="text" class="form-control" name="variant_values[]" placeholder="VD: Đỏ, M...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-2">
+                                <label class="form-label">Giá (VNĐ)</label>
+                                <input type="number" class="form-control" name="variant_prices[]" placeholder="Giá biến thể">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="mb-2">
+                                <label class="form-label">Kho</label>
+                                <input type="number" class="form-control" name="variant_stocks[]" placeholder="Số lượng">
+                            </div>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-variation">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(newRow);
+
+                // Add event listener to the new remove button
+                const removeButtons = newRow.querySelectorAll('.remove-variation');
+                removeButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        this.closest('.variation-row').remove();
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -6,13 +6,15 @@ const {
   getProductById,
   updateProduct,
   deleteProduct,
+  getAllProducts_Admin,
 } = require("../../controllers/product.controller");
 const { authentication } = require("../../auth/authUtils");
 
 router.get("/", getAllProducts);
 router.get("/:id", getProductById);
 
-// router.use(authentication)
+
+router.use(authentication)
 
 router.post("/", createProduct);
 

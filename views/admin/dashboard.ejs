@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản Trị Hệ Thống - Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom styles */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .sidebar {
+            background-color: var(--primary-color);
+            min-height: 100vh;
+            color: white;
+            /* padding-top: 20px; */
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .card-stats {
+            transition: all 0.3s;
+        }
+
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .chart-container {
+            height: 300px;
+        }
+
+        .recent-activity-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .recent-activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .mini-container {
+            border-radius: 20px;
+            box-shadow: 0px 5px 0px #b3b3b3;
+            margin: 20px 50px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 15px;
+        }
+
+        .mini-container:hover {
+            border-radius: 20px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            background-color: #2e2f2f;
+            /* Màu xanh đẹp khi hover */
+            transform: translateY(-5px);
+            /* Đẩy lên một chút để tạo hiệu ứng nâng lên */
+        }
+
+        .mini-container .content {
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+      
+
+        /* Thêm hiệu ứng khi di chuột vào hình ảnh hoặc icon */
+        .mini-container img,
+        .mini-container i {
+            transition: transform 0.3s ease;
+        }
+
+        .mini-container:hover img,
+        .mini-container:hover i {
+            transform: scale(1.1);
+            /* Tăng kích thước hình ảnh hoặc icon khi hover */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <%- include('partials/header') %>
+
+                <!-- Main Content -->
+                <div class="col-md-10 col-lg-10 ms-auto main-content">
+                    <!-- Header -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <h3>Dashboard</h3>
+                            <p class="text-muted">Xin chào Admin, chào mừng trở lại!</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-secondary dropdown-toggle"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-calendar me-1"></i> Hôm nay
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">Hôm nay</a></li>
+                                    <li><a class="dropdown-item" href="#">Tuần này</a></li>
+                                    <li><a class="dropdown-item" href="#">Tháng này</a></li>
+                                    <li><a class="dropdown-item" href="#">Năm này</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card card-stats bg-primary text-white mb-4">
+                                <div class="card-body text-center">
+                                    <div class="card-icon">
+                                        <i class="fas fa-shopping-bag"></i>
+                                    </div>
+                                    <h5 class="card-title">Tổng đơn hàng</h5>
+                                    <h3>236</h3>
+                                    <p class="mb-0"><i class="fas fa-arrow-up"></i> 12% so với tháng trước</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card card-stats bg-success text-white mb-4">
+                                <div class="card-body text-center">
+                                    <div class="card-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <h5 class="card-title">Doanh thu</h5>
+                                    <h3>46.5M</h3>
+                                    <p class="mb-0"><i class="fas fa-arrow-up"></i> 8% so với tháng trước</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card card-stats bg-info text-white mb-4">
+                                <div class="card-body text-center">
+                                    <div class="card-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <h5 class="card-title">Khách hàng mới</h5>
+                                    <h3>125</h3>
+                                    <p class="mb-0"><i class="fas fa-arrow-up"></i> 5% so với tháng trước</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card card-stats bg-warning text-white mb-4">
+                                <div class="card-body text-center">
+                                    <div class="card-icon">
+                                        <i class="fas fa-box-open"></i>
+                                    </div>
+                                    <h5 class="card-title">Sản phẩm</h5>
+                                    <h3>198</h3>
+                                    <p class="mb-0"><i class="fas fa-arrow-up"></i> 3% so với tháng trước</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Doanh thu theo tháng</h5>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary">Ngày</button>
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-secondary active">Tháng</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary">Năm</button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <!-- Chart canvas would go here, using a placeholder -->
+                                        <div class="d-flex justify-content-center align-items-center h-100 bg-light">
+                                            <p class="text-muted">Biểu đồ doanh thu theo tháng</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Phân bổ danh mục</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <!-- Pie chart canvas would go here, using a placeholder -->
+                                        <div class="d-flex justify-content-center align-items-center h-100 bg-light">
+                                            <p class="text-muted">Biểu đồ phân bổ danh mục</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activities and Top Products -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Hoạt động gần đây</h5>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="recent-activity-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-success text-white rounded-circle p-2"
+                                                    style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-1">Đơn hàng mới #43215</h6>
+                                                <p class="text-muted mb-0">Nguyễn Văn A - 2.500.000đ</p>
+                                                <small class="text-muted">5 phút trước</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="recent-activity-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-warning text-white rounded-circle p-2"
+                                                    style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-box"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-1">Sản phẩm mới đã được thêm</h6>
+                                                <p class="text-muted mb-0">iPhone 15 Pro Max - 30.990.000đ</p>
+                                                <small class="text-muted">15 phút trước</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="recent-activity-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-info text-white rounded-circle p-2"
+                                                    style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-1">Khách hàng mới đã đăng ký</h6>
+                                                <p class="text-muted mb-0">Trần Thị B</p>
+                                                <small class="text-muted">30 phút trước</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="recent-activity-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-danger text-white rounded-circle p-2"
+                                                    style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-1">Cảnh báo kho hàng</h6>
+                                                <p class="text-muted mb-0">Samsung Galaxy S23 sắp hết hàng</p>
+                                                <small class="text-muted">1 giờ trước</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Sản phẩm bán chạy</h5>
+                                    <a href="/admin/products" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Sản phẩm</th>
+                                                    <th>Đã bán</th>
+                                                    <th>Tồn kho</th>
+                                                    <th>Doanh thu</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>iPhone 14 Pro</td>
+                                                    <td>42</td>
+                                                    <td>18</td>
+                                                    <td>1.05B</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Samsung Galaxy S23</td>
+                                                    <td>38</td>
+                                                    <td>5</td>
+                                                    <td>912M</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Macbook Air M2</td>
+                                                    <td>27</td>
+                                                    <td>12</td>
+                                                    <td>810M</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Apple Watch Series 8</td>
+                                                    <td>25</td>
+                                                    <td>20</td>
+                                                    <td>250M</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>iPad Pro 12.9</td>
+                                                    <td>22</td>
+                                                    <td>15</td>
+                                                    <td>550M</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Đơn hàng gần đây</h5>
+                                    <a href="/admin/orders" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Khách hàng</th>
+                                                    <th>Ngày</th>
+                                                    <th>Tổng tiền</th>
+                                                    <th>Trạng thái</th>
+                                                    <th>Thanh toán</th>
+                                                    <th>Hành động</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>#43215</td>
+                                                    <td>Nguyễn Văn A</td>
+                                                    <td>14/03/2025</td>
+                                                    <td>2.500.000đ</td>
+                                                    <td><span class="badge bg-warning">Đang xử lý</span></td>
+                                                    <td><span class="badge bg-success">Đã thanh toán</span></td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-success">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>#43214</td>
+                                                    <td>Trần Thị B</td>
+                                                    <td>14/03/2025</td>
+                                                    <td>1.800.000đ</td>
+                                                    <td><span class="badge bg-success">Hoàn thành</span></td>
+                                                    <td><span class="badge bg-success">Đã thanh toán</span></td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>#43213</td>
+                                                    <td>Lê Văn C</td>
+                                                    <td>13/03/2025</td>
+                                                    <td>4.200.000đ</td>
+                                                    <td><span class="badge bg-info">Đang giao</span></td>
+                                                    <td><span class="badge bg-warning">COD</span></td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-sm btn-outline-info">
+                                                                <i class="fas fa-truck"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>#43212</td>
+                                                    <td>Phạm Thị D</td>
+                                                    <td>13/03/2025</td>
+                                                    <td>950.000đ</td>
+                                                    <td><span class="badge bg-danger">Hủy</span></td>
+                                                    <td><span class="badge bg-secondary">Hoàn tiền</span></td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>#43211</td>
+                                                    <td>Vũ Văn E</td>
+                                                    <td>12/03/2025</td>
+                                                    <td>3.500.000đ</td>
+                                                    <td><span class="badge bg-success">Hoàn thành</span></td>
+                                                    <td><span class="badge bg-success">Đã thanh toán</span></td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <%- include('partials/footer') %>
+                </div>
+        </div>
+
+        <!-- Bootstrap and other scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- In a real implementation, you would add Chart.js or other visualization libraries here -->
+</body>
+
+</html>
