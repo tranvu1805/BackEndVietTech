@@ -9,7 +9,8 @@ const reviweRoutes = require("./review/index");
 const reviweReportRoutes = require("./review_report/index");
 const BillRoutes = require("./bill/index");
 const DisscountRoutes = require("./disscount/index");
-const adminRoutes = require("./admin/index")
+const adminRoutes = require("./admin/index");
+const ImageRoutes = require("./image/index");
 
 // API versioning
 router.use("/v1/api/access", accessRoutes);
@@ -26,10 +27,10 @@ router.use("/v1/api/image", ImageRoutes);
 
 // Route mặc định (Home Page)
 router.get("/", (req, res) => {
-  res.render('home/login');
+  res.render("home/login");
 });
 
-router.post('/login', accessController.login);
+router.post("/login", accessController.login);
 
 router.use("/v1/api/cart", require("./cart"));
 
