@@ -109,7 +109,7 @@
             transition: color 0.3s ease;
         }
 
-      
+
 
         /* Thêm hiệu ứng khi di chuột vào hình ảnh hoặc icon */
         .mini-container img,
@@ -134,23 +134,52 @@
                 <!-- Main Content -->
                 <div class="col-md-10 col-lg-10 ms-auto main-content">
                     <!-- Header -->
-                    <div class="row mb-4">
-                        <div class="col-md-8">
+                    <!-- Header -->
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-md-6">
                             <h3>Dashboard</h3>
                             <p class="text-muted">Xin chào Admin, chào mừng trở lại!</p>
                         </div>
-                        <div class="col-md-4 text-end">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-outline-secondary dropdown-toggle"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-calendar me-1"></i> Hôm nay
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="#">Hôm nay</a></li>
-                                    <li><a class="dropdown-item" href="#">Tuần này</a></li>
-                                    <li><a class="dropdown-item" href="#">Tháng này</a></li>
-                                    <li><a class="dropdown-item" href="#">Năm này</a></li>
-                                </ul>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <!-- Date Filter -->
+                                <div class="me-3">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-outline-secondary dropdown-toggle"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-calendar me-1"></i> Hôm nay
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="#">Hôm nay</a></li>
+                                            <li><a class="dropdown-item" href="#">Tuần này</a></li>
+                                            <li><a class="dropdown-item" href="#">Tháng này</a></li>
+                                            <li><a class="dropdown-item" href="#">Năm này</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- User Profile Dropdown -->
+                                <div class="dropdown">
+                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                                        data-bs-toggle="dropdown">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                                style="width: 40px; height: 40px;">AD</div>
+                                            <span>Admin</span>
+                                        </div>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a>
+                                        </li>
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài
+                                                đặt</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="#" onclick="logout()"><i
+                                                    class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -502,6 +531,105 @@
         <!-- Bootstrap and other scripts -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <!-- In a real implementation, you would add Chart.js or other visualization libraries here -->
+        <script>
+            async function logout() {
+                try {
+                    const refreshToken = localStorage.getItem("refreshToken"); // Lấy refreshToken từ localStorage
+                    console.log("refreshToken", refreshToken);
+
+
+                    const response = await fetch("/v1/api/access/logout", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ refreshToken }),
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        console.log("✅ Logout thành công:", data.message);
+
+                        // Xóa token khỏi trình duyệt
+                        localStorage.removeItem("accessToken");
+                        localStorage.removeItem("refreshToken");
+                        sessionStorage.clear(); // Xóa tất cả session nếu cần
+
+                        // Chuyển hướng về trang đăng nhập
+                        window.location.href = "/";
+                    } else {
+                        console.error("❌ Lỗi khi logout:", data.message);
+                    }
+                } catch (error) {
+                    console.error("❌ Lỗi logout trên client:", error);
+                }
+            }
+
+            async function refreshAccessToken() {
+                const refreshToken = localStorage.getItem("refreshToken");
+
+                if (!refreshToken) {
+                    console.error("❌ Không có refreshToken, yêu cầu đăng nhập lại!");
+                    window.location.href = "/login";
+                    return;
+                }
+
+                try {
+                    const response = await fetch("/refresh-token", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ refreshToken }),
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        console.log("✅ Refresh token thành công:", data.accessToken);
+                        localStorage.setItem("accessToken", data.accessToken);
+                    } else {
+                        console.error("❌ Refresh token thất bại:", data.message);
+                        localStorage.removeItem("accessToken");
+                        localStorage.removeItem("refreshToken");
+                        window.location.href = "/login";
+                    }
+                } catch (error) {
+                    console.error("❌ Lỗi refresh token:", error);
+                }
+            }
+
+
+            document.addEventListener("DOMContentLoaded", async function () {
+                const accessToken = localStorage.getItem("accessToken");
+
+
+
+                if (!accessToken) {
+                    console.log("❌ Không tìm thấy accessToken, chuyển hướng về trang đăng nhập!");
+                    window.location.href = "/";
+                    return;
+                }
+
+                // Kiểm tra accessToken còn hạn hay không
+                const isExpired = checkTokenExpiration(accessToken);
+                if (isExpired) {
+                    console.log("⚠ AccessToken đã hết hạn, đang làm mới...");
+                    await refreshAccessToken(); // Gọi hàm làm mới token
+                }
+            });
+
+            // Hàm kiểm tra `accessToken` có hết hạn không
+            function checkTokenExpiration(token) {
+                console.log("accessToken:", token);
+
+                const payload = JSON.parse(atob(token.split('.')[1])); // Giải mã payload của JWT
+                console.log("Thời gian hết hạn của accessToken:", new Date(payload.exp * 1000).toLocaleString());
+
+                return payload.exp * 1000 < Date.now(); // So sánh với thời gian hiện tại
+            }
+        </script>
 </body>
 
 </html>

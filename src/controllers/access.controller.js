@@ -12,17 +12,32 @@ class AccessController {
 
       const { email, password } = req.body;
 
-      console.log("check1: da o day",req.body);
-      console.log("check1: da o day",email);
+      console.log("check1: da o day", req.body);
+      console.log("check1: da o day", email);
       // Kiểm tra thông tin đăng nhập với AccessService
       const result = await AccessService.login({ email, password });
-      
+
       if (result.status === "error") {
         console.warn(`⚠️ Login Failed: ${result.message}`);
         return res.status(result.code).json(result);
       } else {
         console.log(`✅ Login Successful for User: ${result.metadata.account.username}`);
         console.log(`🔑 Access Token: ${result.metadata.tokens.accessToken}`);
+
+        res.cookie("token", result.metadata.tokens.accessToken, {
+          httpOnly: true, // Ngăn JavaScript truy cập token
+          secure: process.env.NODE_ENV === "production", // Chỉ dùng HTTPS trong môi trường production
+          maxAge: 60 * 60 * 1000, // Hết hạn trong 1 giờ
+          sameSite: "Strict" // Ngăn chặn CSRF
+        });
+
+        res.cookie("userId", result.metadata.account._id, {
+          httpOnly: true, // Ngăn JavaScript truy cập userId
+          secure: process.env.NODE_ENV === "production", // Chỉ dùng HTTPS trong môi trường production
+          maxAge: 60 * 60 * 1000, // Hết hạn trong 1 giờ
+          sameSite: "Strict" // Ngăn chặn CSRF
+        });
+
 
         // Trả về kết quả thành công và chuyển hướng người dùng
         return res.status(result.code).json({
@@ -84,38 +99,49 @@ class AccessController {
   };
   logout = async (req, res) => {
     try {
-
       const { refreshToken } = req.body;
       console.log("🛠 Nhận refreshToken từ request:", refreshToken);
+
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Strict"
+      });
 
       if (!refreshToken) {
         console.error("❌ refreshToken bị thiếu trong request!");
         return res.status(400).json({ message: "Missing refresh token!" });
       }
 
-      // 🔎 Tìm KeyStore chứa refreshToken này
-      const keyToken = await KeyTokenService.findByRefreshToken(refreshToken);
-      if (!keyToken) {
-        console.error("❌ Không tìm thấy KeyStore cho refreshToken này!");
-        return res.status(400).json({ message: "Invalid refresh token!" });
+      try {
+        const keyToken = await KeyTokenService.findByRefreshToken(refreshToken);
+        console.log("🔎 Tìm thấy KeyToken:", keyToken);
+        if (!keyToken) {
+          console.error("❌ Không tìm thấy KeyStore cho refreshToken này!");
+          return res.status(400).json({ message: "Invalid refresh token!" });
+        }
+
+        console.log("🛠 UserID từ token:", keyToken.user);
+        const result = await KeyTokenService.removeRefreshToken(keyToken.user, refreshToken);
+        console.log("📌 Kết quả remove:", result);
+        if (!result) {
+          console.error("❌ Không thể xóa refreshToken.");
+          return res.status(400).json({ message: "Logout failed!" });
+        }
+
+        console.log("✅ RefreshToken đã được xóa thành công!");
+        return res.status(200).json({ message: "Logout successful!" });
+
+      } catch (dbError) {
+        console.error("❌ Lỗi khi thao tác với database:", dbError);
+        return res.status(500).json({ message: "Database error" });
       }
-
-      console.log("🛠 UserID từ token:", keyToken.user);
-
-      // 🛠 Xóa refreshToken cụ thể khỏi danh sách
-      const result = await KeyTokenService.removeRefreshToken(keyToken.user, refreshToken);
-      if (!result) {
-        console.error("❌ Không thể xóa refreshToken, có thể đã bị xóa hoặc không tồn tại.");
-        return res.status(400).json({ message: "Logout failed!" });
-      }
-
-      console.log("✅ RefreshToken đã được xóa thành công!");
-      return res.status(200).json({ message: "Logout successful!" });
     } catch (error) {
       console.error("❌ [LOGOUT ERROR]:", error);
-      return res.status(500).json({ message: "Internal Server Error" });
+      return res.status(500).json({ message: "Internal Server Error 2" });
     }
   };
+
 
 }
 

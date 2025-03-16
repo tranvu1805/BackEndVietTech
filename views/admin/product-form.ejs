@@ -152,8 +152,8 @@
                     </a>
                 </div>
 
-                <form action="/v1/api/shop/products/<%= action === 'Edit' ? product._id : '' %>" method="POST"
-                    enctype="multipart/form-data" id="productForm">
+                <form action="/v1/api/shop/products/<%= action === 'Edit' ? product._id : '' %>"
+                    method="<%= action === 'Edit' ? 'PUT' : 'POST' %>" enctype="multipart/form-data" id="productForm">
                     <div class="row">
                         <div class="col-lg-8">
                             <!-- Thông tin cơ bản -->
@@ -504,26 +504,39 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('productForm');
+            const isEdit = form.getAttribute('action').includes('/products/') && form.getAttribute('method') === 'PUT';
+            const isCheck = form.getAttribute('action');
+            console.log('isEdit:', isEdit);
+            
+
 
             form.addEventListener('submit', function (event) {
-                event.preventDefault(); // Ngừng gửi form theo cách truyền thống
+                event.preventDefault();
 
                 // Lấy dữ liệu từ form
                 const formData = new FormData(form);
+
+                const apiUrl = form.getAttribute('action');
+                console.log("API URL:", apiUrl);    
+                
 
                 console.log("Form đang gửi đi với các trường:");
                 for (let pair of formData.entries()) {
                     console.log(pair[0] + ': ' + pair[1]);
                 }
 
+                // URL API endpoint: Đảm bảo rằng URL endpoint đúng cho việc create hoặc update
+                // let apiUrl = '/v1/api/shop/products'; // Đảm bảo đây là đúng endpoint của bạn
+                // if (isEdit) {
+                //     // Nếu là chỉnh sửa sản phẩm, thêm ID sản phẩm vào URL
+                //     const productId = form.getAttribute('data-product-id');  // Lấy ID sản phẩm từ data attribute
+                //     apiUrl = `/v1/api/shop/products/${productId}`;  // Cập nhật sản phẩm
+                // }
 
-                // URL API endpoint (điều chỉnh theo yêu cầu của bạn)
-                const apiUrl = '/v1/api/shop/products'; // Đảm bảo đây là đúng endpoint của bạn
-
-                // Gửi yêu cầu POST đến API tạo sản phẩm
+                // Gửi yêu cầu POST hoặc PUT đến API tạo hoặc cập nhật sản phẩm
                 fetch(apiUrl, {
-                    method: 'POST',
-                    body: formData, // Gửi dữ liệu form (bao gồm ảnh và các trường khác)
+                    method: isEdit ? 'PUT' : 'POST',  // Chọn POST cho create, PUT cho update
+                    body: formData,  // Gửi dữ liệu form (bao gồm ảnh và các trường khác)
                 })
                     .then(response => {
                         if (!response.ok) {
@@ -533,11 +546,12 @@
                     })
                     .then(data => {
                         if (data.success === true) {
-                            alert('Sản phẩm đã được thêm thành công!');
-                            window.location.href = '/v1/api/admin/list'; // Điều hướng đến danh sách sản phẩm
+                            console.log("Success:", data);
+                            
+                            alert('Sản phẩm đã được ' + (isEdit ? 'cập nhật' : 'thêm') + ' thành công!');
+                            // window.location.href = '/v1/api/admin/list'; // Điều hướng đến danh sách sản phẩm
                         } else {
                             console.log("Error:", data.success);
-                            
                             alert('Có lỗi xảy ra: ' + (data.message || 'Vui lòng thử lại!'));
                         }
                     })

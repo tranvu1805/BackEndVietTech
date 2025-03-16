@@ -22,7 +22,7 @@ const createProduct = async (req, res) => {
         // Kiểm tra danh mục có tồn tại không
         const categoryData = await categoryModel.findById(category);
         console.log(categoryData);
-        
+
         if (!categoryData) {
             return res.status(400).json({ success: false, message: "Category not found" });
         }
@@ -43,14 +43,14 @@ const createProduct = async (req, res) => {
                 }
             });
         }
-        
+
         // Kiểm tra thuộc tính hợp lệ
         const validAttributes = {};
         categoryData.attributes_template.forEach(attr => {
             console.log("Checking attribute:", attr);
             console.log("Checking attribute 2:", product_attributes);
-   
-            
+
+
             if (product_attributes[attr] !== undefined) {
                 validAttributes[attr] = product_attributes[attr];
             }
@@ -169,10 +169,26 @@ const getProductById = async (req, res) => {
     }
 };
 
+
+const getProductById_Admin = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id).populate("category");
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+        return product;
+    } catch (error) {
+        console.error("Error fetching product:", error.message);
+    }
+};
+
 // 🟢 4. Cập nhật sản phẩm
 const updateProduct = async (req, res) => {
     try {
         const { variations } = req.body; // Lấy variations từ body
+        console.log("Received data update:", req.body);  // Log dữ liệu nhận được  
+        console.log("Received file update:", req.file);  // Log dữ liệu nhận được
+        
 
         // Kiểm tra và xử lý variations (biến thể sản phẩm)
         if (variations && variations.length > 0) {
@@ -183,7 +199,12 @@ const updateProduct = async (req, res) => {
             });
         }
 
-        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const productData = {
+            ...req.body,
+            product_thumbnail: req.file ? req.file.path : undefined 
+        };
+
+        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, productData, { new: true });
         if (!updatedProduct) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
@@ -206,4 +227,4 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-module.exports = { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, getAllProducts_Admin };
+module.exports = { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, getAllProducts_Admin, getProductById_Admin };

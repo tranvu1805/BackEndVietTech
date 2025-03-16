@@ -1,7 +1,8 @@
 const JWT = require('jsonwebtoken')
 const asyncHandler = require('../helpers/asyncHandler')
 const { findUserById } = require('../services/keytoken.service')
-const { log } = require('console')
+const { log } = require('console');
+const KeyTokenService = require('../services/keytoken.service');
 
 
 const HEADER = {
@@ -35,7 +36,8 @@ const authentication = asyncHandler(async (req, res, next) => {
         return res.status(403).json({ success: false, message: "Access Token is missing in request headers" });
     }
 
-    const keyStore = await KeyTokenService.findByUserId(userId);
+    
+    
     if (!keyStore) {
         return res.status(403).json({ success: false, message: "KeyStore not found for provided userId" });
     }
@@ -57,6 +59,7 @@ const authentication = asyncHandler(async (req, res, next) => {
 
 const verifyRefreshToken = asyncHandler(async (req, res, next) => {
     const refreshToken = req.body.refreshToken;
+   
     if (!refreshToken) {
         return res.status(400).json({ success: false, message: "Refresh token is missing" });
     }
@@ -82,7 +85,7 @@ const verifyRefreshToken = asyncHandler(async (req, res, next) => {
         req.keyStore = keyStore;
         next();
     } catch (error) {
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
+        return res.status(500).json({ success: false, message: "Internal Server Error q" });
     }
 });
 

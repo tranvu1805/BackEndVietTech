@@ -19,7 +19,7 @@ router.get("/:id", getProductById);
 
 router.post("/", upload.single('product_thumbnail'), createProduct);
 
-router.put("/:id", updateProduct);
+router.put("/:id",upload.single('product_thumbnail'), updateProduct);
 router.delete("/:id", deleteProduct);
 
 module.exports = router;

@@ -1,15 +1,20 @@
 const express = require("express");
 const accessController = require("../../controllers/access.controller");
 const { apiKey } = require("../../auth/checkAuth");
-const { getAllProducts_Admin } = require("../../controllers/product.controller");
+const { getAllProducts_Admin, getProductById, getProductById_Admin } = require("../../controllers/product.controller");
 const { getAllCategories, getAllCategories_Admin } = require("../../controllers/category.controller");
 const { getAllBills, getAllBills_Admin, exportBillsToExcel } = require("../../controllers/bill.controller");
+const { authSession, authentication } = require("../../auth/middlewares/authMiddleware");
+
 const router = express.Router();
 
 
 // router.get('/login', (req, res) => {
 //    res.render('home/login');
 // });
+
+router.use(authentication)
+
 
 router.get("/list", async (req, res) => {
     try {
@@ -34,9 +39,25 @@ router.get("/create", async (req, res) => {
     }
 });
 
+router.get("/edit/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const product = await getProductById_Admin(req, res);  // Lấy sản phẩm theo id
+        const categories = await getAllCategories_Admin();  // Lấy danh mục
+        if (!product) {
+            return res.status(404).send("Product not found");
+        }
+        res.render("admin/product-form", { action: "Edit", product, categories });
+    } catch (error) {
+        console.error("Error loading product:", error);
+        res.status(500).send("Error loading product!");
+    }
+});
+
+
 router.get("/categories", async (req, res) => {
     try {
-        const categories = await getAllCategories(req, res);
+        const categories = await getAllCategories_Admin(req, res);
         res.render("admin/categories-list", { categories });
     } catch (error) {
         console.error("Error loading categories:", error);
