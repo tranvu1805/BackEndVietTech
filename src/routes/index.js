@@ -8,9 +8,13 @@ const ShopRoutes = require("./shop/index");
 const reviweRoutes = require("./review/index");
 const reviweReportRoutes = require("./review_report/index");
 const BillRoutes = require("./bill/index");
+const ImageRoutes = require("./image/index");
 const DisscountRoutes = require("./disscount/index");
 const adminRoutes = require("./admin/index");
+
 const ImageRoutes = require("./image/index");
+
+const accessController = require("../controllers/access.controller");
 
 // API versioning
 router.use("/v1/api/access", accessRoutes);

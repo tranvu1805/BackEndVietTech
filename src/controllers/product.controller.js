@@ -4,20 +4,53 @@ const categoryModel = require("../models/category.model");
 // 🟢 1. Tạo sản phẩm mới
 const createProduct = async (req, res) => {
     try {
-        const { product_name, product_thumbnail, product_description, product_price, product_stock, category, product_attributes,variations } = req.body;
+        const {
+            product_name,
+            product_description,
+            product_price, product_stock,
+            category,
+            attribute_keys,
+            attribute_values,
+            variations
+        } = req.body;
 
         console.log(category);
+        let product_thumbnail = req.file ? req.file.path : null;
 
-
+        console.log('Received data:', req.body);  // Log dữ liệu nhận được
+        console.log('File uploaded:', req.file);
         // Kiểm tra danh mục có tồn tại không
         const categoryData = await categoryModel.findById(category);
+        console.log(categoryData);
+        
         if (!categoryData) {
             return res.status(400).json({ success: false, message: "Category not found" });
         }
 
+        if (!categoryData.attributes_template) {
+            return res.status(400).json({ success: false, message: "Danh mục không có thuộc tính hợp lệ." });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: "File upload failed. Please ensure the file is attached." });
+        }
+
+        const product_attributes = {};
+        if (attribute_keys && attribute_values) {
+            attribute_keys.forEach((key, index) => {
+                if (attribute_values[index]) {
+                    product_attributes[key] = attribute_values[index];
+                }
+            });
+        }
+        
         // Kiểm tra thuộc tính hợp lệ
         const validAttributes = {};
         categoryData.attributes_template.forEach(attr => {
+            console.log("Checking attribute:", attr);
+            console.log("Checking attribute 2:", product_attributes);
+   
+            
             if (product_attributes[attr] !== undefined) {
                 validAttributes[attr] = product_attributes[attr];
             }
@@ -45,6 +78,7 @@ const createProduct = async (req, res) => {
 
         res.status(201).json({ success: true, product });
     } catch (error) {
+        console.error('Error creating product:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 };
@@ -110,15 +144,15 @@ const getAllProducts_Admin = async (req, res) => {
             .skip((page - 1) * limit)
             .limit(parseInt(limit));
 
-        
+
 
 
         // res.status(200).json({ success: true, products });
-        return products; 
+        return products;
     } catch (error) {
         // res.status(500).json({ success: false, message: error.message });
         console.log(error);
-        
+
     }
 };
 
@@ -172,4 +206,4 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-module.exports = { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct,getAllProducts_Admin };
+module.exports = { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, getAllProducts_Admin };

@@ -20,6 +20,15 @@ const createCategory = async (req, res) => {
 const getAllCategories = async (req, res) => {
     try {
         const categories = await Category.find().populate("parent_category");
+        res.status(200).json({ success: true, categories });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const getAllCategories_Admin = async (req, res) => {
+    try {
+        const categories = await Category.find().populate("parent_category");
         return categories;
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -44,8 +53,8 @@ const updateCategory = async (req, res) => {
     try {
         const { name, parent_category, attributes_template } = req.body;
         const updatedCategory = await Category.findByIdAndUpdate(
-            req.params.id,
-            { name, parent_category, attributes_template },
+            req.params.id, 
+            { name, parent_category, attributes_template }, 
             { new: true }
         );
 
@@ -72,9 +81,10 @@ const deleteCategory = async (req, res) => {
 };
 
 module.exports = {
-    createCategory,
-    getAllCategories,
+    createCategory, 
+    getAllCategories, 
     getCategoryById,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    getAllCategories_Admin
 };
