@@ -1,5 +1,6 @@
 const Product = require("../models/product.model");
 const categoryModel = require("../models/category.model");
+const e = require("express");
 
 // 🟢 1. Tạo sản phẩm mới
 const createProduct = async (req, res) => {
@@ -165,6 +166,8 @@ const getProductById = async (req, res) => {
         }
         res.status(200).json({ success: true, product });
     } catch (error) {
+        console.log("error",error.message);
+        
         res.status(500).json({ success: false, message: error.message });
     }
 };
