@@ -60,7 +60,7 @@ class PostController {
     if (!req.params.id)
       return ErrorResponse("Id is required", StatusCodes.BAD_REQUEST);
     new SuccessResponse({
-      message: "Post list successfully",
+      message: "get post successfully",
       metadata: await PostService.getPostById({ postId: req.params.id }),
     }).send(res);
   };
