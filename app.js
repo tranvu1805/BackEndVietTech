@@ -17,12 +17,12 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(cookieParser());
 
-app.use(session({
-    secret: process.env.secret_key, // Chuỗi bí mật để mã hóa session
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false } // Đặt `true` nếu dùng HTTPS
-}));
+// app.use(session({
+//     secret: process.env.secret_key, // Chuỗi bí mật để mã hóa session
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: { secure: false } // Đặt `true` nếu dùng HTTPS
+// }));
 
 
 // console.log(`Process::`,process.env);
