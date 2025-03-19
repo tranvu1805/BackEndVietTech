@@ -17,6 +17,9 @@ router.put("/:billId/status", asyncHandler(BillController.updateBillStatus));
 // Lấy tất cả hóa đơn
 router.get("/", asyncHandler(BillController.getAllBills));
 
+router.get('/status/:status', BillController.getBillsByStatus);
+
+
 
 
 

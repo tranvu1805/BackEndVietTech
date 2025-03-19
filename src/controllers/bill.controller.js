@@ -54,6 +54,17 @@ class BillController {
     }
   }
 
+  static async getBillsByStatus(req, res, next) {
+    try {
+        const { status } = req.params; // Lấy trạng thái từ URL
+        const result = await BillService.getBillsByStatus({ status });
+        return res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+}
+
+
 
 }
 
