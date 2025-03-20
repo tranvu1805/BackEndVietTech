@@ -1,0 +1,54 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-10">
+      <div class="jumbotron text-center">
+        <h1 class="display-4">Chào mừng đến với hệ thống</h1>
+        <p class="lead">Hệ thống quản lý tài khoản và xác thực người dùng</p>
+        <hr class="my-4">
+        <p>Đăng nhập hoặc đăng ký tài khoản để tiếp tục sử dụng hệ thống</p>
+        <% if(!user) { %>
+          <div class="d-flex justify-content-center gap-2 mt-4">
+            <a class="btn btn-primary btn-lg" href="/login" role="button">Đăng nhập</a>
+            <a class="btn btn-success btn-lg" href="/register" role="button">Đăng ký</a>
+          </div>
+        <% } else { %>
+          <a class="btn btn-primary btn-lg" href="/dashboard" role="button">Đi đến Dashboard</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row mt-5">
+    <div class="col-md-4">
+      <div class="card text-center mb-4">
+        <div class="card-body">
+          <i class="bi bi-shield-lock display-4 text-primary"></i>
+          <h5 class="card-title mt-3">Bảo mật</h5>
+          <p class="card-text">Hệ thống xác thực an toàn với mã hóa dữ liệu và bảo vệ thông tin người dùng.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center mb-4">
+        <div class="card-body">
+          <i class="bi bi-speedometer2 display-4 text-success"></i>
+          <h5 class="card-title mt-3">Hiệu suất</h5>
+          <p class="card-text">Hệ thống được tối ưu hóa để đảm bảo tốc độ xử lý nhanh và hiệu quả.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center mb-4">
+        <div class="card-body">
+          <i class="bi bi-device-ssd display-4 text-info"></i>
+          <h5 class="card-title mt-3">Lưu trữ</h5>
+          <p class="card-text">Dữ liệu người dùng được lưu trữ an toàn với khả năng khôi phục khi cần thiết.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

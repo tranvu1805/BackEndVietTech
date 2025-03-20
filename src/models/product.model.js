@@ -32,7 +32,8 @@ const productSchema = new Schema({
             stock: { type: Number, required: true }, // Số lượng tồn kho của biến thể
             sku: { type: String, required: true, unique: true }, // Mã SKU duy nhất của biến thể
         }
-    ]
+    ],
+    image_ids: [{ type: Schema.Types.ObjectId, ref: 'Image' }]
 }, { collection: COLLECTION_NAME, timestamps: true });
 
 productSchema.pre('save', function (next) {

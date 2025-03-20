@@ -33,10 +33,15 @@ class CartController {
   };
 
   listToCart = async (req, res, next) => {
-    if (!req.query) return ErrorResponse("userId is required");
+    const { userId } = req.query;
+
+    if (!userId) {
+      return new ErrorResponse("userId is required", 400).send(res);
+    }
+    const result = await CartService.getListUserCart({ userId });
     new SuccessResponse({
       message: "Cart list successfully",
-      metadata: await CartService.getListUserCart(req.query),
+      metadata: result,
     }).send(res);
   };
 }

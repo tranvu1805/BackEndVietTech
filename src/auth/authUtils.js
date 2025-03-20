@@ -1,6 +1,8 @@
-const JWT = require("jsonwebtoken");
-const asyncHandler = require("../helpers/asyncHandler");
-const KeyTokenService = require("../services/keytoken.service");
+const JWT = require('jsonwebtoken')
+const asyncHandler = require('../helpers/asyncHandler')
+const { findUserById } = require('../services/keytoken.service')
+const { log } = require('console')
+
 
 const HEADER = {
     API_KEY: "x-api-key",
@@ -20,10 +22,13 @@ const createToKenPair = async (payload, publicKey, privateKey) => {
 };
 
 const authentication = asyncHandler(async (req, res, next) => {
+
     const userId = req.headers[HEADER.CLIENT_ID];
+
     if (!userId) {
         return res.status(400).json({ success: false, message: "User ID is missing in request headers" });
     }
+
 
     const token = req.headers[HEADER.AUTHORIZATION]?.split(" ")[1];
     if (!token) {
@@ -36,6 +41,7 @@ const authentication = asyncHandler(async (req, res, next) => {
     }
 
     try {
+
         const decoded = JWT.verify(token, keyStore.publicKey);
         if (decoded.userId !== userId) {
             return res.status(403).json({ success: false, message: "Invalid User ID in token payload" });
