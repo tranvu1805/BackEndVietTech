@@ -11,6 +11,16 @@ class ReviewController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+    // Lấy danh sách review theo product_id (chỉ lấy review active và không bị báo cáo)
+    static async getReviewsByProduct(req, res) {
+        try {
+            const { productId } = req.params;
+            const reviews = await reviewService.getReviewsByProductId(productId);
+            res.status(200).json({ success: true, data: reviews });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
     // Lấy tất cả review
     static async getAllReviews(req, res) {
         try {
@@ -42,6 +52,8 @@ class ReviewController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+ 
+
 }
 
 module.exports = ReviewController;

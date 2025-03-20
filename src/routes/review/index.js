@@ -6,6 +6,8 @@ const { apiKey, permissions } = require("../../auth/checkAuth");
 
 // Thêm review mới
 router.post("/add", ReviewController.addReview);
+// Lấy danh sách review theo productId (chỉ lấy review active và không bị báo cáo)
+router.get("/getReviewsByProduct/:productId", ReviewController.getReviewsByProduct);
 // Lấy tất cả review
 router.get("/getAll", ReviewController.getAllReviews);
 // Lấy danh sách review theo accountId và productId

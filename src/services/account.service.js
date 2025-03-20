@@ -2,7 +2,8 @@ const crypto = require("crypto");
 const keyTokenModel = require("../models/keytoken.model");
 const { getInfoData } = require("../utils");
 const { createToKenPair } = require("../auth/authUtils");
-const accountModel = require('../models/account.model'); 
+const accountModel = require('../models/account.model');
+const moment = require("moment");
 
 class AccountService {
   static async getAccountWithRoleById(accountId) {
@@ -111,6 +112,50 @@ class AccountService {
       return { code: 500, message: "Internal Server Error", status: "error" };
     }
   }
+  // ✅ Thống kê số lượng người dùng mới theo tuần, tháng, năm
+  static async getUserStatistics(period) {
+    try {
+      let startDate, prevStartDate, prevEndDate;
+      const today = moment().endOf("day");
+
+      if (period === "week") {
+        startDate = moment().startOf("isoWeek");
+        prevStartDate = moment().subtract(1, "weeks").startOf("isoWeek");
+        prevEndDate = moment().subtract(1, "weeks").endOf("isoWeek");
+      } else if (period === "month") {
+        startDate = moment().startOf("month");
+        prevStartDate = moment().subtract(1, "months").startOf("month");
+        prevEndDate = moment().subtract(1, "months").endOf("month");
+      } else if (period === "year") {
+        startDate = moment().startOf("year");
+        prevStartDate = moment().subtract(1, "years").startOf("year");
+        prevEndDate = moment().subtract(1, "years").endOf("year");
+      } else {
+        return { code: 400, message: "Invalid period!", status: "error" };
+      }
+
+      const currentCount = await accountModel.countDocuments({ createdAt: { $gte: startDate, $lte: today } });
+      const previousCount = await accountModel.countDocuments({ createdAt: { $gte: prevStartDate, $lte: prevEndDate } });
+
+      const percentageChange = previousCount === 0 ? "N/A" : ((currentCount - previousCount) / previousCount) * 100;
+
+      return {
+        code: 200,
+        message: "User statistics fetched successfully!",
+        status: "success",
+        data: {
+          period,
+          currentCount,
+          previousCount,
+          percentageChange: percentageChange !== "N/A" ? percentageChange.toFixed(2) + "%" : "N/A"
+        }
+      };
+    } catch (error) {
+      console.error("❌ Lỗi khi thống kê người dùng:", error);
+      return { code: 500, message: "Internal Server Error", status: "error" };
+    }
+  }
 }
+
 
 module.exports = AccountService;
