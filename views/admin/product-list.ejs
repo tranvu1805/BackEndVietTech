@@ -36,6 +36,8 @@
         .sidebar .nav-link {
             color: rgba(255, 255, 255, 0.8);
             padding: 12px 20px;
+            background-color: transparent;
+            transition: background-color 0.3s ease;
             margin-bottom: 5px;
             border-radius: 4px;
             transition: all 0.3s;
@@ -43,8 +45,9 @@
 
         .sidebar .nav-link:hover,
         .sidebar .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background-color: #007bff;
+            /* Màu nền khi trang được chọn */
+            color: white;
         }
 
         .sidebar .nav-link i {
@@ -619,6 +622,19 @@
                 alert("Đã xảy ra lỗi khi xóa sản phẩm.");
             }
         }
+
+        document.querySelectorAll('.nav-link').forEach(item => {
+           
+            item.addEventListener('click', function () {
+                console.log("da o day");
+            
+                // Xóa lớp active khỏi tất cả các liên kết
+                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+
+                // Thêm lớp active vào mục được chọn
+                this.classList.add('active');
+            });
+        });
     </script>
 
 
