@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { createCategory, getAllCategories, updateCategory, deleteCategory, getCategoryById } = require("../../controllers/category.controller");
-const { route } = require("./category.route");
+// const { route } = require("./category.route");
 const { authentication } = require("../../auth/authUtils");
 
 router.get("/:id", getCategoryById);
