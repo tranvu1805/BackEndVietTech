@@ -11,11 +11,12 @@ const {
 const { authentication } = require("../../auth/authUtils");
 const upload = require("../../auth/middlewares/upload.middleware");
 
+
+router.use(authentication)
 router.get("/", getAllProducts);
 router.get("/:id", getProductById);
 
 
-// router.use(authentication)
 
 router.post("/", upload.single('product_thumbnail'), createProduct);
 

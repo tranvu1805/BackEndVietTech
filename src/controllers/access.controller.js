@@ -12,6 +12,8 @@ class AccessController {
 
       const { email, password } = req.body;
 
+      console.log("check log",req.body);
+      
 
       const result = await AccessService.login({ email, password });
 
@@ -22,19 +24,19 @@ class AccessController {
         console.log(`✅ Login Successful for User: ${result.metadata.account.username}`);
         console.log(`🔑 Access Token: ${result.metadata.tokens.accessToken}`);
 
-        res.cookie("token", result.metadata.tokens.accessToken, {
-          httpOnly: true, // Ngăn JavaScript truy cập token
-          secure: process.env.NODE_ENV === "production", // Chỉ dùng HTTPS trong môi trường production
-          maxAge: 60 * 60 * 1000, // Hết hạn trong 1 giờ
-          sameSite: "Strict" // Ngăn chặn CSRF
-        });
+        // res.cookie("token", result.metadata.tokens.accessToken, {
+        //   httpOnly: true, // Ngăn JavaScript truy cập token
+        //   secure: process.env.NODE_ENV === "production", // Chỉ dùng HTTPS trong môi trường production
+        //   maxAge: 60 * 60 * 1000, // Hết hạn trong 1 giờ
+        //   sameSite: "Strict" // Ngăn chặn CSRF
+        // });
 
-        res.cookie("userId", result.metadata.account._id, {
-          httpOnly: true, // Ngăn JavaScript truy cập userId
-          secure: process.env.NODE_ENV === "production", // Chỉ dùng HTTPS trong môi trường production
-          maxAge: 60 * 60 * 1000, // Hết hạn trong 1 giờ
-          sameSite: "Strict" // Ngăn chặn CSRF
-        });
+        // res.cookie("userId", result.metadata.account._id, {
+        //   httpOnly: true, // Ngăn JavaScript truy cập userId
+        //   secure: process.env.NODE_ENV === "production", // Chỉ dùng HTTPS trong môi trường production
+        //   maxAge: 60 * 60 * 1000, // Hết hạn trong 1 giờ
+        //   sameSite: "Strict" // Ngăn chặn CSRF
+        // });
 
 
         // Trả về kết quả thành công và chuyển hướng người dùng

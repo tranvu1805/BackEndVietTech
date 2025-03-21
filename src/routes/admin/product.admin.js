@@ -2,15 +2,20 @@ const express = require("express");
 const { getAllCategories_Admin } = require("../../controllers/category.controller");
 const { getAllProducts_Admin, getProductById_Admin, exportProductsToExcel } = require("../../controllers/product.controller");
 const router = express.Router();
+
+
 router.get("/list", async (req, res) => {
     try {
         const products = await getAllProducts_Admin(req, res);
-        res.render("admin/product-list", { products });
+        res.render("admin/product-list", { products, query: req.query });
+
     } catch (error) {
         console.error("Error loading products:", error);
         res.status(500).send("Error loading products!");
     }
 });
+
+
 
 router.get("/create", async (req, res) => {
     try {

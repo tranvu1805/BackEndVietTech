@@ -31,12 +31,17 @@ const authentication = asyncHandler(async (req, res, next) => {
     }
 
 
-    const token = req.headers[HEADER.AUTHORIZATION]?.split(" ")[1];
+    const token = req.headers[HEADER.AUTHORIZATION];
+    console.log("check tok",token);
+    
     if (!token) {
         return res.status(403).json({ success: false, message: "Access Token is missing in request headers" });
     }
 
     
+    const keyStore = await KeyTokenService.findByUserId(userId);
+    console.log("check key",keyStore);
+    console.log("check token",token);
     
     if (!keyStore) {
         return res.status(403).json({ success: false, message: "KeyStore not found for provided userId" });
@@ -47,6 +52,9 @@ const authentication = asyncHandler(async (req, res, next) => {
         const decoded = JWT.verify(token, keyStore.publicKey);
         if (decoded.userId !== userId) {
             return res.status(403).json({ success: false, message: "Invalid User ID in token payload" });
+        }else{
+            console.log("done !!!");
+            
         }
 
         req.keyStore = keyStore;
