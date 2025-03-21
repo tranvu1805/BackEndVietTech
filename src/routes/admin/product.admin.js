@@ -1,6 +1,6 @@
 const express = require("express");
 const { getAllCategories_Admin } = require("../../controllers/category.controller");
-const { getAllProducts_Admin, getProductById_Admin } = require("../../controllers/product.controller");
+const { getAllProducts_Admin, getProductById_Admin, exportProductsToExcel } = require("../../controllers/product.controller");
 const router = express.Router();
 router.get("/list", async (req, res) => {
     try {
@@ -33,11 +33,22 @@ router.get("/edit/:id", async (req, res) => {
         if (!product) {
             return res.status(404).send("Product not found");
         }
+        console.log("check product: ", product);
+        
         res.render("admin/product-form", { action: "Edit", product, categories });
     } catch (error) {
         console.error("Error loading product:", error);
         res.status(500).send("Error loading product!");
     }
 });
+
+router.get('/export', async (req, res, next) => {
+    try {
+        await exportProductsToExcel(req, res, next);  // Gọi phương thức xuất Excel
+    } catch (error) {
+        next(error);
+    }
+});
+
 
 module.exports = router;

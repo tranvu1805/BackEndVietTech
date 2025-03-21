@@ -107,12 +107,29 @@
 
         .thumbnail-preview {
             width: 150px;
+            /* Giữ kích thước cố định để hiển thị đều */
             height: 150px;
-            object-fit: contain;
-            border: 1px solid #e3e6f0;
-            background-color: #fff;
+            /* Đảm bảo ảnh có tỷ lệ vuông */
+            object-fit: cover;
+            /* Giữ ảnh đầy đủ khung, cắt bớt phần dư */
+            border: 2px solid #d1d3e2;
+            /* Viền nhẹ màu xám */
+            background-color: #f8f9fc;
+            /* Màu nền dịu nhẹ, giống giao diện admin */
             display: none;
+            /* Ẩn mặc định, chỉ hiển thị khi có ảnh */
             margin-top: 0.5rem;
+            border-radius: 8px;
+            /* Bo góc nhẹ */
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+            /* Đổ bóng nhẹ tạo cảm giác nổi bật */
+            transition: all 0.3s ease-in-out;
+            /* Hiệu ứng mượt mà khi thay đổi */
+        }
+
+        .thumbnail-preview.show {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
         }
 
         .custom-file-input:focus~.custom-file-label {
@@ -135,6 +152,18 @@
         .badge-required {
             background-color: #e74a3b;
         }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 
@@ -147,7 +176,8 @@
                     <h1 class="h3 mb-0 text-gray-800">
                         <%= action %> Sản Phẩm
                     </h1>
-                    <a href="/v1/api/admin/list" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+                    <a href="/v1/api/admin/products/list"
+                        class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
                         <i class="fas fa-arrow-left fa-sm text-white-50 me-1"></i> Quay lại danh sách
                     </a>
                 </div>
@@ -427,30 +457,26 @@
                                     <div class="mb-3">
                                         <div class="d-flex flex-column align-items-center">
                                             <img id="thumbnail-preview"
-                                                src="<%= product && product.product_thumbnail ? product.product_thumbnail : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzSncjhoWGdsxRm0LnCc5FD9kj86QoiTVAhw&s' %>"
-                                                class="img-fluid thumbnail-preview" <% if (product &&
-                                                product.product_thumbnail) { %>
-                                            style="display: block;"
-                                            <% } else { %>
-                                                style="display: none;"
-                                                <% } %>
-                                                    alt="Ảnh đại diện">
+                                                src="<%= product && product.product_thumbnail ? '/' + product.product_thumbnail : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzSncjhoWGdsxRm0LnCc5FD9kj86QoiTVAhw&s' %>"
+                                                class="img-fluid thumbnail-preview <%= product && product.product_thumbnail ? 'show' : '' %>"
+                                                alt="Ảnh đại diện">
 
-                                                    <div class="mt-3 text-center">
-                                                        <label for="product_thumbnail" class="btn btn-outline-primary">
-                                                            <i class="fas fa-upload me-2"></i> Chọn ảnh
-                                                        </label>
-                                                        <input type="file" id="product_thumbnail"
-                                                            name="product_thumbnail" accept="image/*" class="d-none">
-                                                    </div>
-                                                    <small class="form-text text-muted mt-2">Định dạng: JPG, PNG, GIF.
-                                                        Kích thước tối đa: 2MB</small>
-                                                    <% if (product && product.product_thumbnail) { %>
-                                                        <button type="button" id="remove-thumbnail"
-                                                            class="btn btn-outline-danger btn-sm mt-2">
-                                                            <i class="fas fa-trash me-1"></i> Xóa ảnh
-                                                        </button>
-                                                        <% } %>
+
+                                            <div class="mt-3 text-center">
+                                                <label for="product_thumbnail" class="btn btn-outline-primary">
+                                                    <i class="fas fa-upload me-2"></i> Chọn ảnh
+                                                </label>
+                                                <input type="file" id="product_thumbnail" name="product_thumbnail"
+                                                    accept="image/*" class="d-none">
+                                            </div>
+                                            <small class="form-text text-muted mt-2">Định dạng: JPG, PNG, GIF.
+                                                Kích thước tối đa: 2MB</small>
+                                            <% if (product && product.product_thumbnail) { %>
+                                                <button type="button" id="remove-thumbnail"
+                                                    class="btn btn-outline-danger btn-sm mt-2">
+                                                    <i class="fas fa-trash me-1"></i> Xóa ảnh
+                                                </button>
+                                                <% } %>
                                         </div>
                                     </div>
                                 </div>
@@ -507,7 +533,7 @@
             const isEdit = form.getAttribute('action').includes('/products/') && form.getAttribute('method') === 'PUT';
             const isCheck = form.getAttribute('action');
             console.log('isEdit:', isEdit);
-            
+
 
 
             form.addEventListener('submit', function (event) {
@@ -517,8 +543,8 @@
                 const formData = new FormData(form);
 
                 const apiUrl = form.getAttribute('action');
-                console.log("API URL:", apiUrl);    
-                
+                console.log("API URL:", apiUrl);
+
 
                 console.log("Form đang gửi đi với các trường:");
                 for (let pair of formData.entries()) {
@@ -547,7 +573,7 @@
                     .then(data => {
                         if (data.success === true) {
                             console.log("Success:", data);
-                            
+
                             alert('Sản phẩm đã được ' + (isEdit ? 'cập nhật' : 'thêm') + ' thành công!');
                             // window.location.href = '/v1/api/admin/list'; // Điều hướng đến danh sách sản phẩm
                         } else {
@@ -570,29 +596,47 @@
 
                     reader.onload = function (e) {
                         thumbnailPreview.src = e.target.result;
-                        thumbnailPreview.style.display = 'block';
-
-                        // Thêm nút xóa nếu chưa có
-                        if (!document.getElementById('remove-thumbnail')) {
-                            const removeButton = document.createElement('button');
-                            removeButton.id = 'remove-thumbnail';
-                            removeButton.className = 'btn btn-outline-danger btn-sm mt-2';
-                            removeButton.innerHTML = '<i class="fas fa-trash me-1"></i> Xóa ảnh';
-
-                            thumbnailInput.parentNode.parentNode.appendChild(removeButton);
-
-                            removeButton.addEventListener('click', function () {
-                                thumbnailPreview.src = '/images/placeholder.png';
-                                thumbnailPreview.style.display = 'none';
-                                thumbnailInput.value = '';
-                                this.remove();
-                            });
-                        }
-                    }
+                        thumbnailPreview.classList.add('show'); // ✅ hiện lại ảnh
+                    };
 
                     reader.readAsDataURL(this.files[0]);
+
+                    // Nếu bị ẩn bởi lần xoá trước thì remove class hidden
+                    thumbnailPreview.classList.add('show');
+
+                    // Nếu có input hidden báo xoá ảnh, thì xoá đi vì giờ user đã chọn lại ảnh
+                    const removeInput = document.querySelector('input[name="remove_thumbnail"]');
+                    if (removeInput) {
+                        removeInput.remove();
+                    }
+
+                    // Nếu nút "Xóa ảnh" chưa tồn tại, thì thêm lại
+                    if (!document.getElementById('remove-thumbnail')) {
+                        const removeButton = document.createElement('button');
+                        removeButton.id = 'remove-thumbnail';
+                        removeButton.className = 'btn btn-outline-danger btn-sm mt-2';
+                        removeButton.innerHTML = '<i class="fas fa-trash me-1"></i> Xóa ảnh';
+                        thumbnailInput.parentNode.parentNode.appendChild(removeButton);
+
+                        removeButton.addEventListener('click', function () {
+                            thumbnailPreview.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzSncjhoWGdsxRm0LnCc5FD9kj86QoiTVAhw&s';
+                            thumbnailPreview.classList.remove('show'); // ✅ đúng class
+                            thumbnailInput.value = '';
+                            this.remove();
+
+                            const oldRemove = document.querySelector('input[name="remove_thumbnail"]');
+                            if (!oldRemove) {
+                                const hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'remove_thumbnail';
+                                hiddenInput.value = 'true';
+                                document.getElementById('productForm').appendChild(hiddenInput);
+                            }
+                        });
+                    }
                 }
             });
+
 
             // Nếu đã có nút xóa ảnh
             const removeButton = document.getElementById('remove-thumbnail');
@@ -603,7 +647,7 @@
 
                     // Sử dụng ảnh placeholder từ service bên ngoài thay vì đường dẫn local
                     thumbnailPreview.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzSncjhoWGdsxRm0LnCc5FD9kj86QoiTVAhw&s';
-                    thumbnailPreview.style.display = 'none';
+                    thumbnailPreview.classList.add('hidden')
                     thumbnailInput.value = '';
                     document.getElementById('productForm').insertAdjacentHTML('beforeend', '<input type="hidden" name="remove_thumbnail" value="true">');
                 });

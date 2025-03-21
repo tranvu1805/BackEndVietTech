@@ -12,9 +12,7 @@ class AccessController {
 
       const { email, password } = req.body;
 
-      console.log("check1: da o day", req.body);
-      console.log("check1: da o day", email);
-      // Kiểm tra thông tin đăng nhập với AccessService
+
       const result = await AccessService.login({ email, password });
 
       if (result.status === "error") {
@@ -52,6 +50,42 @@ class AccessController {
       return next(error);
     }
   }
+
+  async loginAdmin(req, res, next) {
+    try {
+      const { email, password } = req.body;
+      const result = await AccessService.loginAdmin({ email, password });
+
+      if (result.status === "error") {
+        return res.status(result.code).json(result);
+      }
+
+      res.cookie("token", result.metadata.tokens.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 1000,
+        sameSite: "Strict"
+      });
+
+      res.cookie("userId", result.metadata.account._id, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 1000,
+        sameSite: "Strict"
+      });
+
+      return res.status(result.code).json({
+        result,
+        success: true,
+        message: "Đăng nhập admin thành công",
+        redirectUrl: '/v1/api/admin/dashboard'
+      });
+    } catch (err) {
+      console.error("Lỗi loginAdmin:", err);
+      return next(err);
+    }
+  }
+
 
   // ✅ Đăng ký tài khoản
   signUp = async (req, res) => {

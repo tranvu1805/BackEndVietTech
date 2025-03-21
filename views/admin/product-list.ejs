@@ -9,281 +9,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #2ecc71;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --light-color: #ecf0f1;
-            --dark-color: #2c3e50;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-
-        .sidebar {
-            background-color: var(--primary-color);
-            min-height: 100vh;
-            color: white;
-            /* padding-top: 20px; */
-        }
-
-        .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            padding: 12px 20px;
-            background-color: transparent;
-            transition: background-color 0.3s ease;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background-color: #007bff;
-            /* Màu nền khi trang được chọn */
-            color: white;
-        }
-
-        .sidebar .nav-link i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .main-content {
-            padding: 20px;
-        }
-
-        .page-header {
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card {
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-        }
-
-        .card-header {
-            background-color: #fff;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            font-weight: 600;
-        }
-
-        .table {
-            width: 100%;
-            margin-bottom: 0;
-        }
-
-        .table th {
-            font-weight: 600;
-            background-color: rgba(0, 0, 0, 0.02);
-            border-top: none;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: rgba(52, 152, 219, 0.05);
-        }
-
-        .btn-primary {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-
-        .btn-success {
-            background-color: var(--success-color);
-            border-color: var(--success-color);
-        }
-
-        .btn-warning {
-            background-color: var(--warning-color);
-            border-color: var(--warning-color);
-            color: white;
-        }
-
-        .btn-danger {
-            background-color: var(--danger-color);
-            border-color: var(--danger-color);
-        }
-
-        .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-        }
-
-        .badge {
-            font-weight: 500;
-            padding: 5px 10px;
-            border-radius: 4px;
-        }
-
-        .pagination {
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .pagination .page-link {
-            color: rgb(36, 36, 36);
-            padding: 8px 16px;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-
-        .search-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .search-box input {
-            padding-left: 40px;
-            border-radius: 50px;
-            border: 1px solid #ced4da;
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 15px;
-            top: 12px;
-            color: #6c757d;
-        }
-
-        .variation-details {
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            padding: 10px;
-            margin-top: 5px;
-        }
-
-        .product-attributes,
-        .product-variations {
-            padding: 8px;
-        }
-
-        .attribute-item,
-        .variation-item {
-            border-bottom: 1px solid #eee;
-            padding: 8px 0;
-        }
-
-        .attribute-item:last-child,
-        .variation-item:last-child {
-            border-bottom: none;
-        }
-
-        .status-badge {
-            font-size: 0.75rem;
-            padding: 3px 8px;
-            border-radius: 12px;
-        }
-
-        .stock-high {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .stock-medium {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .stock-low {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .action-buttons {
-            white-space: nowrap;
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            color: white;
-        }
-
-        .top-navbar {
-            background-color: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
-            font-weight: bold;
-        }
-
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .mini-container {
-            border-radius: 20px;
-            box-shadow: 0px 5px 0px #b3b3b3;
-            margin: 20px;
-            background-color: #f0f0f0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 15px;
-        }
-
-        .mini-container:hover {
-            border-radius: 20px;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-            background-color: #2e2f2f;
-            /* Màu xanh đẹp khi hover */
-            transform: translateY(-5px);
-            /* Đẩy lên một chút để tạo hiệu ứng nâng lên */
-        }
-
-        .mini-container .content {
-            color: #333;
-            transition: color 0.3s ease;
-        }
-
-
-
-        /* Thêm hiệu ứng khi di chuột vào hình ảnh hoặc icon */
-        .mini-container img,
-        .mini-container i {
-            transition: transform 0.3s ease;
-        }
-
-        .mini-container:hover img,
-        .mini-container:hover i {
-            transform: scale(1.1);
-            /* Tăng kích thước hình ảnh hoặc icon khi hover */
-        }
-    </style>
+    <link rel="stylesheet 22" href="/css/style.css">
 </head>
 
 <body>
+
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
@@ -327,7 +57,7 @@
                     <!-- Page Header -->
                     <div class="page-header">
                         <h4 class="mb-0">Quản lý Sản phẩm</h4>
-                        <a href="/v1/api/admin/create" class="btn btn-success">
+                        <a href="/v1/api/admin/products/create" class="btn btn-success">
                             <i class="fas fa-plus me-1"></i> Thêm sản phẩm mới
                         </a>
                     </div>
@@ -348,7 +78,7 @@
                                 <button type="button" class="btn btn-outline-secondary">
                                     <i class="fas fa-sort me-1"></i> Sắp xếp
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary">
+                                <button type="button" class="btn btn-outline-secondary" id="exportProductsButton">
                                     <i class="fas fa-download me-1"></i> Xuất
                                 </button>
                             </div>
@@ -417,7 +147,7 @@
                                             </td>
                                             <td class="text-end pe-3">
                                                 <div class="action-buttons">
-                                                    <a href="/v1/api/admin/edit/<%= product._id %>"
+                                                    <a href="/v1/api/admin/products/edit/<%= product._id %>"
                                                         class="btn btn-sm btn-warning me-1">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
@@ -624,10 +354,10 @@
         }
 
         document.querySelectorAll('.nav-link').forEach(item => {
-           
+
             item.addEventListener('click', function () {
                 console.log("da o day");
-            
+
                 // Xóa lớp active khỏi tất cả các liên kết
                 document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
 
@@ -635,6 +365,33 @@
                 this.classList.add('active');
             });
         });
+
+        document.getElementById('exportProductsButton').addEventListener('click', function () {
+            fetch('/v1/api/admin/products/export', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.blob();
+                    }
+                    throw new Error('Error exporting products')
+                })
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);  // Tạo URL cho file Blob
+                    link.download = 'all_products.xlsx';  // Đặt tên file khi tải về
+                    link.click();  // Tự động click vào link để tải file
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi khi xuất file.');
+                })
+        });
+
+
     </script>
 
 
