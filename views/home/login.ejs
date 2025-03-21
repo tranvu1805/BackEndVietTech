@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viettech Admin - Đăng Nhập</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            /* Xanh đậm - màu chính của Viettech */
+            --secondary-color: #ff6d00;
+            /* Cam - màu phụ của Viettech */
+            --background-color: #f5f5f5;
+            --text-color: #424242;
+            --light-color: #ffffff;
+            --border-color: #e0e0e0;
+            --danger-color: #d32f2f;
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .viettech-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .viettech-logo {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .viettech-logo h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0;
+            color: var(--primary-color);
+        }
+
+        .viettech-logo span {
+            color: var(--secondary-color);
+        }
+
+        .logo-tagline {
+            font-size: 1rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .admin-card {
+            background-color: var(--light-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-header p {
+            margin-bottom: 0;
+            opacity: 0.8;
+            font-size: 0.95rem;
+        }
+
+        .admin-icon {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(26, 35, 126, 0.15);
+        }
+
+        .input-group-text {
+            background-color: #f5f5f5;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-viettech {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-viettech:hover {
+            background-color: #0d1b69;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 35, 126, 0.3);
+        }
+
+        .tech-footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.85rem;
+        }
+
+        .tech-icon {
+            margin-right: 0.5rem;
+        }
+
+        .dashboard-features {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+
+        .feature-badge {
+            padding: 0.5rem 1rem;
+            background-color: rgba(26, 35, 126, 0.1);
+            color: var(--primary-color);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .orange-badge {
+            background-color: rgba(255, 109, 0, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .alert {
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border: none;
+        }
+
+        .alert-danger {
+            background-color: rgba(211, 47, 47, 0.1);
+            color: var(--danger-color);
+        }
+
+        .forgot-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .forgot-link:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .viettech-logo h1 {
+                font-size: 2rem;
+            }
+
+            .admin-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .admin-icon i {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container viettech-container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="viettech-logo">
+                    <h1>Viet<span>Tech</span></h1>
+                    <p class="logo-tagline">Hệ thống quản trị cửa hàng điện tử</p>
+                </div>
+
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h2>Đăng nhập quản trị</h2>
+                        <p>Đăng nhập để quản lý cửa hàng điện tử Viettech</p>
+                        <div class="admin-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Tên đăng nhập</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <input type="text" class="form-control" id="email" name="email"
+                                        placeholder="Nhập tên đăng nhập" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Mật khẩu</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" name="password"
+                                        placeholder="Nhập mật khẩu" required>
+                                    <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rememberMe">
+                                    <label class="form-check-label" for="rememberMe">
+                                        Ghi nhớ đăng nhập
+                                    </label>
+                                </div>
+
+                                <a href="#" class="forgot-link">Quên mật khẩu?</a>
+                            </div>
+
+                            <button type="submit" class="btn btn-viettech">
+                                Đăng nhập
+                            </button>
+
+                            <div id="errorMessage" class="alert alert-danger" style="display: none;">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <span id="errorText"></span>
+                            </div>
+
+                            <div class="dashboard-features">
+                                <div class="feature-badge">
+                                    <i class="fas fa-box tech-icon"></i> Quản lý sản phẩm
+                                </div>
+                                <div class="feature-badge orange-badge">
+                                    <i class="fas fa-shopping-cart tech-icon"></i> Đơn hàng
+                                </div>
+                                <div class="feature-badge">
+                                    <i class="fas fa-users tech-icon"></i> Khách hàng
+                                </div>
+                                <div class="feature-badge orange-badge">
+                                    <i class="fas fa-chart-line tech-icon"></i> Báo cáo
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="tech-footer">
+                    <p>© 2025 Viettech Electronics. Tất cả quyền được bảo lưu.</p>
+                    <p>Liên hệ hỗ trợ kỹ thuật: <span style="color: var(--primary-color);">admin@viettech.vn</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Xử lý sự kiện hiển thị/ẩn mật khẩu
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // Xử lý đăng nhập
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Hiển thị hiệu ứng loading
+            const loginButton = document.querySelector('.btn-viettech');
+            const originalText = loginButton.innerHTML;
+            loginButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Đang xử lý...';
+            loginButton.disabled = true;
+
+            // Gửi yêu cầu POST đến API login
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                    remember: document.getElementById('rememberMe').checked
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Khôi phục trạng thái nút
+                    loginButton.innerHTML = originalText;
+                    loginButton.disabled = false;
+                   
+                    
+
+                    if (data.status === "error") {
+                        // Nếu có lỗi, hiển thị thông báo lỗi
+                        document.getElementById('errorMessage').style.display = 'block';
+                        document.getElementById('errorText').textContent = data.message;
+                    } else {
+                        localStorage.setItem('accessToken', data.result.metadata.tokens.accessToken);
+                        localStorage.setItem('userId', data.result.metadata.account._id);
+
+                        console.log("data", data.result.metadata.account._id);
+                        console.log("data 2", data.result.metadata.tokens.accessToken);
+                        
+                        // Nếu đăng nhập thành công, chuyển hướng đến trang dashboard
+                        window.location.href = data.redirectUrl;  // Đảm bảo rằng API trả về trường redirectUrl
+                    }
+                })
+                .catch(error => {
+                    // Khôi phục trạng thái nút
+                    loginButton.innerHTML = originalText;
+                    loginButton.disabled = false;
+
+                    // Hiển thị lỗi kết nối
+                    document.getElementById('errorMessage').style.display = 'block';
+                    document.getElementById('errorText').textContent = 'Lỗi kết nối máy chủ. Vui lòng thử lại sau.';
+                    console.error('Error:', error);
+                });
+        });
+
+    </script>
+</body>
+
+</html>

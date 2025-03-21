@@ -10,23 +10,34 @@ class AccessController {
     try {
       console.log(`[P]:: Login Request Received ::`, req.body);
 
-      const result = await AccessService.login(req.body);
+      const { email, password } = req.body;
 
+      console.log("check1: da o day",req.body);
+      console.log("check1: da o day",email);
+      // Kiểm tra thông tin đăng nhập với AccessService
+      const result = await AccessService.login({ email, password });
+      
       if (result.status === "error") {
         console.warn(`⚠️ Login Failed: ${result.message}`);
+        return res.status(result.code).json(result);
       } else {
-        console.log(
-          `✅ Login Successful for User: ${result.metadata.account.username}`
-        );
+        console.log(`✅ Login Successful for User: ${result.metadata.account.username}`);
         console.log(`🔑 Access Token: ${result.metadata.tokens.accessToken}`);
-      }
 
-      return res.status(result.code).json(result);
+        // Trả về kết quả thành công và chuyển hướng người dùng
+        return res.status(result.code).json({
+          result,
+          success: true,
+          message: "Đăng nhập thành công",
+          redirectUrl: '/v1/api/admin/dashboard' // Chuyển hướng đến trang dashboard sau khi đăng nhập thành công
+        });
+      }
     } catch (error) {
       console.error(`❌ Server Error during Login:`, error.message);
       return next(error);
     }
   }
+
   // ✅ Đăng ký tài khoản
   signUp = async (req, res) => {
     try {

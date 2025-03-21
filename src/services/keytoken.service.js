@@ -93,7 +93,9 @@ class KeyTokenService {
             console.error("❌ [ERROR] updateRefreshToken:", error);
             return false;
         }
-    }
+        return await keytokenModel.findOne({ user: new Types.ObjectId(userId) }).lean();
+    };
+    
 
     static async removeKeyToken(userId) {
         try {

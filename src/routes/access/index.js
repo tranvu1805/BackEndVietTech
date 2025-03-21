@@ -4,8 +4,6 @@ const { apiKey } = require("../../auth/checkAuth");
 const { authentication, verifyRefreshToken } = require("../../auth/authUtils");
 
 const router = express.Router();
-
-// Đăng ký tài khoản
 router.post("/staff/signup", apiKey, accessController.signUpEmployee);
 router.post("/customer/signup", apiKey, accessController.signUp);
 
