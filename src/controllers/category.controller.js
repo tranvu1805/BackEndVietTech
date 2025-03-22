@@ -1,3 +1,4 @@
+const categoryModel = require("../models/category.model");
 const Category = require("../models/category.model");
 
 // Tạo một danh mục mới
@@ -5,11 +6,19 @@ const createCategory = async (req, res) => {
     try {
         const { name, parent_category, attributes_template } = req.body;
         // Kiểm tra nếu thiếu bất kỳ trường nào
+        console.log("check req",req.body);
+        
         if (!name || !attributes_template) {
             return res.status(400).json({ success: false, message: "Name and attributes_template are required!" });
         }
 
-        const category = await Category.create({ name, parent_category, attributes_template });
+        const categoryData = {
+            name,
+            parent_category: parent_category ? parent_category : null,
+            attributes_template,
+        };
+
+        const category = await categoryModel.create(categoryData);
         res.status(201).json({ success: true, category });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

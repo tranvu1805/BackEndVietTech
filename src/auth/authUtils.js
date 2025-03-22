@@ -1,7 +1,8 @@
 const JWT = require('jsonwebtoken')
 const asyncHandler = require('../helpers/asyncHandler')
 const { findUserById } = require('../services/keytoken.service')
-const { log } = require('console')
+const { log } = require('console');
+const KeyTokenService = require('../services/keytoken.service');
 
 
 const HEADER = {
@@ -22,6 +23,8 @@ const createToKenPair = async (payload, publicKey, privateKey) => {
 };
 
 const authentication = asyncHandler(async (req, res, next) => {
+    console.log("check",req.headers[HEADER.CLIENT_ID]);
+    
 
     const userId = req.headers[HEADER.CLIENT_ID];
 
@@ -30,12 +33,18 @@ const authentication = asyncHandler(async (req, res, next) => {
     }
 
 
-    const token = req.headers[HEADER.AUTHORIZATION]?.split(" ")[1];
+    const token = req.headers[HEADER.AUTHORIZATION];
+    console.log("check tok",token);
+    
     if (!token) {
         return res.status(403).json({ success: false, message: "Access Token is missing in request headers" });
     }
 
+    
     const keyStore = await KeyTokenService.findByUserId(userId);
+    console.log("check key",keyStore);
+    console.log("check token",token);
+    
     if (!keyStore) {
         return res.status(403).json({ success: false, message: "KeyStore not found for provided userId" });
     }
@@ -45,6 +54,9 @@ const authentication = asyncHandler(async (req, res, next) => {
         const decoded = JWT.verify(token, keyStore.publicKey);
         if (decoded.userId !== userId) {
             return res.status(403).json({ success: false, message: "Invalid User ID in token payload" });
+        }else{
+            console.log("done !!!");
+            
         }
 
         req.keyStore = keyStore;
@@ -57,6 +69,7 @@ const authentication = asyncHandler(async (req, res, next) => {
 
 const verifyRefreshToken = asyncHandler(async (req, res, next) => {
     const refreshToken = req.body.refreshToken;
+   
     if (!refreshToken) {
         return res.status(400).json({ success: false, message: "Refresh token is missing" });
     }
@@ -82,7 +95,7 @@ const verifyRefreshToken = asyncHandler(async (req, res, next) => {
         req.keyStore = keyStore;
         next();
     } catch (error) {
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
+        return res.status(500).json({ success: false, message: "Internal Server Error q" });
     }
 });
 
