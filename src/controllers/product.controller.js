@@ -160,7 +160,7 @@ const getAllProducts_Admin = async (req, res) => {
             minPrice,
             maxPrice,
             page = 1,
-            limit = 10,
+            limit = 5,
             variant_name,
             variant_value,
             sort
@@ -213,10 +213,8 @@ const getAllProducts_Admin = async (req, res) => {
         }
 
         // Đếm tổng số sản phẩm (phục vụ phân trang)
-        const total = await Product.countDocuments(filter);
-
-        // Tìm sản phẩm với phân trang
-
+        const totalCount = await Product.countDocuments(filter);
+        const totalPages = Math.ceil(totalCount / limit);
 
         let sortOption = {};
         if (sort === 'price_asc') sortOption.product_price = 1;
@@ -230,7 +228,7 @@ const getAllProducts_Admin = async (req, res) => {
             .skip((page - 1) * limit)
             .limit(Number(limit));
 
-        return products;
+        return { products, totalPages, currentPage: Number(page), totalCount };
     } catch (error) {
         console.error("Error getAllProducts_Admin:", error);
         return {

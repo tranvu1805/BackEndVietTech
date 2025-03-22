@@ -6,14 +6,19 @@ const router = express.Router();
 
 router.get("/list", async (req, res) => {
     try {
-        const products = await getAllProducts_Admin(req, res);
-        res.render("admin/product-list", { products, query: req.query });
-
+        const result = await getAllProducts_Admin(req, res);
+        res.render("admin/product-list", {
+            products: result.products,
+            totalPages: result.totalPages,
+            currentPage: result.currentPage,
+            query: req.query
+        });
     } catch (error) {
         console.error("Error loading products:", error);
         res.status(500).send("Error loading products!");
     }
 });
+
 
 
 
@@ -39,7 +44,7 @@ router.get("/edit/:id", async (req, res) => {
             return res.status(404).send("Product not found");
         }
         console.log("check product: ", product);
-        
+
         res.render("admin/product-form", { action: "Edit", product, categories });
     } catch (error) {
         console.error("Error loading product:", error);

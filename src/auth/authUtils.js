@@ -23,6 +23,8 @@ const createToKenPair = async (payload, publicKey, privateKey) => {
 };
 
 const authentication = asyncHandler(async (req, res, next) => {
+    console.log("check",req.headers[HEADER.CLIENT_ID]);
+    
 
     const userId = req.headers[HEADER.CLIENT_ID];
 
