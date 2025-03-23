@@ -57,21 +57,10 @@ class BillController {
     }
   }
 
-<<<<<<< HEAD
-  static async getAllBills_Admin(req, res, next) {
-    try {
-      const bills = await BillService.getAllBills();
-      return bills;
-    } catch (error) {
-      next(error);
-    }
-=======
   static async getAllBills_Admin(req, res) {
     const bills = await BillService.getAllBills();
     return bills;
->>>>>>> origin/ltduong04
   }
-
 
   static async exportBillsToExcel(req, res, next) {
     try {
@@ -80,11 +69,7 @@ class BillController {
 
       // Tạo workbook và worksheet
       const workbook = new ExcelJS.Workbook();
-<<<<<<< HEAD
       const worksheet = workbook.addWorksheet("Bills");
-=======
-      const worksheet = workbook.addWorksheet('Bills');
->>>>>>> origin/ltduong04
 
       // Đặt tiêu đề cho các cột
       worksheet.columns = [
@@ -147,7 +132,6 @@ class BillController {
         "attachment; filename=all_bills.xlsx"
       );
 
-
       // Ghi file ra response
       await workbook.xlsx.write(res);
       res.end();
@@ -155,7 +139,6 @@ class BillController {
       next(error);
     }
   }
-
 
   static async getBillsByStatus(req, res, next) {
     try {
