@@ -1,6 +1,7 @@
 const express = require("express");
 const { getAllCategories_Admin } = require("../../controllers/category.controller");
-const { getAllProducts_Admin, getProductById_Admin, exportProductsToExcel } = require("../../controllers/product.controller");
+const { getAllProducts_Admin, getProductById_Admin, exportProductsToExcel, getTopSellingProducts } = require("../../controllers/product.controller");
+const asyncHandler = require("../../helpers/asyncHandler");
 const router = express.Router();
 
 
@@ -18,6 +19,7 @@ router.get("/list", async (req, res) => {
         res.status(500).send("Error loading products!");
     }
 });
+
 
 
 

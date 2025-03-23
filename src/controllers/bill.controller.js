@@ -34,6 +34,16 @@ class BillController {
     }
   }
 
+  static async getTotalRevenue(req, res) {
+    try {
+      const { startDate, endDate } = req.query;
+      const result = await BillService.getTotalRevenue({ startDate, endDate });
+      return res.status(200).json(result);
+    } catch (error) {
+      return res.status(500).json({ message: "Internal Server Error", error });
+    }
+  }
+
   static async getAllBills(req, res, next) {
     try {
       const bills = await BillService.getAllBills();
@@ -47,6 +57,7 @@ class BillController {
     }
   }
 
+<<<<<<< HEAD
   static async getAllBills_Admin(req, res, next) {
     try {
       const bills = await BillService.getAllBills();
@@ -54,7 +65,13 @@ class BillController {
     } catch (error) {
       next(error);
     }
+=======
+  static async getAllBills_Admin(req, res) {
+    const bills = await BillService.getAllBills();
+    return bills;
+>>>>>>> origin/ltduong04
   }
+
 
   static async exportBillsToExcel(req, res, next) {
     try {
@@ -63,7 +80,11 @@ class BillController {
 
       // Tạo workbook và worksheet
       const workbook = new ExcelJS.Workbook();
+<<<<<<< HEAD
       const worksheet = workbook.addWorksheet("Bills");
+=======
+      const worksheet = workbook.addWorksheet('Bills');
+>>>>>>> origin/ltduong04
 
       // Đặt tiêu đề cho các cột
       worksheet.columns = [
@@ -116,6 +137,7 @@ class BillController {
       });
 
       // Thiết lập header để trình duyệt tải file Excel
+
       res.setHeader(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -125,6 +147,7 @@ class BillController {
         "attachment; filename=all_bills.xlsx"
       );
 
+
       // Ghi file ra response
       await workbook.xlsx.write(res);
       res.end();
@@ -132,6 +155,7 @@ class BillController {
       next(error);
     }
   }
+
 
   static async getBillsByStatus(req, res, next) {
     try {
