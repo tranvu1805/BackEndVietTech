@@ -1,5 +1,7 @@
 const Product = require("../models/product.model");
 const Category = require("../models/category.model");
+const billModel = require("../models/bill.model");
+const { Types } = require("mongoose");
 
 class ProductService {
     static async createProduct() {
@@ -36,6 +38,58 @@ class ProductService {
     static async getAllProducts() {
         return await Product.find().populate("category");
     };
+
+    static async findByCategory(categoryId) {
+        return await Product.find({ category: categoryId });
+    };
+
+    static async getTopSellingProducts(limit = 5) {
+        const result = await billModel.billRepo.aggregate([
+            { $unwind: "$products" },
+            {
+                $addFields: {
+                    "products.productId": {
+                        $cond: [
+                            { $not: [{ $eq: [{ $type: "$products.productId" }, "objectId"] }] },
+                            { $toObjectId: "$products.productId" },
+                            "$products.productId"
+                        ]
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$products.productId", // ObjectId now
+                    totalSold: { $sum: "$products.quantity" }
+                }
+            },
+            { $sort: { totalSold: -1 } },
+            { $limit: limit },
+            {
+                $lookup: {
+                    from: "Products",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "product"
+                }
+            },
+            { $unwind: "$product" },
+            {
+                $project: {
+                    _id: 0,
+                    productId: "$_id",
+                    totalSold: 1,
+                    product_name: "$product.product_name",
+                    product_price: "$product.product_price",
+                    product_stock: "$product.product_stock"
+                }
+            }
+        ]);
+
+        console.log("🔥 Top selling result:", result);
+        return result;
+    }
+
 }
 
 module.exports = ProductService;

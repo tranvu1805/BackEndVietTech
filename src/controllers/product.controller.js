@@ -1,10 +1,19 @@
 const Product = require("../models/product.model");
 const categoryModel = require("../models/category.model");
 const e = require("express");
+const slugify = require('slugify');
 const fs = require('fs');
 const path = require("path")
 const ExcelJS = require('exceljs')
 const ProductService = require("../services/product.service");
+
+const generateSKU = (productName, variantName, variantValue) => {
+    const productSlug = slugify(productName, { lower: true, strict: true });
+    const variantSlug = slugify(variantName, { lower: true, strict: true });
+    const valueSlug = slugify(variantValue, { lower: true, strict: true });
+
+    return `${productSlug}-${variantSlug}-${valueSlug}`;
+};
 
 // 🟢 1. Tạo sản phẩm mới
 const createProduct = async (req, res) => {
@@ -69,7 +78,7 @@ const createProduct = async (req, res) => {
         console.log("check variation 22", variant_names);
         if (variant_names && variant_values && variant_prices && variant_stocks) {
             for (let i = 0; i < variant_names.length; i++) {
-                const sku = `SKU-${variant_names[i]}-${variant_values[i]}`;
+                const sku = generateSKU(product_name, variant_names[i], variant_values[i]);
                 console.log("check sku", sku);
 
                 variations.push({
@@ -242,6 +251,7 @@ const getAllProducts_Admin = async (req, res) => {
 };
 
 
+
 // 🟢 3. Lấy chi tiết sản phẩm
 const getProductById = async (req, res) => {
     try {
@@ -314,6 +324,8 @@ const deleteProduct = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// 🟢 6. Xuất sản phẩm qua excel
 const exportProductsToExcel = async (req, res, next) => {
     try {
         const products = await ProductService.getAllProducts(); // Lấy danh sách sản phẩm từ DB
@@ -526,4 +538,44 @@ const exportProductsToExcel = async (req, res, next) => {
     }
 };
 
-module.exports = { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, getAllProducts_Admin, getProductById_Admin, exportProductsToExcel };
+// 🟢 7. Lọc sản phẩm theo Danh Mục
+const getProductsByCategory = async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+        const products = await ProductService.findByCategory(categoryId);
+
+        return res.status(200).json({
+            message: "Lấy sản phẩm theo danh mục thành công",
+            metadata: products
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Lỗi khi lấy sản phẩm theo category",
+            error
+        });
+    }
+};
+
+const getTopSellingProducts = async (req, res) => {
+    try {
+        const result = await ProductService.getTopSellingProducts(); // gọi service xử lý logic
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error("🔥 Lỗi khi lấy top sản phẩm bán chạy:", error);
+        return res.status(500).json({ message: "Internal server error", error: error.message || error });
+    }
+};
+
+
+module.exports = {
+    createProduct,
+    getAllProducts,
+    getProductById,
+    updateProduct,
+    deleteProduct,
+    getAllProducts_Admin,
+    getProductById_Admin,
+    exportProductsToExcel,
+    getProductsByCategory,
+    getTopSellingProducts
+};

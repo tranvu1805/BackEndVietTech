@@ -2,6 +2,7 @@
 
 const { NotFoundError } = require("../core/error.response");
 const { billRepo } = require("../models/bill.model");
+const productModel = require("../models/product.model");
 
 class BillService {
   static async getBillById({ billId }) {
@@ -39,10 +40,23 @@ class BillService {
   }
 
   static async getAllBills() {
-    const bills = await billRepo.find();
+    const bills = await billRepo.find().lean(); // thêm lean() để dễ thao tác dữ liệu
+
+    // Lặp từng bill
+    for (const bill of bills) {
+      // Lặp từng sản phẩm trong bill
+      for (const product of bill.products) {
+        const productDoc = await productModel.findById(product.productId).lean();
+        if (productDoc) {
+          product.product_name = productDoc.product_name;
+        } else {
+          product.product_name = "Sản phẩm không tồn tại";
+        }
+      }
+    }
+
     return bills;
   }
-
 
   static async getTotalRevenue({ startDate, endDate }) {
     try {

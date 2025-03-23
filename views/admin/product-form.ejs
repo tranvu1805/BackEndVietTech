@@ -544,6 +544,9 @@
                 const formData = new FormData(form);
 
                 const apiUrl = form.getAttribute('action');
+                const accessToken = localStorage.getItem('accessToken');
+                const userId = localStorage.getItem('userId');
+                const apiKey = 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683'
                 console.log("API URL:", apiUrl);
 
 
@@ -564,6 +567,11 @@
                 fetch(apiUrl, {
                     method: isEdit ? 'PUT' : 'POST',  // Chọn POST cho create, PUT cho update
                     body: formData,  // Gửi dữ liệu form (bao gồm ảnh và các trường khác)
+                    headers: {
+                        authorization: accessToken,
+                        'x-client-id': userId,
+                        'x-api-key': apiKey
+                    }
                 })
                     .then(response => {
                         if (!response.ok) {
@@ -696,6 +704,52 @@
                 button.addEventListener('click', function () {
                     this.closest('.attribute-row').remove();
                 });
+            });
+
+
+            document.getElementById('category').addEventListener('change', async function () {
+                const categoryId = this.value;
+
+                if (!categoryId) return;
+
+                try {
+                    const res = await fetch(`/v1/api/shop/categories/${categoryId}/attributes`);
+                    const data = await res.json();
+
+                    if (data && Array.isArray(data.attributes)) {
+                        const container = document.getElementById('attributes-container');
+                        container.innerHTML = ''; // Xóa các dòng hiện tại
+
+                        data.attributes.forEach(attr => {
+                            const row = document.createElement('div');
+                            row.className = 'attribute-row';
+                            row.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="mb-2">
+                                <label class="form-label">Tên thuộc tính</label>
+                                <input type="text" class="form-control" name="attribute_keys[]" value="${attr}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="mb-2">
+                                <label class="form-label">Giá trị</label>
+                                <input type="text" class="form-control" name="attribute_values[]" placeholder="Nhập giá trị cho ${attr}">
+                            </div>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-sm remove-attribute">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                            container.appendChild(row);
+                        });
+                    }
+                } catch (err) {
+                    console.error("Lỗi khi lấy thuộc tính:", err);
+                }
             });
 
             // Add Variation

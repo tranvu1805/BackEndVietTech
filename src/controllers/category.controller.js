@@ -57,6 +57,17 @@ const getCategoryById = async (req, res) => {
     }
 };
 
+const getAttributesByCategory = async (req, res, next) => {
+    try {
+      const category = await Category.findById(req.params.id);
+      if (!category) return res.status(404).json({ message: "Không tìm thấy danh mục!" });
+  
+      return res.status(200).json({ attributes: category.attributes_template || [] });
+    } catch (error) {
+      return res.status(500).json({ message: "Lỗi server", error: error.message });
+    }
+  };
+
 // Cập nhật thông tin danh mục
 const updateCategory = async (req, res) => {
     try {
@@ -95,5 +106,6 @@ module.exports = {
     getCategoryById,
     updateCategory,
     deleteCategory,
-    getAllCategories_Admin
+    getAllCategories_Admin,
+    getAttributesByCategory
 };

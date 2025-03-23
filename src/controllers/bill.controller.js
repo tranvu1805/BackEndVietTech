@@ -32,6 +32,16 @@ class BillController {
     }
   }
 
+  static async getTotalRevenue(req, res) {
+    try {
+      const { startDate, endDate } = req.query;
+      const result = await BillService.getTotalRevenue({ startDate, endDate });
+      return res.status(200).json(result);
+    } catch (error) {
+      return res.status(500).json({ message: "Internal Server Error", error });
+    }
+  }
+
   static async getAllBills(req, res, next) {
     try {
       const bills = await BillService.getAllBills();
@@ -44,25 +54,22 @@ class BillController {
       next(error);
     }
   }
-  
-  static async getAllBills_Admin(req, res, next) {
-    try {
-      const bills = await BillService.getAllBills();
-      return bills
-    } catch (error) {
-      next(error);
-    }
+
+  static async getAllBills_Admin(req, res) {
+    const bills = await BillService.getAllBills();
+    return bills;
   }
+
 
   static async exportBillsToExcel(req, res, next) {
     try {
       // Lấy danh sách hóa đơn từ service
       const bills = await BillService.getAllBills();
-    
+
       // Tạo workbook và worksheet
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Bills');
-    
+
       // Đặt tiêu đề cho các cột
       worksheet.columns = [
         { header: 'Mã Đơn Hàng', key: 'order_code', width: 15 },
@@ -76,7 +83,7 @@ class BillController {
         { header: 'Ngày Tạo', key: 'createdAt', width: 20, style: { numFmt: 'mm/dd/yyyy' } },
         { header: 'Ngày Cập Nhật', key: 'updatedAt', width: 20, style: { numFmt: 'mm/dd/yyyy' } },
       ];
-    
+
       // Thêm dữ liệu hóa đơn vào worksheet
       bills.forEach(bill => {
         worksheet.addRow({
@@ -92,20 +99,20 @@ class BillController {
           updatedAt: new Date(bill.updatedAt).toLocaleDateString('en-US'),
         });
       });
-    
+
       // Thiết lập header để trình duyệt tải file Excel
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename=all_bills.xlsx');
-    
+
       // Ghi file ra response
       await workbook.xlsx.write(res);
       res.end();
-    
+
     } catch (error) {
       next(error);
     }
   }
-  
+
 
 }
 
