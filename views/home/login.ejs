@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viettech Admin - Đăng Nhập</title>
+    <link rel="icon" href="/uploads/mini_logo.ico" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -370,9 +371,11 @@
                     } else {
                         localStorage.setItem('accessToken', data.result.metadata.tokens.accessToken);
                         localStorage.setItem('userId', data.result.metadata.account._id);
+                        localStorage.setItem('refreshToken', data.result.metadata.tokens.refreshToken);
 
                         console.log("data", data.result.metadata.account._id);
                         console.log("data 2", data.result.metadata.tokens.accessToken);
+                        console.log("Refresh Token:", data.result.metadata.tokens.refreshToken);
                         
                         // Nếu đăng nhập thành công, chuyển hướng đến trang dashboard
                         window.location.href = data.redirectUrl;  // Đảm bảo rằng API trả về trường redirectUrl
