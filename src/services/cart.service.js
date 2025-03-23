@@ -496,7 +496,12 @@ class CartService {
           },
         });
       }
-
+      if ((product.quantity || 1) < 0) {
+        console.log("Cannot add product with negative quantity");
+        throw new ConflictRequestError(
+          "Cannot add product with negative quantity"
+        );
+      }
       // Nếu chưa có trong giỏ hàng, thêm mới
       console.log("Adding new product to cart");
       return await CartService.createUserCart({
