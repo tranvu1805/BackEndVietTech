@@ -4,8 +4,8 @@ class ReviewController {
     // Thêm review mới
     static async addReview(req, res) {
         try {
-            const { account_id, product_id, contents_review } = req.body;
-            const review = await reviewService.addReview(account_id, product_id, contents_review);
+            const { account_id, product_id, contents_review , image_ids} = req.body;
+            const review = await reviewService.addReview(account_id, product_id, contents_review, image_ids);
             res.status(201).json({ success: true, data: review });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
@@ -41,17 +41,24 @@ class ReviewController {
         }
     }
 
-    // Cập nhật review theo reviewId
-    static async updateReview(req, res) {
-        try {
-            const { reviewId } = req.params;
-            const { contents_review } = req.body;
-            const updatedReview = await reviewService.updateReview(reviewId, contents_review);
-            res.status(200).json({ success: true, data: updatedReview });
-        } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+   // Cập nhật review theo reviewId
+static async updateReview(req, res) {
+    try {
+        const { reviewId } = req.params;
+        const { contents_review, image_ids } = req.body; // Lấy dữ liệu từ body
+
+        const updatedReview = await reviewService.updateReview(reviewId, contents_review, image_ids);
+        
+        if (!updatedReview) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy review để cập nhật" });
         }
+
+        res.status(200).json({ success: true, data: updatedReview });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
+}
+
  
 
 }

@@ -82,6 +82,34 @@ class BillService {
     }
   }
 
+  static async getBillsByStatus({ status }) {
+    try {
+        // Kiểm tra status có hợp lệ không
+        const validStatuses = ["active", "completed", "failed", "pending"];
+        if (!validStatuses.includes(status)) {
+            return {
+                message: "Invalid status",
+                bills: []
+            };
+        }
+
+        // Lấy danh sách hóa đơn theo status
+        const bills = await billRepo.find({ status });
+
+        return {
+            message: `Lấy danh sách hóa đơn có trạng thái ${status} thành công`,
+            bills
+        };
+    } catch (error) {
+        return {
+            message: "Internal Server Error",
+            error: error.message || "Lỗi không xác định",
+            bills: []
+        };
+    }
+}
+
+
 
 
 }

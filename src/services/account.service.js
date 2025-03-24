@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const accountModel = require("../models/account.model");
 const moment = require("moment");
+const Image = require("../models/image.model");
 
 class AccountService {
   /** Lấy tài khoản và role theo ID */
@@ -12,6 +13,7 @@ class AccountService {
       const account = await accountModel
         .findById(accountId)
         .populate("role_id", "name")
+        .populate("profile_image")
         .select("-password");
       
       if (!account) return { code: 404, message: "Account not found!", status: "error" };

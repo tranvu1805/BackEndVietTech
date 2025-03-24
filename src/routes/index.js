@@ -32,7 +32,7 @@ router.get("/", (req, res) => {
   res.render("home/login");
 });
 
-router.post("/login", accessController.login);
+router.post("/login", accessController.loginAdmin);
 
 router.use("/v1/api/cart", require("./cart"));
 
