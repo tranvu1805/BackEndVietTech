@@ -64,8 +64,8 @@ class AccessService {
         return { code: 400, message: "Email hoặc mật khẩu không đúng!", status: "error" };
       }
 
-      console.log("check role",account.role_id.name);
-      
+      console.log("check role", account.role_id.name);
+
 
       const isPasswordValid = await bcrypt.compare(password, account.password);
       if (!isPasswordValid) {
@@ -190,7 +190,7 @@ class AccessService {
         password,
         phone,
         address,
-        status = "inactive",
+        status = "active",
       } = body;
       console.log("📌 Dữ liệu đầu vào:", body);
 
@@ -236,6 +236,8 @@ class AccessService {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
+      // Ảnh mặc định
+      const DEFAULT_PROFILE_IMAGE_ID = "67d3b37b63838e785e7844da";
       const newAccount = await accountModel.create({
         username,
         full_name,
@@ -243,6 +245,7 @@ class AccessService {
         address,
         email,
         password: hashedPassword,
+        profile_image: DEFAULT_PROFILE_IMAGE_ID,
         role_id: roleData._id,
         status,
       });

@@ -7,7 +7,8 @@ const ReviewSchema = new mongoose.Schema(
   {
     account_id: { type: mongoose.Schema.Types.ObjectId, ref: "account", required: true },
     product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
-    contents_review: { type: String, required: true }
+    contents_review: { type: String, required: true },
+    image_ids: [{ type: mongoose.Schema.Types.ObjectId, ref: "Image" }]
   },
   {
     timestamps: true,
