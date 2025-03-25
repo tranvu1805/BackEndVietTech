@@ -59,6 +59,8 @@ const authentication = asyncHandler(async (req, res, next) => {
             
         }
 
+        req.user = { _id: userId };
+
         req.keyStore = keyStore;
         return next();
     } catch (error) {
