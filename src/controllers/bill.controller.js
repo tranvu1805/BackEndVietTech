@@ -34,6 +34,16 @@ class BillController {
     }
   }
 
+  static async getTotalRevenue(req, res) {
+    try {
+      const { startDate, endDate } = req.query;
+      const result = await BillService.getTotalRevenue({ startDate, endDate });
+      return res.status(200).json(result);
+    } catch (error) {
+      return res.status(500).json({ message: "Internal Server Error", error });
+    }
+  }
+
   static async getAllBills(req, res, next) {
     try {
       const bills = await BillService.getAllBills();
@@ -47,13 +57,9 @@ class BillController {
     }
   }
 
-  static async getAllBills_Admin(req, res, next) {
-    try {
-      const bills = await BillService.getAllBills();
-      return bills;
-    } catch (error) {
-      next(error);
-    }
+  static async getAllBills_Admin(req, res) {
+    const bills = await BillService.getAllBills();
+    return bills;
   }
 
   static async exportBillsToExcel(req, res, next) {
@@ -116,6 +122,7 @@ class BillController {
       });
 
       // Thiết lập header để trình duyệt tải file Excel
+
       res.setHeader(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

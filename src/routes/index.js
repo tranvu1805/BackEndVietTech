@@ -14,6 +14,7 @@ const adminRoutes = require("./admin/index");
 
 const accessController = require("../controllers/access.controller");
 
+
 // API versioning
 router.use("/v1/api/access", accessRoutes);
 router.use("/v1/api/account", accountRoutes);

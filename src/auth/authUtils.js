@@ -1,8 +1,9 @@
 const JWT = require('jsonwebtoken')
 const asyncHandler = require('../helpers/asyncHandler')
+const KeyTokenService  = require('../services/keytoken.service')
+const { log } = require('console')
 const { findUserById } = require('../services/keytoken.service')
-const { log } = require('console');
-const KeyTokenService = require('../services/keytoken.service');
+
 
 
 const HEADER = {
@@ -58,6 +59,8 @@ const authentication = asyncHandler(async (req, res, next) => {
             console.log("done !!!");
             
         }
+
+        req.user = { _id: userId };
 
         req.keyStore = keyStore;
         return next();

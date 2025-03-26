@@ -369,38 +369,13 @@
                                                     <th>Doanh thu</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
+                                            <tbody id="top-selling-body">
                                                 <tr>
-                                                    <td>iPhone 14 Pro</td>
-                                                    <td>42</td>
-                                                    <td>18</td>
-                                                    <td>1.05B</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Samsung Galaxy S23</td>
-                                                    <td>38</td>
-                                                    <td>5</td>
-                                                    <td>912M</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Macbook Air M2</td>
-                                                    <td>27</td>
-                                                    <td>12</td>
-                                                    <td>810M</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Apple Watch Series 8</td>
-                                                    <td>25</td>
-                                                    <td>20</td>
-                                                    <td>250M</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>iPad Pro 12.9</td>
-                                                    <td>22</td>
-                                                    <td>15</td>
-                                                    <td>550M</td>
+                                                    <td colspan="4" class="text-center text-muted">Đang tải dữ liệu...
+                                                    </td>
                                                 </tr>
                                             </tbody>
+
                                         </table>
                                     </div>
                                 </div>
@@ -418,7 +393,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table class="table table-hover">
+                                        <table class="table table-hover" id="recent-orders-table">
                                             <thead>
                                                 <tr>
                                                     <th>ID</th>
@@ -430,94 +405,8 @@
                                                     <th>Hành động</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>#43215</td>
-                                                    <td>Nguyễn Văn A</td>
-                                                    <td>14/03/2025</td>
-                                                    <td>2.500.000đ</td>
-                                                    <td><span class="badge bg-warning">Đang xử lý</span></td>
-                                                    <td><span class="badge bg-success">Đã thanh toán</span></td>
-                                                    <td>
-                                                        <div class="btn-group">
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-outline-primary">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-outline-success">
-                                                                <i class="fas fa-check"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>#43214</td>
-                                                    <td>Trần Thị B</td>
-                                                    <td>14/03/2025</td>
-                                                    <td>1.800.000đ</td>
-                                                    <td><span class="badge bg-success">Hoàn thành</span></td>
-                                                    <td><span class="badge bg-success">Đã thanh toán</span></td>
-                                                    <td>
-                                                        <div class="btn-group">
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-outline-primary">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>#43213</td>
-                                                    <td>Lê Văn C</td>
-                                                    <td>13/03/2025</td>
-                                                    <td>4.200.000đ</td>
-                                                    <td><span class="badge bg-info">Đang giao</span></td>
-                                                    <td><span class="badge bg-warning">COD</span></td>
-                                                    <td>
-                                                        <div class="btn-group">
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-outline-primary">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                            <button type="button" class="btn btn-sm btn-outline-info">
-                                                                <i class="fas fa-truck"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>#43212</td>
-                                                    <td>Phạm Thị D</td>
-                                                    <td>13/03/2025</td>
-                                                    <td>950.000đ</td>
-                                                    <td><span class="badge bg-danger">Hủy</span></td>
-                                                    <td><span class="badge bg-secondary">Hoàn tiền</span></td>
-                                                    <td>
-                                                        <div class="btn-group">
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-outline-primary">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>#43211</td>
-                                                    <td>Vũ Văn E</td>
-                                                    <td>12/03/2025</td>
-                                                    <td>3.500.000đ</td>
-                                                    <td><span class="badge bg-success">Hoàn thành</span></td>
-                                                    <td><span class="badge bg-success">Đã thanh toán</span></td>
-                                                    <td>
-                                                        <div class="btn-group">
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-outline-primary">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+                                            <tbody id="recent-orders-body">
+
                                             </tbody>
                                         </table>
                                     </div>
@@ -604,9 +493,79 @@
             }
 
 
+            async function loadRevenue() {
+                try {
+                    const now = new Date();
+                    const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString(); // đầu tháng
+                    const endDate = new Date().toISOString(); // hôm nay
+
+                    const res = await fetch(`/v1/api/bill/revenue?startDate=${startDate}&endDate=${endDate}`);
+                    const data = await res.json();
+
+                    console.log("check revenue", data);
+
+                    const revenue = Math.floor(data.totalRevenue) || 0; // Làm tròn xuống để loại bỏ số thập phân
+                    document.querySelector(".card-stats.bg-success h3").innerText = revenue.toLocaleString('vi-VN') + ' ₫';
+                } catch (error) {
+                    console.error("Lỗi khi load doanh thu:", error);
+                }
+            }
+
+
+
+            async function loadTotalOrders() {
+                try {
+                    const res = await fetch('/v1/api/bill');
+                    const data = await res.json();
+                    console.log('check order', data);
+
+                    document.querySelector(".card-stats.bg-primary h3").innerText = data.metadata.length;
+                } catch (error) {
+                    console.error("Lỗi khi load đơn hàng:", error);
+                }
+            }
+
+            async function loadRecentOrders() {
+                try {
+                    const res = await fetch('/v1/api/bill');
+                    const data = await res.json();
+
+                    const bills = data.metadata || [];
+                    const recent = bills
+                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                        .slice(0, 5);
+
+                    const tableBody = document.getElementById("recent-orders-body");
+
+                    tableBody.innerHTML = recent.map(bill => `
+      <tr>
+        <td>#${bill._id}</td>
+        <td>${bill.receiver_name || "Không rõ"}</td>
+        <td>${new Date(bill.createdAt).toLocaleDateString()}</td>
+        <td>${bill.total?.toLocaleString()}đ</td>
+        <td><span class="badge bg-warning">${bill.status}</span></td>
+        <td><span class="badge bg-success">${bill.payment_method?.toUpperCase()}</span></td>
+        <td>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+                } catch (error) {
+                    console.error("Lỗi khi load đơn hàng:", error);
+                }
+            }
+
+
+
+
             document.addEventListener("DOMContentLoaded", async function () {
                 const accessToken = localStorage.getItem("accessToken");
-
+                await loadRevenue();
+                await loadTotalOrders();
+                await loadRecentOrders();
+                await loadTopSellingProducts();
 
 
                 if (!accessToken) {
@@ -632,6 +591,42 @@
 
                 return payload.exp * 1000 < Date.now(); // So sánh với thời gian hiện tại
             }
+
+
+            async function loadTopSellingProducts() {
+                try {
+                    const res = await fetch("/v1/api/shop/products/top-selling"); // Đảm bảo route này đúng và được authentication nếu cần
+                    const data = await res.json();
+                    console.log("check top selling", data);
+                    
+
+                    if (!data || !data.length) {
+                        document.getElementById("top-selling-body").innerHTML = `
+          <tr><td colspan="4" class="text-center text-muted">Không có dữ liệu</td></tr>
+        `;
+                        return;
+                    }
+
+                    const rowsHtml = data.map(p => `
+        <tr>
+          <td>${p.product_name}</td>
+          <td>${p.totalSold}</td>
+          <td>${p.product_stock}</td>
+         <td>${(p.totalSold * p.product_price * 25589).toLocaleString('vi-VN')} ₫</td>
+
+        </tr>
+      `).join("");
+
+                    document.getElementById("top-selling-body").innerHTML = rowsHtml;
+                } catch (error) {
+                    console.error("Lỗi khi tải sản phẩm bán chạy:", error);
+                    document.getElementById("top-selling-body").innerHTML = `
+        <tr><td colspan="4" class="text-danger text-center">Lỗi khi tải dữ liệu</td></tr>
+      `;
+                }
+            }
+
+
         </script>
 </body>
 
