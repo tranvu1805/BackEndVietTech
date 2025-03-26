@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("../../auth/middlewares/upload.middleware");
 
 const {
   createCategory,
@@ -20,7 +21,7 @@ router.get("/", getAllCategories);
 
 router.use(authentication)
 
-router.post("/", createCategory);
+router.post("/", upload.single("thumbnail_file"), createCategory);
 router.put("/:id", updateCategory);
 router.delete("/:id", deleteCategory);
 
