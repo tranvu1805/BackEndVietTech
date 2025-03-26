@@ -9,7 +9,7 @@ router.get("/:id/attributes", getAttributesByCategory);
 router.get("/:id", getCategoryById);
 router.get("/", getAllCategories);
 
-// router.use(authentication)
+router.use(authentication)
 
 router.post("/", createCategory);
 router.put("/:id", updateCategory);

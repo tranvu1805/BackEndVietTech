@@ -58,6 +58,26 @@ class BillService {
     return bills;
   }
 
+  static async getAllBillForAdmin(filter = {}, skip = 0, limit = 10) {
+    const [bills, totalItems] = await Promise.all([
+      billRepo.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }).lean(),
+      billRepo.countDocuments(filter)
+    ]);
+
+    for (const bill of bills) {
+      for (const product of bill.products) {
+        const productDoc = await productModel.findById(product.productId).lean();
+        product.product_name = productDoc ? productDoc.product_name : "Sản phẩm không tồn tại";
+      }
+    }
+
+    const totalPages = Math.ceil(totalItems / limit);
+    const currentPage = Math.floor(skip / limit) + 1;
+
+    return { bills, totalItems, totalPages, currentPage };
+  }
+
+
   static async getTotalRevenue({ startDate, endDate }) {
     try {
 

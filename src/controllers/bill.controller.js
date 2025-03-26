@@ -55,10 +55,35 @@ class BillController {
     }
   }
 
-  static async getAllBills_Admin(req, res) {
-    const bills = await BillService.getAllBills();
-    return bills;
+  static async getAllBills_Admin({ search, status, payment_method, start_date, end_date, page = 1, limit = 10 }) {
+    const filter = {};
+
+    if (search) {
+      filter.order_code = { $regex: search, $options: "i" };
+    }
+
+    if (status) {
+      filter.status = status;
+    }
+
+    if (payment_method) {
+      filter.payment_method = payment_method;
+    }
+
+    if (start_date || end_date) {
+      filter.createdAt = {};
+      if (start_date) filter.createdAt.$gte = new Date(start_date);
+      if (end_date) filter.createdAt.$lte = new Date(end_date);
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const result = await BillService.getAllBillForAdmin(filter, skip, parseInt(limit));
+    return result;
   }
+
+
+
 
 
   static async exportBillsToExcel(req, res, next) {
