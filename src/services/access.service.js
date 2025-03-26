@@ -8,26 +8,26 @@ const roleModel = require("../models/role.model");
 
 class AccessService {
   // ✅ Đăng nhập tài khoản - kiểm tra bằng Public Key
-  static async login({ email, password }) {
+  static async login({ username, password }) {
     try {
-      console.log(`📌 [LOGIN] Đăng nhập với email: ${email}`);
+      console.log(`📌 [LOGIN] Đăng nhập với username: ${username}`);
 
-      const account = await accountModel.findOne({ email });
+      const account = await accountModel.findOne({ username });
       if (!account) {
-        console.error(`❌ [LOGIN ERROR] Email không tồn tại: ${email}`);
-        return { code: 400, message: "Email hoặc mật khẩu không đúng!", status: "error" };
+        console.error(`❌ [LOGIN ERROR] Username không tồn tại: ${username}`);
+        return { code: 400, message: "Username hoặc mật khẩu không đúng!", status: "error" };
       }
 
       const isPasswordValid = await bcrypt.compare(password, account.password);
       if (!isPasswordValid) {
-        console.error(`❌ [LOGIN ERROR] Sai mật khẩu cho email: ${email}`);
-        return { code: 400, message: "Email hoặc mật khẩu không đúng!", status: "error" };
+        console.error(`❌ [LOGIN ERROR] Sai mật khẩu cho username: ${username}`);
+        return { code: 400, message: "Username hoặc mật khẩu không đúng!", status: "error" };
       }
 
       const privateKey = crypto.randomBytes(64).toString("hex");
       const publicKey = crypto.randomBytes(64).toString("hex");
 
-      const tokens = await createToKenPair({ userId: account._id, email }, publicKey, privateKey);
+      const tokens = await createToKenPair({ userId: account._id, username }, publicKey, privateKey);
       console.log(`✅ [TOKEN] Token pair created:`, tokens);
 
       await KeyTokenService.createKeyToken({
