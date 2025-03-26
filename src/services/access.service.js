@@ -189,7 +189,7 @@ class AccessService {
         email,
         password,
         phone,
-        address,
+        address="null",
         status = "active",
       } = body;
       console.log("📌 Dữ liệu đầu vào:", body);
