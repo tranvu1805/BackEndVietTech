@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const DOCUMENT_NAME = 'account';
 const COLLECTION_NAME = 'accounts';
+const DEFAULT_PROFILE_IMAGE_ID = "67d3b37b63838e785e7844da"; // ID ảnh mặc định
 
 const AccountSchema = new mongoose.Schema(
     {
@@ -9,7 +10,11 @@ const AccountSchema = new mongoose.Schema(
         phone: { type: String, required: true, unique: true },
         address: { type: String, required: true },
         email: { type: String, required: true, unique: true },
-        password: { type: String, required: true },
+        profile_image: { 
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: "Image", 
+            default: DEFAULT_PROFILE_IMAGE_ID // Gán giá trị mặc định
+        },        password: { type: String, required: true },
         role_id: { type: mongoose.Schema.Types.ObjectId, ref: "role", required: true },
         status: { 
             type: String, 

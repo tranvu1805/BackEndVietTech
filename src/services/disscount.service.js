@@ -92,6 +92,37 @@ class DiscountService {
     };
   }
 
+  // kiểm tra code dùng được ko
+  static async validateDiscountCode(code) {
+    // Tìm mã giảm giá mà không lọc `expiration_date`
+    const discount = await discountRepo.findOne({ code });
+
+    // Nếu không tìm thấy mã giảm giá
+    if (!discount) {
+      return {
+        statusCode: 404,
+        message: "Discount code not found",
+        status: "error",
+      };
+    }
+
+    // Kiểm tra nếu mã đã hết hạn
+    if (new Date(discount.expiration_date) < new Date()) {
+      return {
+        statusCode: 400,
+        message: "Discount code has expired",
+        status: "error",
+      };
+    }
+
+    // Nếu hợp lệ
+    return {
+      message: "Discount code is valid",
+      statusCode: 200,
+      metadata: discount,
+    };
+  }
+
 }
 
 module.exports = DiscountService;

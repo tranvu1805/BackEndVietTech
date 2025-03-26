@@ -1,5 +1,8 @@
 const express = require("express");
-const { getAllBills_Admin, exportBillsToExcel } = require("../../controllers/bill.controller");
+const {
+  getAllBills_Admin,
+  exportBillsToExcel,
+} = require("../../controllers/bill.controller");
 const router = express.Router();
 
 
@@ -47,6 +50,7 @@ router.get('/export', async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+
 });
 
 module.exports = router;

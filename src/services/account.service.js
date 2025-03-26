@@ -1,114 +1,121 @@
 const crypto = require("crypto");
-const keyTokenModel = require("../models/keytoken.model");
-const { getInfoData } = require("../utils");
-const { createToKenPair } = require("../auth/authUtils");
-const accountModel = require('../models/account.model'); 
+const bcrypt = require("bcrypt");
+const accountModel = require("../models/account.model");
+const moment = require("moment");
+const Image = require("../models/image.model");
 
 class AccountService {
+  /** Lấy tài khoản và role theo ID */
   static async getAccountWithRoleById(accountId) {
     try {
-      // Tìm tài khoản theo ID và populate thông tin role
+      if (!accountId) throw new Error("Account ID is required");
+      
       const account = await accountModel
         .findById(accountId)
-        .populate("role_id", "name") // Populate tên quyền (role name)
+        .populate("role_id", "name")
+        .populate("profile_image")
         .select("-password");
-
-      if (!account) {
-        return { code: 404, message: "Account not found!", status: "error" };
-      }
-
+      
+      if (!account) return { code: 404, message: "Account not found!", status: "error" };
+      
       return {
         code: 200,
         message: "Account found!",
         status: "success",
-        data: {
-          ...account.toObject(),
-          role: account.role_id ? account.role_id.name : "No role", // Trả về tên quyền của tài khoản
-        },
+        data: { ...account.toObject(), role: account.role_id?.name || "No role" },
       };
     } catch (error) {
-      console.error("❌ Lỗi khi lấy tài khoản:", error);
-      return { code: 500, message: "Internal Server Error", status: "error" };
+      console.error("❌ Error fetching account:", error);
+      return { code: 500, message: error.message || "Internal Server Error", status: "error" };
     }
   }
 
-
-  // ✅ Cập nhật thông tin tài khoản
+  /** Cập nhật tài khoản */
   static async updateAccount(accountId, updateData) {
     try {
-      console.log(
-        "📌 Cập nhật tài khoản ID:",
-        accountId,
-        "Dữ liệu mới:",
-        updateData
-      );
+      if (!accountId || !updateData) throw new Error("Invalid input");
 
-      // Nếu có cập nhật mật khẩu, mã hóa lại trước khi lưu
+      console.log("📌 Updating account:", accountId, updateData);
+
       if (updateData.password) {
         updateData.password = await bcrypt.hash(updateData.password, 10);
       }
-
-      // Cập nhật tài khoản
-      const updatedAccount = await accountModel
-        .findByIdAndUpdate(accountId, updateData, { new: true })
-        .select("-password");
-      if (!updatedAccount) {
-        return { code: 404, message: "Account not found!", status: "error" };
+      
+      const existingAccount = await accountModel.findById(accountId);
+      if (!existingAccount) return { code: 404, message: "Account not found!", status: "error" };
+      
+      if (updateData.phone) {
+        const phoneExists = await accountModel.findOne({ phone: updateData.phone, _id: { $ne: accountId } });
+        if (phoneExists) throw new Error("Phone number already in use");
       }
 
-      return {
-        code: 200,
-        message: "Account updated successfully!",
-        status: "success",
-        data: updatedAccount,
-      };
+      const updatedAccount = await accountModel.findByIdAndUpdate(accountId, updateData, { new: true }).select("-password");
+      return { code: 200, message: "Account updated successfully!", status: "success", data: updatedAccount };
     } catch (error) {
-      console.error("❌ Lỗi khi cập nhật tài khoản:", error);
-      return { code: 500, message: "Internal Server Error", status: "error" };
+      console.error("❌ Error updating account:", error);
+      return { code: 500, message: error.message || "Internal Server Error", status: "error" };
     }
   }
-  // ✅ Cập nhật trạng thái tài khoản
+
+  /** Cập nhật trạng thái tài khoản */
   static async updateAccountStatus(accountId, newStatus) {
     try {
-      console.log(
-        "📌 Bắt đầu cập nhật trạng thái tài khoản:",
-        accountId,
-        "=>",
-        newStatus
-      );
-
-      // Kiểm tra trạng thái hợp lệ
+      if (!accountId || !newStatus) throw new Error("Invalid input");
       const validStatuses = ["active", "inactive", "banned"];
-      if (!validStatuses.includes(newStatus)) {
-        console.warn("⚠️ Trạng thái không hợp lệ:", newStatus);
-        return { code: 400, message: "Invalid status!", status: "error" };
+      if (!validStatuses.includes(newStatus)) throw new Error("Invalid status!");
+      
+      const updatedAccount = await accountModel.findByIdAndUpdate(accountId, { status: newStatus }, { new: true }).select("-password");
+      if (!updatedAccount) return { code: 404, message: "Account not found!", status: "error" };
+      
+      return { code: 200, message: "Account status updated successfully!", status: "success", data: updatedAccount };
+    } catch (error) {
+      console.error("❌ Error updating account status:", error);
+      return { code: 500, message: error.message || "Internal Server Error", status: "error" };
+    }
+  }
+
+  /** Thống kê số lượng người dùng mới theo tuần, tháng, năm */
+  static async getUserStatistics(period) {
+    try {
+      if (!period) throw new Error("Period is required");
+      const validPeriods = ["week", "month", "year"];
+      if (!validPeriods.includes(period)) throw new Error("Invalid period!");
+
+      let startDate, prevStartDate, prevEndDate;
+      const today = moment().endOf("day");
+
+      switch (period) {
+        case "week":
+          startDate = moment().startOf("isoWeek");
+          prevStartDate = moment().subtract(1, "weeks").startOf("isoWeek");
+          prevEndDate = moment().subtract(1, "weeks").endOf("isoWeek");
+          break;
+        case "month":
+          startDate = moment().startOf("month");
+          prevStartDate = moment().subtract(1, "months").startOf("month");
+          prevEndDate = moment().subtract(1, "months").endOf("month");
+          break;
+        case "year":
+          startDate = moment().startOf("year");
+          prevStartDate = moment().subtract(1, "years").startOf("year");
+          prevEndDate = moment().subtract(1, "years").endOf("year");
+          break;
       }
+      
+      const currentCount = await accountModel.countDocuments({ createdAt: { $gte: startDate, $lte: today } });
+      const previousCount = await accountModel.countDocuments({ createdAt: { $gte: prevStartDate, $lte: prevEndDate } });
+      
+      const percentageChange = previousCount === 0 ? "N/A" : (((currentCount - previousCount) / previousCount) * 100).toFixed(2) + "%";
 
-      // Cập nhật trạng thái tài khoản
-      const updatedAccount = await accountModel
-        .findByIdAndUpdate(accountId, { status: newStatus }, { new: true })
-        .select("-password");
-
-      if (!updatedAccount) {
-        console.warn("⚠️ Không tìm thấy tài khoản ID:", accountId);
-        return { code: 404, message: "Account not found!", status: "error" };
-      }
-
-      console.log(
-        "✅ Cập nhật trạng thái thành công! ID:",
-        accountId,
-        "Trạng thái mới:",
-        newStatus
-      );
       return {
         code: 200,
-        message: "Account status updated successfully!",
+        message: "User statistics fetched successfully!",
         status: "success",
-        data: updatedAccount,
+        data: { period, currentCount, previousCount, percentageChange },
       };
     } catch (error) {
-      console.error("❌ Lỗi khi cập nhật trạng thái tài khoản:", error);
-      return { code: 500, message: "Internal Server Error", status: "error" };
+      console.error("❌ Error fetching user statistics:", error);
+      return { code: 500, message: error.message || "Internal Server Error", status: "error" };
     }
   }
 }

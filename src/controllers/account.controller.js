@@ -1,5 +1,6 @@
 const AccountService = require("../services/account.service");
 const mongoose = require("mongoose");
+const moment = require("moment");
 
 class AccountController {
   async getAccount(req, res, next) {
@@ -41,6 +42,18 @@ class AccountController {
 
     const result = await AccountService.updateAccountStatus(id, status);
     return res.status(result.code).json(result);
+  }
+  async getUserStatistics(req, res) {
+    try {
+      const { period } = req.params;
+      const result = await AccountService.getUserStatistics(period);
+      if (result.data.previousCount === 0) {
+        result.data.percentageChange = "100%";
+    }
+      return res.status(result.code).json(result);
+    } catch (error) {
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
   }
 }
 

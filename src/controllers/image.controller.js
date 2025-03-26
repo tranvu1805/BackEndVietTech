@@ -1,6 +1,7 @@
 const Image = require('../models/image.model');
 const Product = require('../models/product.model');
-
+const Account = require('../models/account.model');
+const Review = require('../models/review.model');
 // Upload ảnh
 const uploadImage = async (req, res) => {
     try {
@@ -53,5 +54,51 @@ const addImageToProduct = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+// Cập nhật ảnh đại diện tài khoản
+const updateImageToAccount = async (req, res) => {
+    const { accountId, imageId } = req.body;
+    try {
+        const account = await Account.findById(accountId);
+        if (!account) {
+            return res.status(404).json({ success: false, message: 'Account not found' });
+        }
 
-module.exports = { uploadImage, addImageToProduct };
+        const image = await Image.findById(imageId);
+        if (!image) {
+            return res.status(404).json({ success: false, message: 'Image not found' });
+        }
+
+        account.profile_image = imageId; // Cập nhật ảnh đại diện
+        await account.save();
+
+        res.status(200).json({ success: true, message: 'Profile image updated successfully', account });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
+
+// Gán ảnh vào review (có thể có nhiều ảnh)
+const addImagesToReview = async (req, res) => {
+    const { reviewId, imageIds } = req.body; // imageIds là một mảng chứa ID các ảnh
+    try {
+        const review = await Review.findById(reviewId);
+        if (!review) {
+            return res.status(404).json({ success: false, message: 'Review not found' });
+        }
+
+        const images = await Image.find({ _id: { $in: imageIds } });
+        if (images.length !== imageIds.length) {
+            return res.status(404).json({ success: false, message: 'One or more images not found' });
+        }
+
+        review.image_ids.push(...imageIds);
+        await review.save();
+
+        res.status(200).json({ success: true, review });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+module.exports = { uploadImage, addImageToProduct, addImagesToReview,updateImageToAccount };

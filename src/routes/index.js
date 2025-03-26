@@ -11,6 +11,7 @@ const BillRoutes = require("./bill/index");
 const ImageRoutes = require("./image/index");
 const DisscountRoutes = require("./disscount/index");
 const adminRoutes = require("./admin/index");
+
 const accessController = require("../controllers/access.controller");
 
 
@@ -29,10 +30,10 @@ router.use("/v1/api/image", ImageRoutes);
 
 // Route mặc định (Home Page)
 router.get("/", (req, res) => {
-  res.render('home/login');
+  res.render("home/login");
 });
 
-router.post('/login', accessController.loginAdmin);
+router.post("/login", accessController.loginAdmin);
 
 router.use("/v1/api/cart", require("./cart"));
 

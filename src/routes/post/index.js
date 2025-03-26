@@ -4,6 +4,9 @@ const express = require("express");
 const postController = require("../../controllers/post.controller");
 const router = express.Router();
 const { asyncHandler } = require("../../auth/checkAuth");
+const { authentication } = require("../../auth/authUtils");
+
+router.use(authentication);
 router.post("", asyncHandler(postController.createPost));
 router.delete("/:id", asyncHandler(postController.deletePost));
 router.put("/:id", asyncHandler(postController.updatePost));
