@@ -9,6 +9,7 @@ const { billRepo } = require("../models/bill.model");
 const Products = require("../models/product.model");
 const Account = require("../models/account.model");
 const { discountRepo } = require("../models/disscount.model");
+const productModel= require("../models/product.model");
 class CartService {
   //Start Repo
 
@@ -352,7 +353,56 @@ class CartService {
     }
 
     let total = 0;
-    currentCart.cart_products.forEach((e) => (total += e.price * e.quantity));
+    const bulkUpdateOps = [];
+
+    // currentCart.cart_products.forEach((e) => (total += e.price * e.quantity));
+    for (const item of currentCart.cart_products) {
+      console.log("🔹 productModel:", productModel);
+      const product = await productModel.findById(item.productId);
+
+      if (!product) {
+        return {
+          code: 404,
+          message: `Product with ID ${item.productId} not found`,
+          status: "error",
+        };
+      }
+
+      if (product.product_stock < item.quantity) {
+        return {
+          code: 400,
+          message: `Not enough stock for product ${product.product_name}`,
+          status: "error",
+        };
+      }
+
+      console.log(
+        `🔹 Trước khi cập nhật: ${product.product_name} (Stock: ${product.product_stock})`
+      );
+
+      // Giảm số lượng tồn kho
+      bulkUpdateOps.push({
+        updateOne: {
+          filter: { _id: item.productId },
+          update: { $inc: { product_stock: -item.quantity } },
+        },
+      });
+
+      total += item.price * item.quantity;
+    }
+
+    // Cập nhật tồn kho của tất cả sản phẩm cùng lúc
+    if (bulkUpdateOps.length > 0) {
+      await productModel.bulkWrite(bulkUpdateOps);
+    }
+
+     // Kiểm tra lại stock sau khi cập nhật
+  for (const item of currentCart.cart_products) {
+    const updatedProduct = await productModel.findById(item.productId);
+    console.log(
+      `✅ Sau khi cập nhật: ${updatedProduct.product_name} (Stock: ${updatedProduct.product_stock})`
+    );
+  }
 
     const shippingFee = 35;
     total += shippingFee;

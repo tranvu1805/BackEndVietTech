@@ -49,7 +49,21 @@ class DiscountController {
         } catch (error) {
             return res.status(500).json({ message: "Internal Server Error", error });
         }
-    }   
+    }  
+    
+    static async validateDiscount(req, res) {
+        try {
+            const { code } = req.body;
+            if (!code) {
+                return res.status(400).json({ message: "Discount code is required" });
+            }
+
+            const response = await DiscountService.validateDiscountCode(code);
+            return res.status(response.statusCode).json(response);
+        } catch (error) {
+            return res.status(500).json({ message: "Internal Server Error", error });
+        }
+    }
 
 }
 
