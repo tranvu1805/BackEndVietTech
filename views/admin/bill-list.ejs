@@ -261,6 +261,7 @@
             transform: translateY(-5px);
         }
 
+
         .mini-container .content {
             color: #333;
             transition: color 0.3s ease;
@@ -270,6 +271,20 @@
         .mini-container:hover i {
             transform: scale(1.1);
         }
+
+        .container-fluid,
+        .row {
+            position: relative;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+            /* Tránh bị đè bởi sidebar cố định */
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
     </style>
 </head>
 
@@ -284,6 +299,7 @@
                     <!-- Top Navbar -->
                     <nav class="navbar navbar-expand-lg top-navbar mb-4">
                         <div class="container-fluid">
+                            <h4 class="mb-0">Quản lý đơn hàng</h4>
                             <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#sidebarMenu">
                                 <span class="navbar-toggler-icon"></span>
@@ -491,11 +507,11 @@
 
 
 
-                                                            <button type="button" class="btn btn-sm btn-danger"
+                                                            <!-- <button type="button" class="btn btn-sm btn-danger"
                                                                 data-bs-toggle="modal"
                                                                 data-bs-target="#deleteModal<%= bill._id %>">
                                                                 <i class="fas fa-trash"></i>
-                                                            </button>
+                                                            </button> -->
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -525,12 +541,17 @@
                                                                                                 <% if (product.variant)
                                                                                                     { %>
                                                                                                     <small
-                                                                                                        class="d-block text-muted">Biến
-                                                                                                        thể: <%=
-                                                                                                            product.variant
-                                                                                                            %></small>
+                                                                                                        class="d-block text-muted">
+                                                                                                        Biến thể:
+                                                                                                        <%= product.variant.variant_name
+                                                                                                            %> - <%=
+                                                                                                                product.variant.variant_value
+                                                                                                                %>
+
+                                                                                                    </small>
                                                                                                     <% } %>
                                                                                             </div>
+
                                                                                             <div class="text-end">
                                                                                                 <span>
                                                                                                     <%= product.quantity
@@ -645,7 +666,7 @@
                                                     </td>
                                                 </tr>
 
-                                                <!-- Delete Confirmation Modal -->
+                                                <!-- Delete Confirmation Modal
                                                 <div class="modal fade" id="deleteModal<%= bill._id %>" tabindex="-1">
                                                     <div class="modal-dialog">
                                                         <div class="modal-content">
@@ -670,7 +691,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> -->
                                                 <% }); %>
                                         </tbody>
                                     </table>
@@ -726,19 +747,19 @@
                                                         <label for="edit_receiver_name" class="form-label">Người
                                                             nhận</label>
                                                         <input type="text" class="form-control" id="edit_receiver_name"
-                                                            name="receiver_name" required>
+                                                            name="receiver_name" readonly>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label for="edit_phone_number" class="form-label">Số điện
                                                             thoại</label>
                                                         <input type="text" class="form-control" id="edit_phone_number"
-                                                            name="phone_number" required>
+                                                            name="phone_number" readonly>
                                                     </div>
                                                     <div class="col-12">
                                                         <label for="edit_address" class="form-label">Địa chỉ giao
                                                             hàng</label>
                                                         <input type="text" class="form-control" id="edit_address"
-                                                            name="address" required>
+                                                            name="address" readonly>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label for="edit_status" class="form-label">Trạng thái</label>
@@ -753,7 +774,7 @@
                                                         <label for="edit_payment_method" class="form-label">Thanh
                                                             toán</label>
                                                         <select class="form-select" id="edit_payment_method"
-                                                            name="payment_method">
+                                                            name="payment_method" disabled>
                                                             <option value="ck">Chuyển khoản</option>
                                                             <option value="tm">Trực tiếp</option>
                                                         </select>
@@ -779,12 +800,18 @@
     <!-- Bootstrap and other scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const accessToken = localStorage.getItem('accessToken');
+        const userId = localStorage.getItem('userId');
+        const apiKey = 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683'
+
         document.getElementById('exportBillsButton').addEventListener('click', function () {
             // Gửi yêu cầu GET đến server để xuất file Excel
             fetch('/v1/api/admin/bills/export', {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    authorization: accessToken,
+                    'x-client-id': userId,
+                    'x-api-key': apiKey
                 }
             })
                 .then(response => {
@@ -812,34 +839,61 @@
             document.getElementById('edit_receiver_name').value = bill.receiver_name;
             document.getElementById('edit_phone_number').value = bill.phone_number;
             document.getElementById('edit_address').value = bill.address;
-            document.getElementById('edit_status').value = bill.status;
             document.getElementById('edit_payment_method').value = bill.payment_method;
+
+            // Build lại option cho trạng thái, ẩn trạng thái hiện tại
+            const statusSelect = document.getElementById('edit_status');
+            const statuses = [
+                { value: 'pending', label: 'Đang xử lý' },
+                { value: 'active', label: 'Đang vận chuyển' },
+                { value: 'completed', label: 'Hoàn thành' },
+                { value: 'cancelled', label: 'Bị hủy' }
+            ];
+
+            statusSelect.innerHTML = statuses
+                .map(s => {
+                    if (s.value === bill.status) {
+                        return `<option value="${s.value}" disabled>${s.label} (hiện tại)</option>`;
+                    }
+                    return `<option value="${s.value}">${s.label}</option>`;
+                })
+                .join('');
+
 
             new bootstrap.Modal(document.getElementById('editBillModal')).show();
         }
+
 
         // Gửi form chỉnh sửa
         document.getElementById('editBillForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
-            const formData = new FormData(this);
-            const billId = formData.get('bill_id');
-            console.log("Bill ID:", billId);
-            console.log("Form data:", formData);
+            const billId = document.getElementById('edit_bill_id').value;
+            const status = document.getElementById('edit_status').value;
+
+            console.log('billId:', billId);
+            console.log('status:', status);
 
 
-
-            fetch(`/v1/api/admin/bills/${billId}/edit`, {
-                method: 'POST',
-                body: new URLSearchParams(formData)
+            fetch(`/v1/api/bill/${billId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: accessToken,
+                    'x-client-id': userId,
+                    'x-api-key': apiKey
+                },
+                body: JSON.stringify({ status })
             })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        alert('Cập nhật thành công!');
+                    console.log('data:', data);
+
+                    if (data.statusCode === 200) {
+                        alert('Cập nhật trạng thái thành công!');
                         location.reload();
                     } else {
-                        alert('Có lỗi xảy ra khi cập nhật.');
+                        alert('Có lỗi xảy ra khi cập nhật trạng thái.');
                     }
                 })
                 .catch(error => {
@@ -847,6 +901,7 @@
                     alert('Lỗi không xác định.');
                 });
         });
+
 
         function handleEditFromButton(btn) {
             const bill = JSON.parse(btn.getAttribute('data-bill'));

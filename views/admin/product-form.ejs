@@ -61,6 +61,14 @@
             font-size: 0.85rem;
         }
 
+        .sticky-sidebar {
+            position: sticky;
+            top: 100px;
+            /* khoảng cách cách đỉnh khi dính */
+            z-index: 2;
+            /* cao hơn nội dung khác */
+        }
+
         .remove-attribute,
         .remove-variation {
             background-color: #e74a3b;
@@ -449,76 +457,79 @@
                         </div>
 
                         <div class="col-lg-4">
-                            <!-- Ảnh đại diện sản phẩm -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <i class="fas fa-image me-2"></i> Ảnh đại diện
-                                </div>
-                                <div class="card-body text-center">
-                                    <div class="mb-3">
-                                        <div class="d-flex flex-column align-items-center">
-                                            <img id="thumbnail-preview"
-                                                src="<%= product && product.product_thumbnail ? '/' + product.product_thumbnail : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzSncjhoWGdsxRm0LnCc5FD9kj86QoiTVAhw&s' %>"
-                                                class="img-fluid thumbnail-preview <%= product && product.product_thumbnail ? 'show' : '' %>"
-                                                alt="Ảnh đại diện">
+                            <div class="sticky-sidebar">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="fas fa-image me-2"></i> Ảnh đại diện
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <img id="thumbnail-preview"
+                                                    src="<%= product && product.product_thumbnail ? '/' + product.product_thumbnail : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzSncjhoWGdsxRm0LnCc5FD9kj86QoiTVAhw&s' %>"
+                                                    class="img-fluid thumbnail-preview <%= product && product.product_thumbnail ? 'show' : '' %>"
+                                                    alt="Ảnh đại diện">
 
 
-                                            <div class="mt-3 text-center">
-                                                <label for="product_thumbnail" class="btn btn-outline-primary">
-                                                    <i class="fas fa-upload me-2"></i> Chọn ảnh
-                                                </label>
-                                                <input type="file" id="product_thumbnail" name="product_thumbnail"
-                                                    accept="image/*" class="d-none">
+                                                <div class="mt-3 text-center">
+                                                    <label for="product_thumbnail" class="btn btn-outline-primary">
+                                                        <i class="fas fa-upload me-2"></i> Chọn ảnh
+                                                    </label>
+                                                    <input type="file" id="product_thumbnail" name="product_thumbnail"
+                                                        accept="image/*" class="d-none">
+                                                </div>
+                                                <small class="form-text text-muted mt-2">Định dạng: JPG, PNG, GIF.
+                                                    Kích thước tối đa: 2MB</small>
+                                                <% if (product && product.product_thumbnail) { %>
+                                                    <button type="button" id="remove-thumbnail"
+                                                        class="btn btn-outline-danger btn-sm mt-2">
+                                                        <i class="fas fa-trash me-1"></i> Xóa ảnh
+                                                    </button>
+                                                    <% } %>
                                             </div>
-                                            <small class="form-text text-muted mt-2">Định dạng: JPG, PNG, GIF.
-                                                Kích thước tối đa: 2MB</small>
-                                            <% if (product && product.product_thumbnail) { %>
-                                                <button type="button" id="remove-thumbnail"
-                                                    class="btn btn-outline-danger btn-sm mt-2">
-                                                    <i class="fas fa-trash me-1"></i> Xóa ảnh
-                                                </button>
-                                                <% } %>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Trạng thái và hành động -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <i class="fas fa-cog me-2"></i> Trạng thái & Hành động
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <label for="status" class="form-label">Trạng thái sản phẩm</label>
-                                        <select class="form-select" id="status" name="status">
-                                            <option value="active" <%=product && product.status==='active' ? 'selected'
-                                                : '' %>>Hiển thị</option>
-                                            <option value="inactive" <%=product && product.status==='inactive'
-                                                ? 'selected' : '' %>>Ẩn</option>
-                                            <option value="draft" <%=product && product.status==='draft' ? 'selected'
-                                                : '' %>>Bản nháp</option>
-                                        </select>
+                                <!-- Trạng thái và hành động -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="fas fa-cog me-2"></i> Trạng thái & Hành động
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="featured" class="form-label">Sản phẩm nổi bật</label>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="featured"
-                                                name="featured" <%=product && product.featured ? 'checked' : '' %>>
-                                            <label class="form-check-label" for="featured">Đánh dấu là sản phẩm nổi
-                                                bật</label>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="status" class="form-label">Trạng thái sản phẩm</label>
+                                            <select class="form-select" id="status" name="status">
+                                                <option value="active" <%=product && product.status==='active'
+                                                    ? 'selected' : '' %>>Hiển thị</option>
+                                                <option value="inactive" <%=product && product.status==='inactive'
+                                                    ? 'selected' : '' %>>Ẩn</option>
+                                                <option value="draft" <%=product && product.status==='draft'
+                                                    ? 'selected' : '' %>>Bản nháp</option>
+                                            </select>
                                         </div>
-                                    </div>
-                                    <div class="d-grid gap-2">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-save me-1"></i> Lưu sản phẩm
-                                        </button>
-                                        <a href="/admin/products" class="btn btn-outline-secondary">
-                                            <i class="fas fa-times me-1"></i> Hủy
-                                        </a>
+                                        <div class="mb-3">
+                                            <label for="featured" class="form-label">Sản phẩm nổi bật</label>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="featured"
+                                                    name="featured" <%=product && product.featured ? 'checked' : '' %>>
+                                                <label class="form-check-label" for="featured">Đánh dấu là sản phẩm nổi
+                                                    bật</label>
+                                            </div>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-1"></i> Lưu sản phẩm
+                                            </button>
+                                            <a href="/v1/api/admin/products/list" class="btn btn-outline-secondary">
+                                                <i class="fas fa-times me-1"></i> Hủy
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            <!-- Ảnh đại diện sản phẩm -->
+
                         </div>
                     </div>
                 </form>
@@ -584,7 +595,7 @@
                             console.log("Success:", data);
 
                             alert('Sản phẩm đã được ' + (isEdit ? 'cập nhật' : 'thêm') + ' thành công!');
-                            // window.location.href = '/v1/api/admin/list'; // Điều hướng đến danh sách sản phẩm
+                            window.location.href = '/v1/api/admin/products/list'; // Điều hướng đến danh sách sản phẩm
                         } else {
                             console.log("Error:", data.success);
                             alert('Có lỗi xảy ra: ' + (data.message || 'Vui lòng thử lại!'));

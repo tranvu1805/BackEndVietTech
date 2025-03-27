@@ -9,15 +9,15 @@ class AccountService {
   static async getAccountWithRoleById(accountId) {
     try {
       if (!accountId) throw new Error("Account ID is required");
-      
+
       const account = await accountModel
         .findById(accountId)
         .populate("role_id", "name")
         .populate("profile_image")
         .select("-password");
-      
+
       if (!account) return { code: 404, message: "Account not found!", status: "error" };
-      
+
       return {
         code: 200,
         message: "Account found!",
@@ -30,6 +30,30 @@ class AccountService {
     }
   }
 
+  static async getAllAccounts({ page, limit, search }) {
+    const query = search
+      ? {
+        $or: [
+          { full_name: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+          { username: { $regex: search, $options: "i" } }
+        ]
+      }
+      : {};
+
+      const accounts = await accountModel.find(query)
+      .populate("role_id")
+      .populate("profile_image") 
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+    
+
+    const total = await accountModel.countDocuments(query);
+
+    return accounts
+  }
+
   /** Cập nhật tài khoản */
   static async updateAccount(accountId, updateData) {
     try {
@@ -40,10 +64,10 @@ class AccountService {
       if (updateData.password) {
         updateData.password = await bcrypt.hash(updateData.password, 10);
       }
-      
+
       const existingAccount = await accountModel.findById(accountId);
       if (!existingAccount) return { code: 404, message: "Account not found!", status: "error" };
-      
+
       if (updateData.phone) {
         const phoneExists = await accountModel.findOne({ phone: updateData.phone, _id: { $ne: accountId } });
         if (phoneExists) throw new Error("Phone number already in use");
@@ -63,10 +87,10 @@ class AccountService {
       if (!accountId || !newStatus) throw new Error("Invalid input");
       const validStatuses = ["active", "inactive", "banned"];
       if (!validStatuses.includes(newStatus)) throw new Error("Invalid status!");
-      
+
       const updatedAccount = await accountModel.findByIdAndUpdate(accountId, { status: newStatus }, { new: true }).select("-password");
       if (!updatedAccount) return { code: 404, message: "Account not found!", status: "error" };
-      
+
       return { code: 200, message: "Account status updated successfully!", status: "success", data: updatedAccount };
     } catch (error) {
       console.error("❌ Error updating account status:", error);
@@ -101,10 +125,10 @@ class AccountService {
           prevEndDate = moment().subtract(1, "years").endOf("year");
           break;
       }
-      
+
       const currentCount = await accountModel.countDocuments({ createdAt: { $gte: startDate, $lte: today } });
       const previousCount = await accountModel.countDocuments({ createdAt: { $gte: prevStartDate, $lte: prevEndDate } });
-      
+
       const percentageChange = previousCount === 0 ? "N/A" : (((currentCount - previousCount) / previousCount) * 100).toFixed(2) + "%";
 
       return {

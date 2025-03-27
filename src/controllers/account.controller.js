@@ -19,6 +19,26 @@ class AccountController {
     }
   }
 
+    async getAllAccount(req, res, next) {
+      try {
+        const { page = 1, limit = 10, search = "" } = req.query;
+
+        const result = await AccountService.getAllAccounts({
+          page: parseInt(page),
+          limit: parseInt(limit),
+          search: search.trim()
+        });
+
+        console.log("check result",result);
+        
+
+        return result;
+      } catch (error) {
+        return next(error);
+      }
+    }
+
+
   // ✅ Cập nhật tài khoản theo ID
   async updateAccount(req, res, next) {
     try {
@@ -49,7 +69,7 @@ class AccountController {
       const result = await AccountService.getUserStatistics(period);
       if (result.data.previousCount === 0) {
         result.data.percentageChange = "100%";
-    }
+      }
       return res.status(result.code).json(result);
     } catch (error) {
       return res.status(500).json({ message: "Internal Server Error" });

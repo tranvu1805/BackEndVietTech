@@ -58,7 +58,7 @@ class BillService {
     return bills;
   }
 
-  static async getAllBillForAdmin(filter = {}, skip = 0, limit = 10) {
+  static async getAllBillForAdmin(filter = {}, skip = 0, limit = 5) {
     const [bills, totalItems] = await Promise.all([
       billRepo.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }).lean(),
       billRepo.countDocuments(filter)

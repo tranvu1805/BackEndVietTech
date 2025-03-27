@@ -27,6 +27,19 @@
             color: #333;
         }
 
+        .container-fluid,
+        .row {
+            position: relative;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+            /* Tránh bị đè bởi sidebar cố định */
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
         .sidebar {
             background-color: var(--primary-color);
             min-height: 100vh;
@@ -93,23 +106,23 @@
         .table-hover tbody tr:hover {
             background-color: rgba(52, 152, 219, 0.05);
         }
-        
+
         .btn-primary {
             background-color: var(--secondary-color);
             border-color: var(--secondary-color);
         }
-        
+
         .btn-success {
             background-color: var(--success-color);
             border-color: var(--success-color);
         }
-        
+
         .btn-warning {
             background-color: var(--warning-color);
             border-color: var(--warning-color);
             color: white;
         }
-        
+
         .btn-danger {
             background-color: var(--danger-color);
             border-color: var(--danger-color);
@@ -158,7 +171,7 @@
             top: 12px;
             color: #6c757d;
         }
-        
+
         .attribute-details {
             background-color: #f8f9fa;
             border-radius: 4px;
@@ -268,7 +281,7 @@
         .mini-container:hover i {
             transform: scale(1.1);
         }
-        
+
         .category-badge {
             display: inline-block;
             padding: 3px 8px;
@@ -276,12 +289,12 @@
             font-size: 12px;
             font-weight: 500;
         }
-        
+
         .parent-category {
             background-color: #e3f2fd;
             color: #0d47a1;
         }
-        
+
         .child-category {
             background-color: #e8f5e9;
             color: #1b5e20;
@@ -295,219 +308,455 @@
             <!-- Sidebar -->
             <%- include('partials/header') %>
 
-            <!-- Main Content -->
-            <div class="col-md-10 col-lg-10 ms-auto main-content">
-                <!-- Top Navbar -->
-                <nav class="navbar navbar-expand-lg top-navbar mb-4">
-                    <div class="container-fluid">
-                        <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        
-                        <div class="ms-auto d-flex align-items-center">
-                            <div class="dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                    <div class="user-profile">
-                                        <div class="user-avatar">AD</div>
-                                        <div>Admin</div>
-                                    </div>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài đặt</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
-                                </ul>
+                <!-- Main Content -->
+                <div class="col-md-10 col-lg-10 ms-auto main-content">
+                    <!-- Top Navbar -->
+                    <nav class="navbar navbar-expand-lg top-navbar mb-4">
+                        <div class="container-fluid">
+                            
+                            <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#sidebarMenu">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
+
+                            <div class="ms-auto d-flex align-items-center">
+                                <div class="dropdown">
+                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                                        data-bs-toggle="dropdown">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                                style="width: 40px; height: 40px;font-weight: bold;">V</div>
+                                            <span>Admin</span>
+                                        </div>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a>
+                                        </li>
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài
+                                                đặt</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>
+                                                Đăng xuất</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <h4 class="mb-0">Quản lý Danh Mục</h4>
+                        <a href="/v1/api/admin/categories/create" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i> Thêm danh mục mới
+                        </a>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" class="form-control" placeholder="Tìm kiếm danh mục...">
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-end">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="fas fa-filter me-1"></i> Lọc
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="fas fa-sort me-1"></i> Sắp xếp
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="fas fa-download me-1"></i> Xuất
+                                </button>
                             </div>
                         </div>
                     </div>
-                </nav>
 
-                <!-- Page Header -->
-                <div class="page-header">
-                    <h4 class="mb-0">Quản lý Danh Mục</h4>
-                    <a href="/v1/api/admin/categories/create" class="btn btn-success">
-                        <i class="fas fa-plus me-1"></i> Thêm danh mục mới
-                    </a>
-                </div>
+                    <!-- Categories Table -->
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-3">ID</th>
+                                        <th>Tên danh mục</th>
+                                        <th>Loại</th>
+                                        <th>Danh mục cha</th>
+                                        <th>Số thuộc tính</th>
+                                        <th>Thông tin chi tiết</th>
+                                        <th class="text-end pe-3">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% categories.forEach(category=> { %>
+                                        <tr>
+                                            <td class="ps-3"><small class="text-muted">
+                                                    <%= category._id %>
+                                                </small></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2"
+                                                        style="width: 40px; height: 40px; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f1f1f1;">
+                                                        <% if (category.thumbnail) { %>
+                                                            <img src="<%= category.thumbnail %>" alt="Thumbnail"
+                                                                style="width: 100%; height: 100%; object-fit: cover;">
+                                                            <% } else { %>
+                                                                <i class="fas fa-folder text-secondary"></i>
+                                                                <% } %>
+                                                    </div>
+                                                    <div>
+                                                        <%= category.name %>
+                                                    </div>
+                                                </div>
+                                            </td>
 
-                <!-- Search and Filter -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" class="form-control" placeholder="Tìm kiếm danh mục...">
-                        </div>
-                    </div>
-                    <div class="col-md-6 d-flex justify-content-end">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-outline-secondary">
-                                <i class="fas fa-filter me-1"></i> Lọc
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary">
-                                <i class="fas fa-sort me-1"></i> Sắp xếp
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary">
-                                <i class="fas fa-download me-1"></i> Xuất
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Categories Table -->
-                <div class="card">
-                    <div class="card-body p-0">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="ps-3">ID</th>
-                                    <th>Tên danh mục</th>
-                                    <th>Loại</th>
-                                    <th>Danh mục cha</th>
-                                    <th>Số thuộc tính</th>
-                                    <th>Thông tin chi tiết</th>
-                                    <th class="text-end pe-3">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% categories.forEach(category => { %>
-                                <tr>
-                                    <td class="ps-3"><small class="text-muted"><%= category._id %></small></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="category-icon me-2" style="width: 40px; height: 40px; background-color: #f1f1f1; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-                                                <i class="fas fa-folder text-secondary"></i>
-                                            </div>
-                                            <div><%= category.name %></div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <% if (!category.parent_category) { %>
-                                            <span class="category-badge parent-category">Danh mục chính</span>
-                                        <% } else { %>
-                                            <span class="category-badge child-category">Danh mục con</span>
-                                        <% } %>
-                                    </td>
-                                    <td>
-                                        <% if (category.parent_category) { %>
-                                            <%= category.parent_category.name %>
-                                        <% } else { %>
-                                            <span class="text-muted">—</span>
-                                        <% } %>
-                                    </td>
-                                    <td>
-                                        <% let countClass = ""; %>
-                                        <% if (category.attributes_template.length > 8) { %>
-                                            <% countClass = "item-count-high"; %>
-                                        <% } else if (category.attributes_template.length > 3) { %>
-                                            <% countClass = "item-count-medium"; %>
-                                        <% } else { %>
-                                            <% countClass = "item-count-low"; %>
-                                        <% } %>
-                                        <span class="status-badge <%= countClass %>">
-                                            <%= category.attributes_template.length %> thuộc tính
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-secondary" type="button" 
-                                                data-bs-toggle="collapse" 
-                                                data-bs-target="#details<%= category._id %>" 
-                                                aria-expanded="false">
-                                            <i class="fas fa-info-circle me-1"></i> Chi tiết
-                                        </button>
-                                    </td>
-                                    <td class="text-end pe-3">
-                                        <div class="action-buttons">
-                                            <a href="/admin/categories/<%= category._id %>/edit" class="btn btn-sm btn-warning me-1">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal<%= category._id %>">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- Details Row -->
-                                <tr class="collapse" id="details<%= category._id %>">
-                                    <td colspan="7" class="p-0">
-                                        <div class="attribute-details">
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="category-attributes">
-                                                        <h6 class="mb-3"><i class="fas fa-list-ul me-2"></i>Thuộc tính danh mục</h6>
-                                                        <% if (category.attributes_template.length === 0) { %>
-                                                            <p class="text-muted">Không có thuộc tính nào được định nghĩa</p>
-                                                        <% } else { %>
-                                                            <div class="row">
-                                                                <% category.attributes_template.forEach(attribute => { %>
-                                                                    <div class="col-md-3 mb-2">
-                                                                        <div class="attribute-badge p-2 bg-light rounded">
-                                                                            <i class="fas fa-tag me-1 text-secondary"></i>
-                                                                            <%= attribute %>
-                                                                        </div>
-                                                                    </div>
-                                                                <% }); %>
-                                                            </div>
+                                            <td>
+                                                <% if (!category.parent_category) { %>
+                                                    <span class="category-badge parent-category">Danh mục chính</span>
+                                                    <% } else { %>
+                                                        <span class="category-badge child-category">Danh mục con</span>
                                                         <% } %>
+                                            </td>
+                                            <td>
+                                                <% if (category.parent_category) { %>
+                                                    <%= category.parent_category.name %>
+                                                        <% } else { %>
+                                                            <span class="text-muted">—</span>
+                                                            <% } %>
+                                            </td>
+                                            <td>
+                                                <% let countClass="" ; %>
+                                                    <% if (category.attributes_template.length> 8) { %>
+                                                        <% countClass="item-count-high" ; %>
+                                                            <% } else if (category.attributes_template.length> 3) { %>
+                                                                <% countClass="item-count-medium" ; %>
+                                                                    <% } else { %>
+                                                                        <% countClass="item-count-low" ; %>
+                                                                            <% } %>
+                                                                                <span
+                                                                                    class="status-badge <%= countClass %>">
+                                                                                    <%= category.attributes_template.length
+                                                                                        %> thuộc tính
+                                                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-secondary" type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#details<%= category._id %>" aria-expanded="false">
+                                                    <i class="fas fa-info-circle me-1"></i> Chi tiết
+                                                </button>
+                                            </td>
+                                            <td class="text-end pe-3">
+                                                <div class="action-buttons">
+                                                    <button type="button" class="btn btn-sm btn-warning me-1"
+                                                        data-category='<%- JSON.stringify(category) %>'
+                                                        onclick="handleEditCategory(this)">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+
+
+
+                                                    <button type="button" class="btn btn-sm btn-danger"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#deleteModal<%= category._id %>">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <!-- Details Row -->
+                                        <tr class="collapse" id="details<%= category._id %>">
+                                            <td colspan="7" class="p-0">
+                                                <div class="attribute-details">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="category-attributes">
+                                                                <h6 class="mb-3"><i
+                                                                        class="fas fa-list-ul me-2"></i>Thuộc tính danh
+                                                                    mục</h6>
+                                                                <% if (category.attributes_template.length===0) { %>
+                                                                    <p class="text-muted">Không có thuộc tính nào được
+                                                                        định nghĩa</p>
+                                                                    <% } else { %>
+                                                                        <div class="row">
+                                                                            <%
+                                                                                category.attributes_template.forEach(attribute=>
+                                                                                { %>
+                                                                                <div class="col-md-3 mb-2">
+                                                                                    <div
+                                                                                        class="attribute-badge p-2 bg-light rounded">
+                                                                                        <i
+                                                                                            class="fas fa-tag me-1 text-secondary"></i>
+                                                                                        <%= attribute %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <% }); %>
+                                                                        </div>
+                                                                        <% } %>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Delete Confirmation Modal -->
+                                        <div class="modal fade" id="deleteModal<%= category._id %>" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Xác nhận xóa</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Bạn có chắc chắn muốn xóa danh mục "<%= category.name %>"?
+                                                        </p>
+                                                        <% if (!category.parent_category) { %>
+                                                            <p class="text-danger"><small>Lưu ý: Xóa danh mục này sẽ xóa
+                                                                    tất cả các danh mục con của nó.</small></p>
+                                                            <% } %>
+                                                                <p class="text-danger"><small>Thao tác này không thể
+                                                                        hoàn tác.</small></p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Hủy</button>
+                                                        <button class="btn btn-danger"
+                                                            onclick="deleteCategory('<%= category._id %>')">
+                                                            Xác nhận xóa
+                                                        </button>
+
+
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- Delete Confirmation Modal -->
-                                <div class="modal fade" id="deleteModal<%= category._id %>" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Xác nhận xóa</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                                        <!-- Edit Modal -->
+                                        <% }); %>
+                                </tbody>
+                            </table>
+                            <!-- Edit Category Modal -->
+                            <!-- Modal sửa danh mục -->
+                            <div class="modal fade" id="editCategoryModal" tabindex="-1"
+                                aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <form id="editCategoryForm" class="modal-content" enctype="multipart/form-data">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editCategoryModalLabel">Chỉnh sửa danh mục</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Đóng"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="category_id" id="edit_category_id">
+
+                                            <!-- Tên danh mục -->
+                                            <div class="mb-3">
+                                                <label class="form-label">Tên danh mục</label>
+                                                <input type="text" name="name" class="form-control"
+                                                    id="edit_category_name" required>
                                             </div>
-                                            <div class="modal-body">
-                                                <p>Bạn có chắc chắn muốn xóa danh mục "<%= category.name %>"?</p>
-                                                <% if (!category.parent_category) { %>
-                                                    <p class="text-danger"><small>Lưu ý: Xóa danh mục này sẽ xóa tất cả các danh mục con của nó.</small></p>
-                                                <% } %>
-                                                <p class="text-danger"><small>Thao tác này không thể hoàn tác.</small></p>
+
+                                            <!-- Danh mục cha -->
+                                            <div class="mb-3">
+                                                <label class="form-label">Danh mục cha</label>
+                                                <select class="form-select" id="edit_parent_category"
+                                                    name="parent_category">
+                                                    <option value="">Không có</option>
+                                                    <% categories.forEach(parent=> { %>
+                                                        <option value="<%= parent._id %>">
+                                                            <%= parent.name %>
+                                                        </option>
+                                                        <% }) %>
+                                                </select>
                                             </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                                <a href="/admin/categories/<%= category._id %>/delete" class="btn btn-danger">Xác nhận xóa</a>
+
+                                            <!-- Ảnh thumbnail -->
+                                            <div class="mb-3">
+                                                <label class="form-label">Ảnh thumbnail</label>
+                                                <input type="file" name="thumbnail" id="edit_thumbnail"
+                                                    class="form-control">
+                                                <div class="mt-2">
+                                                    <img id="edit_thumbnail_preview" src="" alt="Preview" width="100"
+                                                        style="display:none;">
+                                                </div>
+                                            </div>
+
+                                            <!-- Thuộc tính -->
+                                            <div class="mb-3">
+                                                <label class="form-label">Thuộc tính (ngăn cách bởi dấu phẩy)</label>
+                                                <textarea name="attributes_template" class="form-control"
+                                                    id="edit_attributes_template" rows="2"></textarea>
                                             </div>
                                         </div>
-                                    </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Hủy</button>
+                                            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                        </div>
+                                    </form>
                                 </div>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                            </div>
 
-                <!-- Pagination -->
-                <nav>
-                    <ul class="pagination">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" aria-label="Previous">
-                                <i class="fas fa-chevron-left"></i>
-                            </a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Next">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
+
+
+                        </div>
+                    </div>
+
+
+
+                    <!-- Pagination -->
+                    <nav>
+                        <ul class="pagination">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Previous">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#" aria-label="Next">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
         </div>
     </div>
 
     <!-- Bootstrap and other scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <script>
+
+        function deleteCategory(categoryId) {
+            if (!confirm("Bạn có chắc chắn muốn xóa danh mục này?")) return;
+
+            const accessToken = localStorage.getItem('accessToken');
+            const userId = localStorage.getItem('userId');
+            const apiKey = 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683'
+
+            fetch(`/v1/api/shop/categories/${categoryId}`, {
+                method: 'DELETE',
+                headers: {
+                    authorization: accessToken,
+                    'x-client-id': userId,
+                    'x-api-key': apiKey
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Xóa danh mục thành công!');
+                        location.reload();
+                    } else {
+                        alert('Không thể xóa: ' + (data.message || 'Lỗi không xác định.'));
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Lỗi khi kết nối tới server.');
+                });
+        }
+
+        function handleEditCategory(btn) {
+            const category = JSON.parse(btn.getAttribute('data-category'));
+
+            // Set các giá trị vào form
+            document.getElementById('edit_category_id').value = category._id;
+            document.getElementById('edit_category_name').value = category.name;
+            document.getElementById('edit_attributes_template').value = category.attributes_template.join(', ');
+
+            const parentSelect = document.getElementById('edit_parent_category');
+            if (category.parent_category && category.parent_category._id) {
+                parentSelect.value = category.parent_category._id;
+            } else {
+                parentSelect.value = '';
+            }
+
+            // Ảnh preview
+            const preview = document.getElementById('edit_thumbnail_preview');
+            if (category.thumbnail) {
+                preview.src = category.thumbnail;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+
+            new bootstrap.Modal(document.getElementById('editCategoryModal')).show();
+        }
+
+        document.getElementById('edit_thumbnail').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('edit_thumbnail_preview');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        // Gửi form chỉnh sửa
+        document.getElementById('editCategoryForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            const categoryId = document.getElementById('edit_category_id').value;
+            const name = document.getElementById('edit_category_name').value.trim();
+            const parent_category = document.getElementById('edit_parent_category').value;
+            const attributesStr = document.getElementById('edit_attributes_template').value.trim();
+            const attributes_template = attributesStr.split(',').map(attr => attr.trim()).filter(attr => attr);
+            const thumbnailFile = document.getElementById('edit_thumbnail').files[0];
+
+            formData.append('name', name);
+            formData.append('attributes_template', JSON.stringify(attributes_template));
+            if (parent_category) formData.append('parent_category', parent_category);
+            if (thumbnailFile) formData.append('thumbnail_file', thumbnailFile);
+            const accessToken = localStorage.getItem('accessToken');
+            const userId = localStorage.getItem('userId');
+            const apiKey = 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683'
+
+            fetch(`/v1/api/shop/categories/${categoryId}`, {
+                method: 'PUT',
+                headers: {
+                    authorization: accessToken,
+                    'x-client-id': userId,
+                    'x-api-key': apiKey
+                },
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("data", data);
+
+                    if (data.success) {
+                        alert('Cập nhật danh mục thành công!');
+                        location.reload();
+                    } else {
+                        alert('Lỗi cập nhật: ' + (data.message || 'Không rõ nguyên nhân.'));
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Lỗi kết nối đến máy chủ.');
+                });
+        });
+    </script>
+
+
 </body>
+
 </html>

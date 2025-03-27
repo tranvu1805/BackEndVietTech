@@ -57,9 +57,10 @@ class BillController {
     }
   }
 
-  static async getAllBills_Admin({ search, status, payment_method, start_date, end_date, page = 1, limit = 10 }) {
+  static async getAllBills_Admin({ search, status, payment_method, start_date, end_date, page = 1, limit = 5 }) {
     const filter = {};
-
+    console.log("check limit",limit);
+    
     if (search) {
       filter.order_code = { $regex: search, $options: "i" };
     }

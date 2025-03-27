@@ -22,7 +22,8 @@ router.get("/", getAllCategories);
 router.use(authentication)
 
 router.post("/", upload.single("thumbnail_file"), createCategory);
-router.put("/:id", updateCategory);
+router.put("/:id", upload.single("thumbnail_file"), updateCategory);
+
 router.delete("/:id", deleteCategory);
 
 module.exports = router;
