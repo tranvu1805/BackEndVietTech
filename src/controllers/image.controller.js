@@ -54,7 +54,6 @@ const addImageToProduct = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
-// Cập nhật ảnh đại diện tài khoản
 const updateImageToAccount = async (req, res) => {
     const { accountId, imageId } = req.body;
     try {
@@ -71,7 +70,27 @@ const updateImageToAccount = async (req, res) => {
         account.profile_image = imageId; // Cập nhật ảnh đại diện
         await account.save();
 
-        res.status(200).json({ success: true, message: 'Profile image updated successfully', account });
+        res.status(200).json({ 
+            success: true, 
+            message: 'Profile image updated successfully', 
+            account: {
+                _id: account._id,
+                username: account.username,
+                email: account.email,
+                profile_image: {
+                    _id: image._id,
+                    file_name: image.file_name,
+                    file_path: image.file_path,
+                    file_size: image.file_size,
+                    file_type: image.file_type,
+                    url: image.url,
+                    uploaded_at: image.uploaded_at,
+                    createdAt: image.createdAt,
+                    updatedAt: image.updatedAt,
+                    __v: image.__v
+                }
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
