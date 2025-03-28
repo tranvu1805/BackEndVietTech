@@ -531,9 +531,17 @@
                     const data = await res.json();
 
                     const bills = data.metadata || [];
+        
+                    console.log("Kiểu dữ liệu bills:", typeof bills);
+                    console.log("Giá trị bills:", bills);
+
+
                     const recent = bills
                         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                         .slice(0, 5);
+
+                    console.log("check recent", recent);
+
 
                     const tableBody = document.getElementById("recent-orders-body");
 
@@ -598,7 +606,7 @@
                     const res = await fetch("/v1/api/shop/products/top-selling"); // Đảm bảo route này đúng và được authentication nếu cần
                     const data = await res.json();
                     console.log("check top selling", data);
-                    
+
 
                     if (!data || !data.length) {
                         document.getElementById("top-selling-body").innerHTML = `

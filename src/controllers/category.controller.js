@@ -5,17 +5,29 @@ const Category = require("../models/category.model");
 const createCategory = async (req, res) => {
     try {
         const { name, parent_category, attributes_template } = req.body;
-        // Kiểm tra nếu thiếu bất kỳ trường nào
-        console.log("check req",req.body);
-        
-        if (!name || !attributes_template) {
-            return res.status(400).json({ success: false, message: "Name and attributes_template are required!" });
+
+        // Parse attributes_template nếu được gửi dưới dạng chuỗi
+        const parsedAttributes = typeof attributes_template === "string"
+            ? JSON.parse(attributes_template)
+            : attributes_template;
+
+        // Ưu tiên file upload nếu có
+        const thumbnail = req.file
+            ? `/uploads/${req.file.filename}` // hoặc URL đầy đủ nếu bạn dùng domain
+            : req.body.thumbnail || "";
+
+        if (!name || !parsedAttributes) {
+            return res.status(400).json({
+                success: false,
+                message: "Name and attributes_template are required!"
+            });
         }
 
         const categoryData = {
             name,
-            parent_category: parent_category ? parent_category : null,
-            attributes_template,
+            parent_category: parent_category || null,
+            attributes_template: parsedAttributes,
+            thumbnail
         };
 
         const category = await categoryModel.create(categoryData);
@@ -71,10 +83,11 @@ const getAttributesByCategory = async (req, res, next) => {
 // Cập nhật thông tin danh mục
 const updateCategory = async (req, res) => {
     try {
-        const { name, parent_category, attributes_template } = req.body;
+        const { name, parent_category, attributes_template, thumbnail } = req.body;
+
         const updatedCategory = await Category.findByIdAndUpdate(
-            req.params.id, 
-            { name, parent_category, attributes_template }, 
+            req.params.id,
+            { name, parent_category, attributes_template, thumbnail },
             { new: true }
         );
 
@@ -86,6 +99,7 @@ const updateCategory = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
 
 // Xóa một danh mục
 const deleteCategory = async (req, res) => {
