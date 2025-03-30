@@ -73,6 +73,24 @@ class AccountController {
       return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
   }
+  /** ✅ Đổi mật khẩu trực tiếp */
+async changePassword(req, res, next) {
+  try {
+      const { accountId, newPassword } = req.body;
+
+      if (!mongoose.Types.ObjectId.isValid(accountId)) {
+          return res.status(400).json({ message: "ID tài khoản không hợp lệ!" });
+      }
+      if (!newPassword || newPassword.length < 6) {
+          return res.status(400).json({ message: "Mật khẩu mới phải có ít nhất 6 ký tự!" });
+      }
+
+      const result = await AccountService.changePassword(accountId, newPassword);
+      return res.status(result.code).json(result);
+  } catch (error) {
+      return next(error);
+  }
+}
 }
 
 module.exports = new AccountController();

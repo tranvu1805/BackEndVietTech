@@ -202,6 +202,27 @@ class AccountService {
     res.status(500).json({ message: "Lỗi trong quá trình xử lý!", error: error.message });
   }
 }
+/** Đổi mật khẩu khi có mật khẩu mới */
+static async changePassword(accountId, newPassword) {
+  try {
+      if (!accountId || !newPassword) throw new Error("Thiếu thông tin cần thiết!");
+
+      // Mã hóa mật khẩu mới
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Cập nhật mật khẩu mới vào database
+      const updatedAccount = await accountModel.findByIdAndUpdate(accountId, { password: hashedPassword }, { new: true });
+
+      if (!updatedAccount) {
+          return { code: 404, message: "Tài khoản không tồn tại!", status: "error" };
+      }
+
+      return { code: 200, message: "Mật khẩu đã được cập nhật thành công!", status: "success" };
+  } catch (error) {
+      console.error("❌ Lỗi khi đổi mật khẩu:", error);
+      return { code: 500, message: error.message || "Lỗi hệ thống!", status: "error" };
+  }
+}
 }
 
 module.exports = AccountService;

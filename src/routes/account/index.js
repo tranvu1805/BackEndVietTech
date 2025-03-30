@@ -13,5 +13,7 @@ router.use(authentication)
 
 router.put("/update/:id", AccountController.updateAccount);
 router.put("/status/:id", AccountController.updateAccountStatus);
+// ✅ API đổi mật khẩu (cần xác thực)
+router.post("/change-password", AccountController.changePassword);
 
 module.exports = router;
