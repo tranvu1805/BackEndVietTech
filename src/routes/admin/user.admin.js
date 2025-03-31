@@ -8,12 +8,17 @@ const router = express.Router();
 // Admin page hiển thị danh sách
 router.get("/list", async (req, res, next) => {
     try {
-        const users = await accountController.getAllAccount(req, res, next);
+        const result = await accountController.getAllAccounts(req, res, next);
+        const users = result.accounts;
 
         const roles = await roleModel.find().lean(); // ✅ lấy danh sách vai trò
 
+
+        console.log("check users: ", users);
+
+
         res.render("admin/user-list", {
-            users,
+            users: users, // ✅ truyền thêm biến users vào view
             roles, // ✅ truyền thêm biến roles vào view
             currentPage: parseInt(req.query.page) || 1,
             limit: parseInt(req.query.limit) || 10,

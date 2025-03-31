@@ -7,6 +7,8 @@ class AccountController {
     try {
         const { page = 1, limit = 10 } = req.query;
         const result = await AccountService.getAllAccounts(parseInt(page), parseInt(limit));
+        console.log("🛠️ Kết quả lấy danh sách tài khoản:", result);
+        
         return res.status(result.code).json(result);
     } catch (error) {
         return next(error);
@@ -29,24 +31,7 @@ class AccountController {
     }
   }
 
-    async getAllAccount(req, res, next) {
-      try {
-        const { page = 1, limit = 10, search = "" } = req.query;
-
-        const result = await AccountService.getAllAccounts({
-          page: parseInt(page),
-          limit: parseInt(limit),
-          search: search.trim()
-        });
-
-        console.log("check result",result);
-        
-
-        return result;
-      } catch (error) {
-        return next(error);
-      }
-    }
+    
 
 
   // ✅ Cập nhật tài khoản theo ID
