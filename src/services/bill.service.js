@@ -14,7 +14,7 @@ class BillService {
   }
 
   static async updateBillStatus({ billId, status }) {
-    const validStatuses = ["active", "completed", "failed", "pending"];
+    const validStatuses = ["active", "completed", "cancelled", "pending"];
 
     // Kiểm tra xem status có hợp lệ không
     if (!validStatuses.includes(status)) {

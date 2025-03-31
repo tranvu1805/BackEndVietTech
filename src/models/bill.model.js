@@ -42,7 +42,7 @@ const BillSchema = new mongoose.Schema(
         status: {
             type: String,
             required: true,
-            enum: ["active", "completed", "failed", "pending"],
+            enum: ["active", "completed", "cancelled", "pending"],
             default: "pending",
         },
         payment_method: {

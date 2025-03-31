@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 
-const DOCUMENT_NAME = 'Variant'
-const COLLECTION_NAME = 'Variants'
+const DOCUMENT_NAME = 'Attribute'
+const COLLECTION_NAME = 'Attributes'
 
-const VariantSchema = new Schema({
+const AttributeSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -19,4 +19,4 @@ const VariantSchema = new Schema({
     }
 }, { collection: COLLECTION_NAME, timestamps: true });
 
-module.exports = mongoose.model(DOCUMENT_NAME, VariantSchema);
+module.exports = mongoose.model(DOCUMENT_NAME, AttributeSchema);

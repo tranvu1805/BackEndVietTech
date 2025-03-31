@@ -105,6 +105,32 @@
             border-color: var(--success-color);
         }
 
+        .log-entry {
+            border-left: 4px solid var(--secondary-color);
+            background-color: #fdfdfd;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .log-entry strong {
+            color: var(--primary-color);
+        }
+
+        .log-meta {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .log-note {
+            font-style: italic;
+            color: #444;
+            margin-top: 5px;
+        }
+
+
         .btn-warning {
             background-color: var(--warning-color);
             border-color: var(--warning-color);
@@ -284,7 +310,6 @@
             overflow-y: auto;
             height: 100vh;
         }
-
     </style>
 </head>
 
@@ -569,6 +594,9 @@
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
+
+
+
                                                                                     <% }); %>
                                                                                         <div
                                                                                             class="mt-3 pt-2 border-top">
@@ -603,6 +631,18 @@
                                                                                             </div>
                                                                                         </div>
                                                                                         <% } %>
+
+                                                                                            <div id="log-container-<%= bill._id %>"
+                                                                                                class="mt-3">
+                                                                                                <h6><i
+                                                                                                        class="fas fa-history me-2"></i>Lịch
+                                                                                                    sử trạng thái</h6>
+                                                                                                <ul class="list-group"
+                                                                                                    id="log-list-<%= bill._id %>">
+                                                                                                    <!-- Sẽ render bằng JS -->
+                                                                                                </ul>
+                                                                                            </div>
+
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-md-5 border-start">
@@ -850,14 +890,35 @@
                 { value: 'cancelled', label: 'Bị hủy' }
             ];
 
-            statusSelect.innerHTML = statuses
-                .map(s => {
-                    if (s.value === bill.status) {
-                        return `<option value="${s.value}" disabled>${s.label} (hiện tại)</option>`;
-                    }
-                    return `<option value="${s.value}">${s.label}</option>`;
-                })
-                .join('');
+            const nextStatusMap = {
+                pending: ['active', 'cancelled'],
+                active: ['completed', 'cancelled'],
+                completed: [],
+                cancelled: []
+            };
+
+            const currentStatus = bill.status;
+            const validNextStatuses = nextStatusMap[currentStatus] || [];
+
+            // Nếu không có trạng thái kế tiếp => disable dropdown
+            if (validNextStatuses.length === 0) {
+                statusSelect.innerHTML = `<option selected disabled>Không thể thay đổi</option>`;
+                statusSelect.disabled = true;
+            } else {
+                statusSelect.disabled = false;
+                statusSelect.innerHTML = validNextStatuses
+                    .map(s => {
+                        const labelMap = {
+                            pending: 'Đang xử lý',
+                            active: 'Đang vận chuyển',
+                            completed: 'Hoàn thành',
+                            cancelled: 'Bị hủy'
+                        };
+                        return `<option value="${s}">${labelMap[s]}</option>`;
+                    })
+                    .join('');
+            }
+
 
 
             new bootstrap.Modal(document.getElementById('editBillModal')).show();
@@ -907,6 +968,67 @@
             const bill = JSON.parse(btn.getAttribute('data-bill'));
             openEditModal(bill);
         }
+
+        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(button => {
+            button.addEventListener('click', async () => {
+                const targetId = button.getAttribute('data-bs-target');
+                const billId = targetId.replace('#details', '');
+                const logList = document.getElementById(`log-list-${billId}`);
+
+                // Nếu đã có log thì không cần fetch lại
+                if (logList.getAttribute('data-loaded')) return;
+
+                try {
+                    const res = await fetch(`/v1/api/log/${billId}/logs`, {
+                        headers: {
+                            authorization: accessToken,
+                            'x-client-id': userId,
+                            'x-api-key': apiKey
+                        }
+                    });
+                    const data = await res.json();
+                    const logs = data.metadata || [];
+                    console.log('logs:', logs);
+
+                    if (!Array.isArray(logs)) {
+                        logList.innerHTML = '<li class="list-group-item text-danger">Không có dữ liệu log.</li>';
+                        return;
+                    }
+
+                    if (logs.length === 0) {
+                        logList.innerHTML = '<li class="list-group-item text-muted">Chưa có thay đổi trạng thái.</li>';
+                    } else {
+                        logs.forEach(log => {
+                            console.log('log:', log.changed_by);
+
+                            const li = document.createElement('li');
+                            li.classList.add('list-group-item', 'log-entry');
+
+                            const from = log.before?.status || '---';
+                            const to = log.after?.status || '---';
+                            const note = log.note || 'Không có ghi chú';
+                            const user = log.changed_by?.email || 'Không xác định';
+                            const time = new Date(log.createdAt).toLocaleString('vi-VN');
+
+                            li.innerHTML = `
+        <strong>${from}</strong> ➜ <strong>${to}</strong>
+        <div class="log-meta">Bởi <span>${user}</span> lúc <span>${time}</span></div>
+        <div class="log-note">${note}</div>
+    `;
+
+                            logList.appendChild(li);
+                        });
+
+                    }
+
+                    logList.setAttribute('data-loaded', 'true');
+                } catch (error) {
+                    console.error('Lỗi lấy log:', error);
+                    logList.innerHTML = '<li class="list-group-item text-danger">Lỗi tải lịch sử.</li>';
+                }
+            });
+        });
+
 
 
     </script>

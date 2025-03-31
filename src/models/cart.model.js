@@ -36,7 +36,6 @@ const cartProductSchema = new Schema(
       },
       variant_name: String,
       variant_value: String,
-      sku: String,
     },
   },
   { _id: false }
