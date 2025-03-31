@@ -10,12 +10,12 @@ class AccessController {
     try {
       console.log(`[P]:: Login Request Received ::`, req.body);
 
-      const { email, password } = req.body;
+      const { username , password } = req.body;
 
       console.log("check log",req.body);
       
 
-      const result = await AccessService.login({ email, password });
+      const result = await AccessService.login({ username , password });
 
       if (result.status === "error") {
         console.warn(`⚠️ Login Failed: ${result.message}`);

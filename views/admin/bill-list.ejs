@@ -291,11 +291,12 @@
 
                             <div class="ms-auto d-flex align-items-center">
                                 <div class="dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
                                         data-bs-toggle="dropdown">
-                                        <div class="user-profile">
-                                            <div class="user-avatar">AD</div>
-                                            <div>Admin</div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                                style="width: 40px; height: 40px;font-weight: bold;">V</div>
+                                            <span>Admin</span>
                                         </div>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end">
@@ -306,8 +307,8 @@
                                         <li>
                                             <hr class="dropdown-divider">
                                         </li>
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>
-                                                Đăng xuất</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="logout()"><i
+                                                    class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -315,326 +316,463 @@
                     </nav>
 
                     <!-- Page Header -->
-                    <div class="page-header">
+                    <!-- <div class="page-header">
                         <h4 class="mb-0">Quản lý Đơn Hàng</h4>
                         <a href="/v1/api/admin/bill/create" class="btn btn-success">
                             <i class="fas fa-plus me-1"></i> Tạo đơn hàng mới
                         </a>
-                    </div>
+                    </div> -->
 
                     <!-- Search and Filter -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="text" class="form-control" placeholder="Tìm kiếm đơn hàng theo mã...">
+                    <form id="filterForm" class="row g-3 align-items-end mb-4" method="GET"
+                        action="/v1/api/admin/bills">
+                        <!-- Tìm kiếm -->
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Tìm kiếm theo mã đơn</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="search" name="search"
+                                    placeholder="Nhập mã đơn hàng..." value="<%= search || '' %>">
                             </div>
                         </div>
-                        <div class="col-md-6 d-flex justify-content-end">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-outline-secondary dropdown-toggle"
-                                    data-bs-toggle="dropdown">
-                                    <i class="fas fa-filter me-1"></i> Trạng thái
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">Tất cả</a></li>
-                                    <li><a class="dropdown-item" href="#">Đang xử lý</a></li>
-                                    <li><a class="dropdown-item" href="#">Đang vận chuyển</a></li>
-                                    <li><a class="dropdown-item" href="#">Hoàn thành</a></li>
-                                    <li><a class="dropdown-item" href="#">Bị hủy</a></li>
-                                </ul>
-                                <button type="button" class="btn btn-outline-secondary dropdown-toggle"
-                                    data-bs-toggle="dropdown">
-                                    <i class="fas fa-money-bill me-1"></i> Thanh toán
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">Tất cả</a></li>
-                                    <li><a class="dropdown-item" href="#">Chuyển khoản</a></li>
-                                    <li><a class="dropdown-item" href="#">Thanh toán trực tiếp</a></li>
-                                </ul>
-                                <button type="button" class="btn btn-outline-secondary" id="exportBillsButton">
-                                    <i class="fas fa-download me-1"></i> Xuất
-                                </button>
-                                
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Orders Table -->
-                    <div class="card">
-                        <div class="card-body p-0">
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="ps-3">Mã đơn hàng</th>
-                                        <th>Khách hàng</th>
-                                        <th>Tổng tiền</th>
-                                        <th>Trạng thái</th>
-                                        <th>Phương thức</th>
-                                        <th>Ngày tạo</th>
-                                        <th class="text-end pe-3">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% bills.forEach(bill=> { %>
-                                        <tr>
-                                            <td class="ps-3">#<%= bill.order_code %>
-                                            </td>
-                                            <td>
-                                                <div>
-                                                    <div>
-                                                        <%= bill.receiver_name %>
-                                                    </div>
-                                                    <small class="text-muted">
-                                                        <%= bill.phone_number %>
-                                                    </small>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <%= (bill.total + bill.shipping_fee).toLocaleString() %> ₫
-                                                    <small class="d-block text-muted">Phí ship: <%=
-                                                            bill.shipping_fee.toLocaleString() %> ₫</small>
-                                            </td>
-                                            <td>
-                                                <% let statusClass="" ; %>
-                                                    <% let statusText="" ; %>
-                                                        <% if (bill.status==="pending" ) { %>
-                                                            <% statusClass="status-pending" ; %>
-                                                                <% statusText="Đang xử lý" ; %>
-                                                                    <% } else if (bill.status==="active" ) { %>
-                                                                        <% statusClass="status-active" ; %>
-                                                                            <% statusText="Đang vận chuyển" ; %>
-                                                                                <% } else if (bill.status==="completed"
-                                                                                    ) { %>
-                                                                                    <% statusClass="status-completed" ;
-                                                                                        %>
-                                                                                        <% statusText="Hoàn thành" ; %>
-                                                                                            <% } else { %>
-                                                                                                <% statusClass="status-failed"
+                        <!-- Trạng thái -->
+                        <div class="col-md-2">
+                            <label for="status" class="form-label">Trạng thái</label>
+                            <select class="form-select" id="status" name="status"
+                                onchange="document.getElementById('filterForm').submit()">
+                                <option value="">Tất cả</option>
+                                <option value="pending" <%=status==='pending' ? 'selected' : '' %>>Đang xử lý</option>
+                                <option value="active" <%=status==='active' ? 'selected' : '' %>>Đang vận chuyển
+                                </option>
+                                <option value="completed" <%=status==='completed' ? 'selected' : '' %>>Hoàn thành
+                                </option>
+                                <option value="cancelled" <%=status==='cancelled' ? 'selected' : '' %>>Bị hủy</option>
+                            </select>
+                        </div>
+
+                        <!-- Thanh toán -->
+                        <div class="col-md-2">
+                            <label for="payment_method" class="form-label">Thanh toán</label>
+                            <select class="form-select" id="payment_method" name="payment_method"
+                                onchange="document.getElementById('filterForm').submit()">
+                                <option value="">Tất cả</option>
+                                <option value="ck" <%=payment_method==='ck' ? 'selected' : '' %>>Chuyển khoản</option>
+                                <option value="tm" <%=payment_method==='tm' ? 'selected' : '' %>>Trực tiếp</option>
+                            </select>
+                        </div>
+
+                        <!-- Từ ngày -->
+                        <div class="col-md-2">
+                            <label for="start_date" class="form-label">Từ ngày</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date"
+                                value="<%= start_date || '' %>">
+                        </div>
+
+                        <!-- Đến ngày -->
+                        <div class="col-md-2">
+                            <label for="end_date" class="form-label">Đến ngày</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date"
+                                value="<%= end_date || '' %>">
+                        </div>
+
+                        <!-- Nút thao tác -->
+                        <div class="col-12 d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-filter me-1"></i> Lọc đơn hàng
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="exportBillsButton">
+                                <i class="fas fa-download me-1"></i> Xuất
+                            </button>
+                        </div>
+                    </form>
+
+
+                    <% if (errorMessage) { %>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <%= errorMessage %>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                        </div>
+                        <% } %>
+                            <!-- Orders Table -->
+                            <div class="card">
+                                <div class="card-body p-0">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="ps-3">Mã đơn hàng</th>
+                                                <th>Khách hàng</th>
+                                                <th>Tổng tiền</th>
+                                                <th>Trạng thái</th>
+                                                <th>Phương thức</th>
+                                                <th>Ngày tạo</th>
+                                                <th class="text-end pe-3">Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% bills.forEach(bill=> { %>
+                                                <tr>
+                                                    <td class="ps-3">#<%= bill.order_code %>
+                                                    </td>
+                                                    <td>
+                                                        <div>
+                                                            <div>
+                                                                <%= bill.receiver_name %>
+                                                            </div>
+                                                            <small class="text-muted">
+                                                                <%= bill.phone_number %>
+                                                            </small>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <%= (bill.total + bill.shipping_fee).toLocaleString() %> ₫
+                                                            <small class="d-block text-muted">Phí ship: <%=
+                                                                    bill.shipping_fee.toLocaleString() %> ₫</small>
+                                                    </td>
+                                                    <td>
+                                                        <% let statusClass="" ; %>
+                                                            <% let statusText="" ; %>
+                                                                <% if (bill.status==="pending" ) { %>
+                                                                    <% statusClass="status-pending" ; %>
+                                                                        <% statusText="Đang xử lý" ; %>
+                                                                            <% } else if (bill.status==="active" ) { %>
+                                                                                <% statusClass="status-active" ; %>
+                                                                                    <% statusText="Đang vận chuyển" ; %>
+                                                                                        <% } else if
+                                                                                            (bill.status==="completed" )
+                                                                                            { %>
+                                                                                            <% statusClass="status-completed"
+                                                                                                ; %>
+                                                                                                <% statusText="Hoàn thành"
                                                                                                     ; %>
-                                                                                                    <% statusText="Bị hủy"
-                                                                                                        ; %>
-                                                                                                        <% } %>
-                                                                                                            <span
-                                                                                                                class="status-badge <%= statusClass %>">
-                                                                                                                <%= statusText
-                                                                                                                    %>
-                                                                                                            </span>
-                                            </td>
-                                            <td>
-                                                <% if (bill.payment_method==="ck" ) { %>
-                                                    <span><i class="fas fa-university me-1"></i> Chuyển khoản</span>
-                                                    <% } else { %>
-                                                        <span><i class="fas fa-money-bill me-1"></i> Trực tiếp</span>
-                                                        <% } %>
-                                            </td>
-                                            <td>
-                                                <%= new Date(bill.createdAt).toLocaleDateString('vi-VN') %>
-                                                    <small class="d-block text-muted">
-                                                        <%= new Date(bill.createdAt).toLocaleTimeString('vi-VN') %>
-                                                    </small>
-                                            </td>
-                                            <td class="text-end pe-3">
-                                                <div class="action-buttons">
-                                                    <button class="btn btn-sm btn-primary me-1" type="button"
-                                                        data-bs-toggle="collapse"
-                                                        data-bs-target="#details<%= bill._id %>" aria-expanded="false">
-                                                        <i class="fas fa-info-circle"></i>
-                                                    </button>
-                                                    <a href="/admin/bills/<%= bill._id %>/edit"
-                                                        class="btn btn-sm btn-warning me-1">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <button type="button" class="btn btn-sm btn-danger"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#deleteModal<%= bill._id %>">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- Details Row -->
-                                        <tr class="collapse" id="details<%= bill._id %>">
-                                            <td colspan="7" class="p-0">
-                                                <div class="order-details">
-                                                    <div class="row">
-                                                        <div class="col-md-7">
-                                                            <div class="product-list">
-                                                                <h6 class="mb-3"><i
-                                                                        class="fas fa-shopping-cart me-2"></i>Sản phẩm
-                                                                    trong đơn hàng</h6>
-                                                                <% if (bill.products.length===0) { %>
-                                                                    <p class="text-muted">Không có sản phẩm</p>
-                                                                    <% } else { %>
-                                                                        <% bill.products.forEach(product=> { %>
-                                                                            <div class="product-item">
-                                                                                <div
-                                                                                    class="d-flex justify-content-between">
-                                                                                    <div>
-                                                                                        <strong>
-                                                                                            <%= product.product_name %>
-                                                                                        </strong>
-                                                                                        <% if (product.variant) { %>
-                                                                                            <small
-                                                                                                class="d-block text-muted">Biến
-                                                                                                thể: <%= product.variant
-                                                                                                    %></small>
-                                                                                            <% } %>
-                                                                                    </div>
-                                                                                    <div class="text-end">
-                                                                                        <span>
-                                                                                            <%= product.quantity %> x
-                                                                                                <%= product.price.toLocaleString()
-                                                                                                    %> ₫
-                                                                                        </span>
-                                                                                        <div class="text-muted">
-                                                                                            <%= (product.quantity *
-                                                                                                product.price).toLocaleString()
-                                                                                                %> ₫
+                                                                                                    <% } else { %>
+                                                                                                        <% statusClass="status-failed"
+                                                                                                            ; %>
+                                                                                                            <% statusText="Bị hủy"
+                                                                                                                ; %>
+                                                                                                                <% } %>
+                                                                                                                    <span
+                                                                                                                        class="status-badge <%= statusClass %>">
+                                                                                                                        <%= statusText
+                                                                                                                            %>
+                                                                                                                    </span>
+                                                    </td>
+                                                    <td>
+                                                        <% if (bill.payment_method==="ck" ) { %>
+                                                            <span><i class="fas fa-university me-1"></i> Chuyển
+                                                                khoản</span>
+                                                            <% } else { %>
+                                                                <span><i class="fas fa-money-bill me-1"></i> Trực
+                                                                    tiếp</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <%= new Date(bill.createdAt).toLocaleDateString('vi-VN') %>
+                                                            <small class="d-block text-muted">
+                                                                <%= new Date(bill.createdAt).toLocaleTimeString('vi-VN')
+                                                                    %>
+                                                            </small>
+                                                    </td>
+                                                    <td class="text-end pe-3">
+                                                        <div class="action-buttons">
+                                                            <button class="btn btn-sm btn-primary me-1" type="button"
+                                                                data-bs-toggle="collapse"
+                                                                data-bs-target="#details<%= bill._id %>"
+                                                                aria-expanded="false">
+                                                                <i class="fas fa-info-circle"></i>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-warning me-1" type="button"
+                                                                data-bill='<%- JSON.stringify(bill) %>'
+                                                                onclick="handleEditFromButton(this)">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+
+
+
+                                                            <button type="button" class="btn btn-sm btn-danger"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#deleteModal<%= bill._id %>">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <!-- Details Row -->
+                                                <tr class="collapse" id="details<%= bill._id %>">
+                                                    <td colspan="7" class="p-0">
+                                                        <div class="order-details">
+                                                            <div class="row">
+                                                                <div class="col-md-7">
+                                                                    <div class="product-list">
+                                                                        <h6 class="mb-3"><i
+                                                                                class="fas fa-shopping-cart me-2"></i>Sản
+                                                                            phẩm
+                                                                            trong đơn hàng</h6>
+                                                                        <% if (bill.products.length===0) { %>
+                                                                            <p class="text-muted">Không có sản phẩm</p>
+                                                                            <% } else { %>
+                                                                                <% bill.products.forEach(product=> { %>
+                                                                                    <div class="product-item">
+                                                                                        <div
+                                                                                            class="d-flex justify-content-between">
+                                                                                            <div>
+                                                                                                <strong>
+                                                                                                    <%= product.product_name
+                                                                                                        %>
+                                                                                                </strong>
+                                                                                                <% if (product.variant)
+                                                                                                    { %>
+                                                                                                    <small
+                                                                                                        class="d-block text-muted">Biến
+                                                                                                        thể: <%=
+                                                                                                            product.variant
+                                                                                                            %></small>
+                                                                                                    <% } %>
+                                                                                            </div>
+                                                                                            <div class="text-end">
+                                                                                                <span>
+                                                                                                    <%= product.quantity
+                                                                                                        %>
+                                                                                                        x
+                                                                                                        <%= product.price.toLocaleString()
+                                                                                                            %> ₫
+                                                                                                </span>
+                                                                                                <div class="text-muted">
+                                                                                                    <%= (product.quantity
+                                                                                                        *
+                                                                                                        product.price).toLocaleString()
+                                                                                                        %> ₫
+                                                                                                </div>
+                                                                                            </div>
                                                                                         </div>
                                                                                     </div>
-                                                                                </div>
+                                                                                    <% }); %>
+                                                                                        <div
+                                                                                            class="mt-3 pt-2 border-top">
+                                                                                            <div
+                                                                                                class="d-flex justify-content-between">
+                                                                                                <strong>Tổng tiền sản
+                                                                                                    phẩm:</strong>
+                                                                                                <strong>
+                                                                                                    <%= bill.total.toLocaleString()
+                                                                                                        %> ₫
+                                                                                                </strong>
+                                                                                            </div>
+                                                                                            <div
+                                                                                                class="d-flex justify-content-between mt-2">
+                                                                                                <span>Phí vận
+                                                                                                    chuyển:</span>
+                                                                                                <span>
+                                                                                                    <%= bill.shipping_fee.toLocaleString()
+                                                                                                        %> ₫
+                                                                                                </span>
+                                                                                            </div>
+                                                                                            <div
+                                                                                                class="d-flex justify-content-between mt-2">
+                                                                                                <strong>Tổng thanh
+                                                                                                    toán:</strong>
+                                                                                                <strong
+                                                                                                    class="text-danger">
+                                                                                                    <%= (bill.total +
+                                                                                                        bill.shipping_fee).toLocaleString()
+                                                                                                        %> ₫
+                                                                                                </strong>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <% } %>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-5 border-start">
+                                                                    <div class="order-info">
+                                                                        <h6 class="mb-3"><i
+                                                                                class="fas fa-info-circle me-2"></i>Thông
+                                                                            tin
+                                                                            đơn hàng</h6>
+                                                                        <div class="mb-2">
+                                                                            <strong>Người nhận:</strong>
+                                                                            <div>
+                                                                                <%= bill.receiver_name %>
                                                                             </div>
-                                                                            <% }); %>
-                                                                                <div class="mt-3 pt-2 border-top">
-                                                                                    <div
-                                                                                        class="d-flex justify-content-between">
-                                                                                        <strong>Tổng tiền sản
-                                                                                            phẩm:</strong>
-                                                                                        <strong>
-                                                                                            <%= bill.total.toLocaleString()
-                                                                                                %> ₫
-                                                                                        </strong>
-                                                                                    </div>
-                                                                                    <div
-                                                                                        class="d-flex justify-content-between mt-2">
-                                                                                        <span>Phí vận chuyển:</span>
-                                                                                        <span>
-                                                                                            <%= bill.shipping_fee.toLocaleString()
-                                                                                                %> ₫
-                                                                                        </span>
-                                                                                    </div>
-                                                                                    <div
-                                                                                        class="d-flex justify-content-between mt-2">
-                                                                                        <strong>Tổng thanh
-                                                                                            toán:</strong>
-                                                                                        <strong class="text-danger">
-                                                                                            <%= (bill.total +
-                                                                                                bill.shipping_fee).toLocaleString()
-                                                                                                %> ₫
-                                                                                        </strong>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <% } %>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-5 border-start">
-                                                            <div class="order-info">
-                                                                <h6 class="mb-3"><i
-                                                                        class="fas fa-info-circle me-2"></i>Thông tin
-                                                                    đơn hàng</h6>
-                                                                <div class="mb-2">
-                                                                    <strong>Người nhận:</strong>
-                                                                    <div>
-                                                                        <%= bill.receiver_name %>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="mb-2">
-                                                                    <strong>Số điện thoại:</strong>
-                                                                    <div>
-                                                                        <%= bill.phone_number %>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="mb-2">
-                                                                    <strong>Địa chỉ giao hàng:</strong>
-                                                                    <div>
-                                                                        <%= bill.address %>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="mb-2">
-                                                                    <strong>Phương thức thanh toán:</strong>
-                                                                    <div>
-                                                                        <% if (bill.payment_method==="ck" ) { %>
-                                                                            <i class="fas fa-university me-1"></i>
-                                                                            Chuyển khoản ngân hàng
-                                                                            <% } else { %>
-                                                                                <i class="fas fa-money-bill me-1"></i>
-                                                                                Thanh toán khi nhận hàng
-                                                                                <% } %>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="mb-2">
-                                                                    <strong>Ngày tạo:</strong>
-                                                                    <div>
-                                                                        <%= new
-                                                                            Date(bill.createdAt).toLocaleString('vi-VN')
-                                                                            %>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="mb-2">
-                                                                    <strong>Cập nhật lần cuối:</strong>
-                                                                    <div>
-                                                                        <%= new
-                                                                            Date(bill.updatedAt).toLocaleString('vi-VN')
-                                                                            %>
+                                                                        </div>
+                                                                        <div class="mb-2">
+                                                                            <strong>Số điện thoại:</strong>
+                                                                            <div>
+                                                                                <%= bill.phone_number %>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="mb-2">
+                                                                            <strong>Địa chỉ giao hàng:</strong>
+                                                                            <div>
+                                                                                <%= bill.address %>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="mb-2">
+                                                                            <strong>Phương thức thanh toán:</strong>
+                                                                            <div>
+                                                                                <% if (bill.payment_method==="ck" ) { %>
+                                                                                    <i
+                                                                                        class="fas fa-university me-1"></i>
+                                                                                    Chuyển khoản ngân hàng
+                                                                                    <% } else { %>
+                                                                                        <i
+                                                                                            class="fas fa-money-bill me-1"></i>
+                                                                                        Thanh toán khi nhận hàng
+                                                                                        <% } %>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="mb-2">
+                                                                            <strong>Ngày tạo:</strong>
+                                                                            <div>
+                                                                                <%= new
+                                                                                    Date(bill.createdAt).toLocaleString('vi-VN')
+                                                                                    %>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="mb-2">
+                                                                            <strong>Cập nhật lần cuối:</strong>
+                                                                            <div>
+                                                                                <%= new
+                                                                                    Date(bill.updatedAt).toLocaleString('vi-VN')
+                                                                                    %>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                                    </td>
+                                                </tr>
 
-                                        <!-- Delete Confirmation Modal -->
-                                        <div class="modal fade" id="deleteModal<%= bill._id %>" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Xác nhận xóa</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <p>Bạn có chắc chắn muốn xóa đơn hàng #<%= bill.order_code %>?
-                                                        </p>
-                                                        <p class="text-danger"><small>Thao tác này không thể hoàn
-                                                                tác.</small></p>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary"
-                                                            data-bs-dismiss="modal">Hủy</button>
-                                                        <a href="/admin/bills/<%= bill._id %>/delete"
-                                                            class="btn btn-danger">Xác nhận xóa</a>
+                                                <!-- Delete Confirmation Modal -->
+                                                <div class="modal fade" id="deleteModal<%= bill._id %>" tabindex="-1">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Xác nhận xóa</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>Bạn có chắc chắn muốn xóa đơn hàng #<%=
+                                                                        bill.order_code %>?
+                                                                </p>
+                                                                <p class="text-danger"><small>Thao tác này không thể
+                                                                        hoàn
+                                                                        tác.</small></p>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Hủy</button>
+                                                                <a href="/admin/bills/<%= bill._id %>/delete"
+                                                                    class="btn btn-danger">Xác nhận xóa</a>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                                <% }); %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Pagination -->
+                            <nav>
+                                <ul class="pagination justify-content-center">
+                                    <% if (currentPage> 1) { %>
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="?<%= `page=${currentPage - 1}&limit=${limit}&search=${search || ''}&status=${status || ''}&payment_method=${payment_method || ''}&start_date=${start_date || ''}&end_date=${end_date || ''}` %>">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                        <% } %>
+
+                                            <% for (let i=1; i <=totalPages; i++) { %>
+                                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                                    <a class="page-link"
+                                                        href="?<%= `page=${i}&limit=${limit}&search=${search || ''}&status=${status || ''}&payment_method=${payment_method || ''}&start_date=${start_date || ''}&end_date=${end_date || ''}` %>">
+                                                        <%= i %>
+                                                    </a>
+                                                </li>
+                                                <% } %>
+
+                                                    <% if (currentPage < totalPages) { %>
+                                                        <li class="page-item">
+                                                            <a class="page-link"
+                                                                href="?<%= `page=${currentPage + 1}&limit=${limit}&search=${search || ''}&status=${status || ''}&payment_method=${payment_method || ''}&start_date=${start_date || ''}&end_date=${end_date || ''}` %>">
+                                                                <i class="fas fa-chevron-right"></i>
+                                                            </a>
+                                                        </li>
+                                                        <% } %>
+                                </ul>
+                            </nav>
+
+                            <div class="modal fade" id="editBillModal" tabindex="-1"
+                                aria-labelledby="editBillModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editBillModalLabel">Chỉnh sửa đơn hàng</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
                                         </div>
-                                        <% }); %>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                                        <div class="modal-body">
+                                            <form id="editBillForm">
+                                                <input type="hidden" name="bill_id" id="edit_bill_id">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label for="edit_receiver_name" class="form-label">Người
+                                                            nhận</label>
+                                                        <input type="text" class="form-control" id="edit_receiver_name"
+                                                            name="receiver_name" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="edit_phone_number" class="form-label">Số điện
+                                                            thoại</label>
+                                                        <input type="text" class="form-control" id="edit_phone_number"
+                                                            name="phone_number" required>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label for="edit_address" class="form-label">Địa chỉ giao
+                                                            hàng</label>
+                                                        <input type="text" class="form-control" id="edit_address"
+                                                            name="address" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="edit_status" class="form-label">Trạng thái</label>
+                                                        <select class="form-select" id="edit_status" name="status">
+                                                            <option value="pending">Đang xử lý</option>
+                                                            <option value="active">Đang vận chuyển</option>
+                                                            <option value="completed">Hoàn thành</option>
+                                                            <option value="cancelled">Bị hủy</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="edit_payment_method" class="form-label">Thanh
+                                                            toán</label>
+                                                        <select class="form-select" id="edit_payment_method"
+                                                            name="payment_method">
+                                                            <option value="ck">Chuyển khoản</option>
+                                                            <option value="tm">Trực tiếp</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Hủy</button>
+                                            <button type="submit" form="editBillForm" class="btn btn-primary">Lưu thay
+                                                đổi</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <!-- Pagination -->
-                    <nav>
-                        <ul class="pagination">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" aria-label="Previous">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Next">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
                 </div>
+
         </div>
     </div>
 
@@ -668,6 +806,53 @@
                     alert('Có lỗi khi xuất file.');
                 });
         });
+
+        function openEditModal(bill) {
+            document.getElementById('edit_bill_id').value = bill._id;
+            document.getElementById('edit_receiver_name').value = bill.receiver_name;
+            document.getElementById('edit_phone_number').value = bill.phone_number;
+            document.getElementById('edit_address').value = bill.address;
+            document.getElementById('edit_status').value = bill.status;
+            document.getElementById('edit_payment_method').value = bill.payment_method;
+
+            new bootstrap.Modal(document.getElementById('editBillModal')).show();
+        }
+
+        // Gửi form chỉnh sửa
+        document.getElementById('editBillForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const billId = formData.get('bill_id');
+            console.log("Bill ID:", billId);
+            console.log("Form data:", formData);
+
+
+
+            fetch(`/v1/api/admin/bills/${billId}/edit`, {
+                method: 'POST',
+                body: new URLSearchParams(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Cập nhật thành công!');
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra khi cập nhật.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi:', error);
+                    alert('Lỗi không xác định.');
+                });
+        });
+
+        function handleEditFromButton(btn) {
+            const bill = JSON.parse(btn.getAttribute('data-bill'));
+            openEditModal(bill);
+        }
+
 
     </script>
 </body>
