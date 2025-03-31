@@ -9,7 +9,7 @@ const { billRepo } = require("../models/bill.model");
 const Products = require("../models/product.model");
 const Account = require("../models/account.model");
 const { discountRepo } = require("../models/disscount.model");
-const productModel= require("../models/product.model");
+const productModel = require("../models/product.model");
 class CartService {
   //Start Repo
 
@@ -106,8 +106,8 @@ class CartService {
             const itemVariantId = item.variant?.variantId
               ? item.variant.variantId.toString()
               : item.variantId
-              ? item.variantId.toString()
-              : null;
+                ? item.variantId.toString()
+                : null;
 
             console.log(`Item variant ID: ${itemVariantId}`);
 
@@ -352,11 +352,22 @@ class CartService {
       };
     }
 
+    // Chỉ lấy sản phẩm có isSelected == true
+    const selectedProducts = currentCart.cart_products.filter((p) => p.isSelected);
+
+    if (!selectedProducts || selectedProducts.length === 0) {
+      return {
+        code: 400,
+        message: "No selected products to checkout.",
+        status: "error",
+      };
+    }
+
     let total = 0;
     const bulkUpdateOps = [];
 
     // currentCart.cart_products.forEach((e) => (total += e.price * e.quantity));
-    for (const item of currentCart.cart_products) {
+    for (const item of selectedProducts) {
       console.log("🔹 productModel:", productModel);
       const product = await productModel.findById(item.productId);
 
@@ -396,13 +407,13 @@ class CartService {
       await productModel.bulkWrite(bulkUpdateOps);
     }
 
-     // Kiểm tra lại stock sau khi cập nhật
-  for (const item of currentCart.cart_products) {
-    const updatedProduct = await productModel.findById(item.productId);
-    console.log(
-      `✅ Sau khi cập nhật: ${updatedProduct.product_name} (Stock: ${updatedProduct.product_stock})`
-    );
-  }
+    // Kiểm tra lại stock sau khi cập nhật
+    for (const item of selectedProducts) {
+      const updatedProduct = await productModel.findById(item.productId);
+      console.log(
+        `✅ Sau khi cập nhật: ${updatedProduct.product_name} (Stock: ${updatedProduct.product_stock})`
+      );
+    }
 
     const shippingFee = 35;
     total += shippingFee;
@@ -430,7 +441,7 @@ class CartService {
 
     const newBill = await billRepo.create({
       user_id: currentCart.cart_userId,
-      products: currentCart.cart_products,
+      products: selectedProducts,
       order_code: orderCode,
       address: address,
       total: total,
@@ -445,6 +456,53 @@ class CartService {
 
     // await currentCart.deleteOne()
     return newBill;
+  }
+
+  static async updateIsSelected({ userId, productId, isSelected }) {
+    try {
+      // Tìm giỏ hàng của người dùng
+      const currentCart = await cart.findOne({ cart_userId: userId, cart_state: "active" });
+
+      if (!currentCart) {
+        return {
+          code: 400,
+          message: "Cart not found",
+          status: "error",
+        };
+      }
+
+      // Tìm sản phẩm trong giỏ hàng
+      const productIndex = currentCart.cart_products.findIndex(
+        (p) => p.productId.toString() === productId.toString()
+      );
+
+      if (productIndex === -1) {
+        return {
+          code: 404,
+          message: "Product not found in cart",
+          status: "error",
+        };
+      }
+
+      // Cập nhật trạng thái isSelected
+      currentCart.cart_products[productIndex].isSelected = isSelected;
+
+      // Lưu lại giỏ hàng sau khi cập nhật
+      await currentCart.save();
+
+      return {
+        code: 200,
+        message: "Product selection updated successfully",
+        status: "success",
+      };
+    } catch (error) {
+      console.error("Error updating isSelected:", error);
+      return {
+        code: 500,
+        message: "Internal server error",
+        status: "error",
+      };
+    }
   }
 
   static async addToCart({ userId, product = {} }) {
@@ -515,6 +573,7 @@ class CartService {
         price: productPrice,
         image: productImage,
         quantity: product.quantity || 1,
+        isSelected: true,
       };
 
       // Chỉ thêm thông tin biến thể nếu có
@@ -745,8 +804,8 @@ class CartService {
         const variantId = item.variantId
           ? item.variantId.toString()
           : item.variant?.variantId
-          ? item.variant.variantId.toString()
-          : null;
+            ? item.variant.variantId.toString()
+            : null;
 
         console.log(`Item ${productId} variantId: ${variantId}`);
 

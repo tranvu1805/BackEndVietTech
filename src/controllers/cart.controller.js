@@ -19,6 +19,14 @@ class CartController {
     }).send(res);
   };
 
+  updateIsSelected = async (req, res, next) => {
+    new SuccessResponse({
+      message: "Product selection updated successfully",
+      metadata: await CartService.updateIsSelected(req.body),
+    }).send(res);
+  };
+  
+
   update = async (req, res, next) => {
     new SuccessResponse({
       message: "Cart updated successfully",
