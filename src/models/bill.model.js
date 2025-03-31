@@ -48,7 +48,7 @@ const BillSchema = new mongoose.Schema(
         payment_method: {
             type: String,
             required: true,
-            enum: ["ck", "tm"],
+            enum: ["ck", "tm", "vnpay"],
             default: "ck",
         },
         discount_code: {

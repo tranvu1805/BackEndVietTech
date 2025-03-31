@@ -10,6 +10,12 @@ const Products = require("../models/product.model");
 const Account = require("../models/account.model");
 const { discountRepo } = require("../models/disscount.model");
 const productModel = require("../models/product.model");
+const vnpayConfig = require("../configs/vnpay");
+const moment = require("moment");
+const qs = require("qs");
+const crypto = require("crypto");
+
+
 class CartService {
   //Start Repo
 
@@ -438,6 +444,41 @@ class CartService {
 
     // Sinh mã đơn hàng ngẫu nhiên 5 chữ số
     const orderCode = Math.floor(10000 + Math.random() * 90000);
+
+    if (payment_method === "vnpay") {
+      // Tạo request VNPay
+      const date = new Date();
+      const createDate = moment(date).format("YYYYMMDDHHmmss");
+      const orderInfo = `Thanh toán đơn hàng #${orderCode}`;
+
+      let vnp_Params = {
+        vnp_Version: "2.1.0",
+        vnp_Command: "pay",
+        vnp_TmnCode: vnpayConfig.vnp_TmnCode,
+        vnp_Amount: Math.round(total * 100) , // VNPay
+        vnp_CurrCode: "VND",
+        vnp_TxnRef: orderCode.toString(),
+        vnp_OrderInfo: orderInfo,
+        vnp_OrderType: "billpayment",
+        vnp_Locale: "vn",
+        vnp_ReturnUrl: vnpayConfig.vnp_ReturnUrl,
+        vnp_IpAddr: "127.0.0.1",
+        vnp_CreateDate: createDate,
+      };
+
+      // Sắp xếp tham số theo thứ tự alphabet
+      vnp_Params = Object.fromEntries(Object.entries(vnp_Params).sort());
+
+      // Tạo chuỗi query và mã hóa với SHA512
+      const signData = qs.stringify(vnp_Params, { encode: false });
+      const hmac = crypto.createHmac("sha512", vnpayConfig.vnp_HashSecret);
+      const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
+      vnp_Params.vnp_SecureHash = signed;
+
+      const paymentUrl = `${vnpayConfig.vnp_Url}?${qs.stringify(vnp_Params, { encode: false })}`;
+
+      return { code: 200, status: "redirect", paymentUrl };
+    }
 
     const newBill = await billRepo.create({
       user_id: currentCart.cart_userId,
