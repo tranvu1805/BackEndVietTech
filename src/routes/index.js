@@ -12,6 +12,7 @@ const ImageRoutes = require("./image/index");
 const DisscountRoutes = require("./disscount/index");
 const adminRoutes = require("./admin/index");
 const logRoutes = require("./logs/index");
+const vnpayRoutes = require("./vnpay/index"); // Import route VNPay
 
 const accessController = require("../controllers/access.controller");
 
@@ -29,6 +30,9 @@ router.use("/v1/api/disscount", DisscountRoutes);
 router.use("/v1/api/admin", adminRoutes);
 router.use("/v1/api/image", ImageRoutes);
 router.use("/v1/api/log",logRoutes);
+
+router.use("/v1/api/vnpay", vnpayRoutes); // Định tuyến VNPay API
+
 
 // Route mặc định (Home Page)
 router.get("/", (req, res) => {

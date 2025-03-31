@@ -37,6 +37,11 @@ const cartProductSchema = new Schema(
       variant_name: String,
       variant_value: String,
     },
+     //Thêm isSelected vào sản phẩm trong giỏ hàng
+     isSelected: {
+      type: Boolean,
+      default: true, // Mặc định sản phẩm được chọn khi thêm vào giỏ hàng
+    },
   },
   { _id: false }
 );

@@ -14,4 +14,7 @@ router.get("", asyncHandler(cartController.listToCart));
 
 router.post("/checkout", asyncHandler(cartController.checkout));
 
+// Cập nhật isSelected của sản phẩm
+router.post("/update-is-selected", asyncHandler(cartController.updateIsSelected));
+
 module.exports = router;
