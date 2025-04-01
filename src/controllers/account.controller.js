@@ -9,7 +9,8 @@ class AccountController {
         const result = await AccountService.getAllAccounts(parseInt(page), parseInt(limit));
         console.log("🛠️ Kết quả lấy danh sách tài khoản:", result);
         
-        return res.status(result.code).json(result);
+        return result.data.accounts;
+
     } catch (error) {
         return next(error);
     }
