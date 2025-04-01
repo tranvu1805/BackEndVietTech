@@ -49,10 +49,47 @@ const getAllCategories = async (req, res) => {
 
 const getAllCategories_Admin = async (req, res) => {
     try {
-        const categories = await Category.find().populate("parent_category");
-        return categories;
+        const { page = 1, limit = 10, search = "", type = "" } = req.query;
+
+        const query = {};
+
+        // Tìm kiếm theo tên
+        if (search) {
+            query.name = { $regex: search, $options: "i" };
+        }
+
+        // Lọc theo loại danh mục
+        if (type === "parent") {
+            query.parent_category = null;
+        } else if (type === "child") {
+            query.parent_category = { $ne: null };
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const [categories, totalCategories] = await Promise.all([
+            Category.find(query)
+                .populate("parent_category")
+                .skip(skip)
+                .limit(parseInt(limit))
+                .lean(),
+            Category.countDocuments(query),
+        ]);
+
+        return {
+            success: true,
+            data: {
+                categories,
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(totalCategories / limit),
+                totalCategories,
+                limit: parseInt(limit),
+                search,
+                type,
+            },
+        };
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 };
 

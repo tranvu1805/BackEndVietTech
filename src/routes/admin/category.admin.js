@@ -3,14 +3,28 @@ const { getAllCategories_Admin } = require("../../controllers/category.controlle
 const categoryModel = require("../../models/category.model");
 const router = express.Router();
 router.get("/", async (req, res) => {
-    try {
-        const categories = await getAllCategories_Admin(req, res);
-        res.render("admin/categories-list", { categories });
-    } catch (error) {
-        console.error("Error loading categories:", error);
-        res.status(500).send("Error loading categories!");
-    }
-});
+    const result = await getAllCategories_Admin(req, res);
+    if (!result.success) return;
+  
+    const {
+      categories,
+      currentPage,
+      totalPages,
+      limit,
+      search,
+      type,
+    } = result.data;
+  
+    res.render("admin/categories-list", {
+      categories,
+      currentPage,
+      totalPages,
+      limit,
+      search,
+      type,
+    });
+  });
+  
 
 router.get("/create", async (req, res) => {
     try {

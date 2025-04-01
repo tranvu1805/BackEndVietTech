@@ -30,15 +30,13 @@ const cartProductSchema = new Schema(
       default: 1,
     },
     // Thông tin biến thể (nếu có)
-    variant: {
-      variantId: {
-        type: Types.ObjectId,
-      },
-      variant_name: String,
-      variant_value: String,
+    detailsVariantId: {
+      type: Types.ObjectId,
+      ref: "DetailsVariant", // người dùng chọn biến thể cụ thể nào
+      required: false,
     },
-     //Thêm isSelected vào sản phẩm trong giỏ hàng
-     isSelected: {
+    //Thêm isSelected vào sản phẩm trong giỏ hàng
+    isSelected: {
       type: Boolean,
       default: true, // Mặc định sản phẩm được chọn khi thêm vào giỏ hàng
     },

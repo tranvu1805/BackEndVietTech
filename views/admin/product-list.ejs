@@ -71,7 +71,8 @@
                             <label for="searchName" class="form-label">Tìm kiếm sản phẩm</label>
                             <div class="input-group">
                                 <input type="text" id="searchName" class="form-control" placeholder="Tên sản phẩm"
-                                    value="<%= query?.name || '' %>">
+                                    value="<%= query?.search || '' %>">
+
                                 <button class="btn btn-outline-primary" id="searchButton"><i
                                         class="fas fa-search"></i></button>
                             </div>
@@ -113,7 +114,12 @@
                                 </option>
                                 <option value="stock_desc" <%=query?.sort==='stock_desc' ? 'selected' : '' %>>Kho giảm
                                     dần</option>
+                                <option value="name_asc" <%=query?.sort==='name_asc' ? 'selected' : '' %>>Tên A-Z
+                                </option>
+                                <option value="name_desc" <%=query?.sort==='name_desc' ? 'selected' : '' %>>Tên Z-A
+                                </option>
                             </select>
+
                         </div>
 
                         <!-- Nút hành động -->
@@ -550,7 +556,7 @@
 
             let query = '?';
 
-            if (name) query += `name=${encodeURIComponent(name)}&`;
+            if (name) query += `search=${encodeURIComponent(name)}&`; 
             if (status) query += `status=${status}&`;
             if (stock) query += `stock=${stock}&`;
             if (sort) query += `sort=${sort}&`;

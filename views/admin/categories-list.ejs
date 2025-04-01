@@ -313,7 +313,7 @@
                     <!-- Top Navbar -->
                     <nav class="navbar navbar-expand-lg top-navbar mb-4">
                         <div class="container-fluid">
-                            
+
                             <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#sidebarMenu">
                                 <span class="navbar-toggler-icon"></span>
@@ -356,10 +356,13 @@
                     <!-- Search and Filter -->
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <div class="search-box">
+                            <!-- Tìm kiếm danh mục -->
+                            <form method="GET" class="search-box" action="/v1/api/admin/categories/">
                                 <i class="fas fa-search"></i>
-                                <input type="text" class="form-control" placeholder="Tìm kiếm danh mục...">
-                            </div>
+                                <input type="text" name="search" class="form-control" placeholder="Tìm kiếm danh mục..."
+                                    value="<%= search %>">
+                            </form>
+
                         </div>
                         <div class="col-md-6 d-flex justify-content-end">
                             <div class="btn-group">
@@ -612,22 +615,17 @@
 
                     <!-- Pagination -->
                     <nav>
-                        <ul class="pagination">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" aria-label="Previous">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Next">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
+                        <ul class="pagination justify-content-center">
+                            <% for (let i=1; i <=totalPages; i++) { %>
+                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=<%= i %>&limit=<%= limit %>&search=<%= search %>">
+                                        <%= i %>
+                                    </a>
+                                </li>
+                                <% } %>
                         </ul>
                     </nav>
+
                 </div>
         </div>
     </div>

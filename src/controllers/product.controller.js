@@ -148,6 +148,7 @@ const getAllProducts = async (req, res) => {
             search,
             minPrice,
             maxPrice,
+            sort,
             // page = 1,
             // limit = 10,
             variant_filters // JSON string: [{"name":"Màu sắc","value":"Trắng"}, ...]
@@ -200,11 +201,35 @@ const getAllProducts = async (req, res) => {
         }
 
 
+        let sortOption = {};
+        switch (sort) {
+            case "price_asc":
+                sortOption.product_price = 1;
+                break;
+            case "price_desc":
+                sortOption.product_price = -1;
+                break;
+            case "name_asc":
+                sortOption.product_name = 1;
+                break;
+            case "name_desc":
+                sortOption.product_name = -1;
+                break;
+            case "stock_asc":
+                sortOption.product_stock = 1;
+                break;
+            case "stock_desc":
+                sortOption.product_stock = -1;
+                break;
+            default:
+                sortOption.createdAt = -1;
+        }
 
 
         // ✅ Truy vấn danh sách sản phẩm
         const products = await Product.find(matchProduct)
             .populate("category")
+            .sort(sortOption);
         // .skip((page - 1) * limit)
         // .limit(Number(limit));
 
