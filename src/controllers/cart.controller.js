@@ -9,13 +9,12 @@ class CartController {
     const userId = req.user?.id || req.body.userId;
     const product = req.body;
     console.log("product", product);
-    
+
     new SuccessResponse({
       message: "Cart created successfully",
       metadata: await CartService.addToCart({ userId, product }),
     }).send(res);
   };
-
 
   checkout = async (req, res, next) => {
     new SuccessResponse({
@@ -31,17 +30,36 @@ class CartController {
     }).send(res);
   };
 
-
   update = async (req, res, next) => {
-    const userId = req.user?.id || req.body.userId;
-    const product = req.body;
+    try {
+      // Lấy userId từ request
+      const userId = req.user?.id || req.body.userId;
 
-    new SuccessResponse({
-      message: "Cart updated successfully",
-      metadata: await CartService.updateUserCart({ userId, product }),
-    }).send(res);
+      // Lấy thông tin sản phẩm từ req.body.product
+      const { product } = req.body;
+
+      if (!userId) {
+        return next(new ErrorResponse("userId is required", 400));
+      }
+
+      if (!product || !product.productId) {
+        return next(new ErrorResponse("product information is required", 400));
+      }
+
+      // Log dữ liệu để debug
+      console.log("Updating cart with:", { userId, product });
+
+      // Truyền đúng cấu trúc dữ liệu vào service
+      const result = await CartService.updateUserCart({ userId, product });
+
+      new SuccessResponse({
+        message: "Cart updated successfully",
+        metadata: result,
+      }).send(res);
+    } catch (error) {
+      next(error);
+    }
   };
-
   delete = async (req, res, next) => {
     const userId = req.user?.id || req.body.userId;
     const { productId, detailsVariantId } = req.body;
@@ -55,7 +73,6 @@ class CartController {
       }),
     }).send(res);
   };
-
 
   listToCart = async (req, res, next) => {
     const { userId } = req.query;
