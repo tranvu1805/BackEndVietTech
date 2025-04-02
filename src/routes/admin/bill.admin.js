@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
     try {
-        const { search, status, payment_method, start_date, end_date, page = 1, limit = 10 } = req.query;
+        const { search, status, payment_method, start_date, end_date, page = 1, limit = 5 } = req.query;
 
         const result = await getAllBills_Admin({ search, status, payment_method, start_date, end_date, page, limit });
 

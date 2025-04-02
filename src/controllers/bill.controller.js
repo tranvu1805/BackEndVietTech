@@ -1,5 +1,5 @@
 "use strict";
-
+const logModel = require("../models/log.model");
 const BillService = require("../services/bill.service");
 const ExcelJS = require("exceljs");
 
@@ -18,10 +18,24 @@ class BillController {
     try {
       const { billId } = req.params;
       const { status } = req.body;
+      const userId = req.user.userId || req.user._id;
+      console.log("check userId: ", userId);
+      
+      const oldBill = await BillService.getBillById({ billId });
 
       const updatedBill = await BillService.updateBillStatus({
         billId,
         status,
+      });
+
+      await logModel.create({
+        target_type: "Bill",
+        target_id: billId,
+        action: "status_change",
+        before: { status: oldBill.status },
+        after: { status },
+        changed_by: userId,
+        note: `Cập nhật trạng thái đơn hàng từ "${oldBill.status}" sang "${status}"`
       });
 
       return res.status(200).json({
@@ -33,6 +47,27 @@ class BillController {
       next(error);
     }
   }
+
+  static async getBillLogs(req, res, next) {
+    try {
+      const { billId } = req.params;
+
+      const logs = await logModel.find({
+        target_type: "Bill",
+        target_id: billId
+      }).populate("changed_by", "name email")
+        .sort({ created_at: -1 });
+
+      return res.status(200).json({
+        message: "Fetched bill logs successfully",
+        statusCode: 200,
+        metadata: logs
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
 
   static async getTotalRevenue(req, res) {
     try {
@@ -57,8 +92,9 @@ class BillController {
     }
   }
 
-  static async getAllBills_Admin({ search, status, payment_method, start_date, end_date, page = 1, limit = 10 }) {
+  static async getAllBills_Admin({ search, status, payment_method, start_date, end_date, page = 1, limit = 5 }) {
     const filter = {};
+    console.log("check limit", limit);
 
     if (search) {
       filter.order_code = { $regex: search, $options: "i" };

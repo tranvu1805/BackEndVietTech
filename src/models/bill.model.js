@@ -42,13 +42,13 @@ const BillSchema = new mongoose.Schema(
         status: {
             type: String,
             required: true,
-            enum: ["active", "completed", "failed", "pending"],
+            enum: ["active", "completed", "cancelled", "pending"],
             default: "pending",
         },
         payment_method: {
             type: String,
             required: true,
-            enum: ["ck", "tm"],
+            enum: ["ck", "tm", "vnpay"],
             default: "ck",
         },
         discount_code: {

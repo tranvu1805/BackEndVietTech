@@ -7,7 +7,10 @@ class AccountController {
     try {
         const { page = 1, limit = 10 } = req.query;
         const result = await AccountService.getAllAccounts(parseInt(page), parseInt(limit));
-        return res.status(result.code).json(result);
+        console.log("🛠️ Kết quả lấy danh sách tài khoản:", result);
+        
+        return result.data.accounts;
+
     } catch (error) {
         return next(error);
     }
@@ -28,6 +31,9 @@ class AccountController {
       return next(error);
     }
   }
+
+    
+
 
   // ✅ Cập nhật tài khoản theo ID
   async updateAccount(req, res, next) {
@@ -59,7 +65,7 @@ class AccountController {
       const result = await AccountService.getUserStatistics(period);
       if (result.data.previousCount === 0) {
         result.data.percentageChange = "100%";
-    }
+      }
       return res.status(result.code).json(result);
     } catch (error) {
       return res.status(500).json({ message: "Internal Server Error" });

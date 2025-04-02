@@ -6,11 +6,16 @@ const { ErrorResponse } = require("../core/error.response");
 
 class CartController {
   addToCart = async (req, res, next) => {
+    const userId = req.user?.id || req.body.userId;
+    const product = req.body;
+    console.log("product", product);
+    
     new SuccessResponse({
       message: "Cart created successfully",
-      metadata: await CartService.addToCart(req.body),
+      metadata: await CartService.addToCart({ userId, product }),
     }).send(res);
   };
+
 
   checkout = async (req, res, next) => {
     new SuccessResponse({
@@ -19,18 +24,38 @@ class CartController {
     }).send(res);
   };
 
+  updateIsSelected = async (req, res, next) => {
+    new SuccessResponse({
+      message: "Product selection updated successfully",
+      metadata: await CartService.updateIsSelected(req.body),
+    }).send(res);
+  };
+
+
   update = async (req, res, next) => {
+    const userId = req.user?.id || req.body.userId;
+    const product = req.body;
+
     new SuccessResponse({
       message: "Cart updated successfully",
-      metadata: await CartService.updateUserCart(req.body),
+      metadata: await CartService.updateUserCart({ userId, product }),
     }).send(res);
   };
+
   delete = async (req, res, next) => {
+    const userId = req.user?.id || req.body.userId;
+    const { productId, detailsVariantId } = req.body;
+
     new SuccessResponse({
       message: "Cart deleted successfully",
-      metadata: await CartService.deleteUserCart(req.body),
+      metadata: await CartService.deleteUserCart({
+        userId,
+        productId,
+        variantId: detailsVariantId, // truyền dưới tên variantId cho service cũ nếu chưa refactor tên
+      }),
     }).send(res);
   };
+
 
   listToCart = async (req, res, next) => {
     const { userId } = req.query;

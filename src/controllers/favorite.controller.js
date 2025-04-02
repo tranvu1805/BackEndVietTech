@@ -9,9 +9,15 @@ class FavouriteController {
             const favorite = await favoriteService.addToFavorites(userId, productId);
             res.status(201).json({ success: true, favorite });
         } catch (error) {
+            console.log("Error adding to favorites:", error);
+
             if (error.code === 11000) {
-                return res.status(400).json({ success: false, message: "Sản phẩm đã được thêm vào yêu thích." });
+                return res.status(409).json({
+                    success: false,
+                    message: "Sản phẩm này đã nằm trong danh sách yêu thích."
+                });
             }
+
             res.status(500).json({ success: false, message: error.message });
         }
     }
