@@ -7,50 +7,57 @@ const accountModel = require("../models/account.model");
 const roleModel = require("../models/role.model");
 
 class AccessService {
-  // ✅ Đăng nhập tài khoản - kiểm tra bằng Public Key
-  static async login({ username, password }) {
-    try {
-      console.log(`📌 [LOGIN] Đăng nhập với username: ${username}`);
+ // ✅ Đăng nhập tài khoản - kiểm tra bằng Public Key
+static async login({ username, password }) {
+  try {
+    console.log(`📌 [LOGIN] Đăng nhập với username: ${username}`);
 
-      const account = await accountModel.findOne({ username });
-      if (!account) {
-        console.error(`❌ [LOGIN ERROR] Username không tồn tại: ${username}`);
-        return { code: 400, message: "Username hoặc mật khẩu không đúng!", status: "error" };
-      }
-
-      const isPasswordValid = await bcrypt.compare(password, account.password);
-      if (!isPasswordValid) {
-        console.error(`❌ [LOGIN ERROR] Sai mật khẩu cho username: ${username}`);
-        return { code: 400, message: "Username hoặc mật khẩu không đúng!", status: "error" };
-      }
-
-      const privateKey = crypto.randomBytes(64).toString("hex");
-      const publicKey = crypto.randomBytes(64).toString("hex");
-
-      const tokens = await createToKenPair({ userId: account._id, username }, publicKey, privateKey);
-      console.log(`✅ [TOKEN] Token pair created:`, tokens);
-
-      await KeyTokenService.createKeyToken({
-        userId: account._id,
-        publicKey,
-        privateKey,
-        refreshTokens: [tokens.refreshToken],
-      });
-
-      return {
-        code: 200,
-        message: "Đăng nhập thành công!",
-        status: "success",
-        metadata: {
-          account: getInfoData({ fields: ["_id", "username", "full_name", "email", "phone"], object: account }),
-          tokens,
-        },
-      };
-    } catch (error) {
-      console.error("❌ [LOGIN ERROR] Lỗi khi đăng nhập:", error);
-      return { code: 500, message: "Lỗi máy chủ nội bộ", status: "error" };
+    const account = await accountModel.findOne({ username });
+    if (!account) {
+      console.error(`❌ [LOGIN ERROR] Username không tồn tại: ${username}`);
+      return { code: 400, message: "Username hoặc mật khẩu không đúng!", status: "error" };
     }
+
+    // Kiểm tra trạng thái tài khoản
+    if (account.status === "inactive") {
+      console.error(`❌ [LOGIN ERROR] Tài khoản bị khóa: ${username}`);
+      return { code: 403, message: "Tài khoản của bạn đã bị khóa, vui lòng liên hệ với hỗ trợ!", status: "error" };
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, account.password);
+    if (!isPasswordValid) {
+      console.error(`❌ [LOGIN ERROR] Sai mật khẩu cho username: ${username}`);
+      return { code: 400, message: "Username hoặc mật khẩu không đúng!", status: "error" };
+    }
+
+    const privateKey = crypto.randomBytes(64).toString("hex");
+    const publicKey = crypto.randomBytes(64).toString("hex");
+
+    const tokens = await createToKenPair({ userId: account._id, username }, publicKey, privateKey);
+    console.log(`✅ [TOKEN] Token pair created:`, tokens);
+
+    await KeyTokenService.createKeyToken({
+      userId: account._id,
+      publicKey,
+      privateKey,
+      refreshTokens: [tokens.refreshToken],
+    });
+
+    return {
+      code: 200,
+      message: "Đăng nhập thành công!",
+      status: "success",
+      metadata: {
+        account: getInfoData({ fields: ["_id", "username", "full_name", "email", "phone"], object: account }),
+        tokens,
+      },
+    };
+  } catch (error) {
+    console.error("❌ [LOGIN ERROR] Lỗi khi đăng nhập:", error);
+    return { code: 500, message: "Lỗi máy chủ nội bộ", status: "error" };
   }
+}
+
 
   static async loginAdmin({ email, password }) {
     try {

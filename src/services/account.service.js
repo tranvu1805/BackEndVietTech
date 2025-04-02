@@ -39,7 +39,7 @@ class AccountService {
       };
     } catch (error) {
       console.error("❌ Error fetching accounts:", error);
-      return { code: 500, message: error.message || "Internal Server Error 2", status: "error" };
+      return { code: 500, message: error.message || "Internal Server Error", status: "error" };
     }
   }
   /** Lấy tài khoản và role theo ID */
@@ -67,8 +67,6 @@ class AccountService {
       return { code: 500, message: error.message || "Internal Server Error", status: "error" };
     }
   }
-
-  
 
   /** Cập nhật tài khoản */
   static async updateAccount(accountId, updateData) {
@@ -169,20 +167,52 @@ class AccountService {
         return res.status(404).json({ message: "Email không tồn tại trong hệ thống!" });
       }
 
-      // Nếu không có OTP & mật khẩu => Gửi OTP
+      // Nếu không có OTP & mật khẩu => Gửi OTP mới
       if (!otp && !newPassword) {
         const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Xóa OTP cũ nếu có và tạo OTP mới
+        otpStore.delete(email);
+
+        // Lưu OTP mới vào bộ nhớ, có hạn sử dụng trong 5 phút
         otpStore.set(email, { otp: generatedOtp, expires: Date.now() + 5 * 60 * 1000 });
 
-        // Gửi OTP qua email
+        // Gửi OTP qua email với HTML format
         await transporter.sendMail({
-          from: process.env.SMTP_USER,
+          from: `"VietTech Support" <${process.env.SMTP_USER}>`, // Địa chỉ gửi email
           to: email,
-          subject: "VietTech OTP Reset Pass",
-          text: `Mã OTP của bạn là ${generatedOtp}. Mã có hiệu lực trong 5 phút.`,
+          subject: "🔐 Xác minh OTP - Đặt lại mật khẩu VietTech",
+          replyTo: "noreply@vt.com", // Địa chỉ email không thể trả lời
+          headers: {
+            'X-Precedence': 'bulk',  // Giảm khả năng email bị vào thư rác
+            'X-Mailer': 'VietTechMailer', // Đặt tên phần mềm gửi email
+          },
+          text: `
+          Bạn vừa yêu cầu đặt lại mật khẩu cho tài khoản VietTech. Đây là mã OTP của bạn:
+          
+          ${generatedOtp}
+          
+          Mã OTP có hiệu lực trong 5 phút. Không chia sẻ mã này với bất kỳ ai.
+          
+          Trân trọng,
+          Đội ngũ VietTech
+        `,
+          html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2 style="color: #007BFF;">🔐 Mã xác minh OTP của bạn</h2>
+            <p>Xin chào,</p>
+            <p>Bạn vừa yêu cầu đặt lại mật khẩu cho tài khoản VietTech. Đây là mã OTP của bạn:</p>
+            <h3 style="font-size: 24px; color: #D32F2F; text-align: center; background: #F8F9FA; padding: 10px; border-radius: 8px;">
+              ${generatedOtp}
+            </h3>
+            <p>Mã OTP có hiệu lực trong <b>5 phút</b>. Không chia sẻ mã này với bất kỳ ai.</p>
+            <p>Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
+            <p>Trân trọng,<br>Đội ngũ VietTech</p>
+          </div>
+        `,
         });
 
-        return res.json({ message: "OTP đã được gửi thành công!" });
+        return res.json({ message: "OTP đã được gửi thành công! Vui lòng kiểm tra email của bạn." });
       }
 
       // Nếu có OTP & mật khẩu => Kiểm tra OTP & đổi mật khẩu
@@ -204,6 +234,7 @@ class AccountService {
       res.status(500).json({ message: "Lỗi trong quá trình xử lý!", error: error.message });
     }
   }
+
   /** Đổi mật khẩu khi có mật khẩu mới */
   static async changePassword(accountId, newPassword) {
     try {

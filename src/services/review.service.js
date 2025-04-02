@@ -4,12 +4,13 @@ const Image = require("../models/image.model");
 const User = require("../models/account.model"); // Thêm dòng này
 
 class ReviewService {
-    static async addReview(account_id, product_id, contents_review, image_ids = []) {
+    static async addReview(account_id, product_id, contents_review, rating, image_ids = []) {
         try {
             const newReview = new Review({
                 account_id,
                 product_id,
                 contents_review,
+                rating, // Thêm trường rating
                 image_ids  // Lưu danh sách ảnh nếu có
             });
 
@@ -26,6 +27,7 @@ class ReviewService {
                     account_id: newReview.account_id,
                     product_id: newReview.product_id,
                     contents_review: newReview.contents_review,
+                    rating: newReview.rating, // Trả về rating
                     createdAt: newReview.createdAt,
                     updatedAt: newReview.updatedAt,
                     images: images.map(image => ({
@@ -71,6 +73,7 @@ class ReviewService {
                     avatar: profile_image ? profile_image.url : "http://localhost:3056/uploads/1741927291394.png",
                     product_id: review.product_id,
                     contents_review: review.contents_review,
+                    rating: review.rating, // Trả về rating
                     createdAt: review.createdAt,
                     updatedAt: review.updatedAt,
                     images: images.map(image => ({
@@ -86,7 +89,6 @@ class ReviewService {
         }
     }
 
-
     // Lấy tất cả review
     static async getAllReviews() {
         try {
@@ -95,6 +97,7 @@ class ReviewService {
             throw new Error("Lỗi khi lấy danh sách review: " + error.message);
         }
     }
+
     // Lấy danh sách review theo account_id và product_id
     static async getReviewsByAccountAndProduct(accountId, productId) {
         try {
@@ -105,10 +108,11 @@ class ReviewService {
     }
 
     // Cập nhật nội dung review theo reviewId
-    static async updateReview(reviewId, contents_review, image_ids) {
+    static async updateReview(reviewId, contents_review, rating, image_ids) {
         try {
             const updateData = {};
             if (contents_review) updateData.contents_review = contents_review;
+            if (rating) updateData.rating = rating; // Cập nhật rating
             if (image_ids) updateData.image_ids = image_ids;
             updateData.updatedAt = new Date(); // Cập nhật thời gian chỉnh sửa
 
@@ -133,6 +137,7 @@ class ReviewService {
                     account_id: updatedReview.account_id,
                     product_id: updatedReview.product_id,
                     contents_review: updatedReview.contents_review,
+                    rating: updatedReview.rating, // Trả về rating
                     createdAt: updatedReview.createdAt,
                     updatedAt: updatedReview.updatedAt,
                     images: images.map(image => ({
@@ -153,7 +158,6 @@ class ReviewService {
             throw new Error("Lỗi khi cập nhật review: " + error.message);
         }
     }
-
 }
 
 module.exports = ReviewService;
