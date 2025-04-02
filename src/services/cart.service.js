@@ -29,7 +29,6 @@ class CartService {
       };
 
       console.log("check pro", product);
-      
 
       // Tạo cart_product với thông tin đầy đủ
       const productToAdd = {
@@ -657,10 +656,8 @@ class CartService {
         detailsVariantId = detailsVariant._id;
       }
 
-      console.log("product quan cart", productInput.quantity);
-      console.log("product variants", detailsVariantId);
-      
-      
+      console.log("product quantity:", productInput.quantity);
+      console.log("product variant:", detailsVariantId);
 
       // Tạo sản phẩm để thêm vào giỏ
       const productToAdd = {
@@ -712,6 +709,24 @@ class CartService {
 
       const { productId, quantity, detailsVariantId } = product;
 
+      // Nếu số lượng <= 0, chuyển sang phương thức xóa hoặc giảm số lượng
+      if (quantity <= 0) {
+        console.log(
+          "Quantity is zero or negative, handling deletion or reduction"
+        );
+        // Kiểm tra sản phẩm có trong giỏ hàng không
+        const isInCart = await CartService.isProductInCart({
+          userId,
+          productId,
+          detailsVariantId,
+        });
+
+        if (!isInCart && quantity < 0) {
+          throw new NotFoundError(
+            "Cannot decrease quantity for product not in cart"
+          );
+        }
+
         if (quantity === 0) {
           console.log("Quantity is zero, deleting product");
           return await this.deleteUserCart({
@@ -734,12 +749,11 @@ class CartService {
 
       // Tìm thông tin sản phẩm từ database
       const existingProduct = await Products.findById(productId);
-      console.log("existingProduct", productId);
       if (!existingProduct) {
         throw new NotFoundError("Product not found in database");
       }
 
-      // Kiểm tra sản phẩm có trong giỏ hàng không - SỬA DÒNG NÀY
+      // Kiểm tra sản phẩm có trong giỏ hàng không
       const isInCart = await CartService.isProductInCart({
         userId,
         productId,
@@ -764,24 +778,23 @@ class CartService {
       const userCart = await cart.findOne({
         cart_userId: userId,
         cart_state: "active",
-      };
+      });
 
-      // Sử dụng $elemMatch để đảm bảo tìm đúng sản phẩm
-      if (variantId) {
-        query["cart_products"] = {
-          $elemMatch: {
-            productId: productId,
-            detailsVariantId: variantId, // ✅ Đúng theo schema mới
-          },
-        };
+      if (!userCart) {
+        throw new NotFoundError("Cart not found");
       }
-      else {
-        query["cart_products"] = {
-          $elemMatch: {
-            productId: productId,
-            detailsVariantId: null, // Không có biến thể
-          },
-        };
+
+      // Tìm sản phẩm trong giỏ hàng
+      const productIndex = userCart.cart_products.findIndex(
+        (item) =>
+          item.productId.toString() === productId.toString() &&
+          (detailsVariantId
+            ? item.detailsVariantId?.toString() === detailsVariantId.toString()
+            : !item.detailsVariantId)
+      );
+
+      if (productIndex === -1) {
+        throw new NotFoundError("Product not found in cart");
       }
 
       // Cập nhật số lượng
@@ -804,18 +817,12 @@ class CartService {
         throw new NotFoundError("User not found");
       }
 
-
-
-
       const query = {
         cart_userId: userId,
         cart_state: "active",
       };
 
       let pullCondition = { productId };
-
-      console.log("variantId", variantId);
-
 
       // Nếu có variantId, thêm điều kiện tìm kiếm
       if (variantId) {
@@ -836,15 +843,7 @@ class CartService {
         },
       };
 
-      console.log("pullCondition:", pullCondition);
-
-      console.log("Delete cart query:", query);
-      console.log("Delete cart updateSet:", updateSet);
-
-
       const deleteCart = await cart.updateOne(query, updateSet);
-      console.log("Delete cart result:", deleteCart);
-
       return deleteCart;
     } catch (error) {
       console.error("Error deleting from cart:", error);
