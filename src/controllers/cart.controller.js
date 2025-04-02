@@ -64,6 +64,9 @@ class CartController {
     const userId = req.user?.id || req.body.userId;
     const { productId, detailsVariantId } = req.body;
 
+    console.log("productId", req.body);
+    
+
     new SuccessResponse({
       message: "Cart deleted successfully",
       metadata: await CartService.deleteUserCart({

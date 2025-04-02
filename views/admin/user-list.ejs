@@ -23,7 +23,7 @@
             --dark-color: #2c3e50;
         }
 
-        
+
 
         /* Additional user-specific styles */
         .user-avatar-large {
@@ -102,27 +102,34 @@
                     </div>
 
                     <!-- Search and Filter -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="text" class="form-control" placeholder="Tìm kiếm người dùng...">
-                            </div>
+                    <form method="GET" action="/v1/api/admin/user/list" class="row g-2">
+                        <div class="col-md-4">
+                            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..."
+                                value="<%= search %>">
                         </div>
-                        <div class="col-md-6 d-flex justify-content-end">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-filter me-1"></i> Lọc
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-sort me-1"></i> Sắp xếp
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-download me-1"></i> Xuất
-                                </button>
-                            </div>
+                        <div class="col-md-3">
+                            <select name="role" class="form-select">
+                                <option value="">-- Vai trò --</option>
+                                <% roles.forEach(r=> { %>
+                                    <option value="<%= r.name %>" <%=role===r.name ? "selected" : "" %>><%= r.name %>
+                                    </option>
+                                    <% }) %>
+                            </select>
                         </div>
-                    </div>
+                        <div class="col-md-3">
+                            <select name="status" class="form-select">
+                                <option value="">-- Trạng thái --</option>
+                                <option value="active" <%=status==="active" ? "selected" : "" %>>Hoạt động</option>
+                                <option value="inactive" <%=status==="inactive" ? "selected" : "" %>>Không hoạt động
+                                </option>
+                                <option value="suspended" <%=status==="suspended" ? "selected" : "" %>>Tạm khóa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary w-100"><i class="fas fa-search me-1"></i> Lọc</button>
+                        </div>
+                    </form>
+
 
                     <!-- Users Table -->
                     <div class="card">
@@ -324,22 +331,18 @@
 
                     <!-- Pagination -->
                     <nav>
-                        <ul class="pagination">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" aria-label="Previous">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Next">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
+                        <ul class="pagination justify-content-center">
+                            <% for (let i=1; i <=totalPages; i++) { %>
+                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                    <a class="page-link"
+                                        href="?page=<%= i %>&limit=<%= limit %>&search=<%= search %>&role=<%= role %>&status=<%= status %>">
+                                        <%= i %>
+                                    </a>
+                                </li>
+                                <% } %>
                         </ul>
                     </nav>
+
                 </div>
         </div>
     </div>
@@ -352,7 +355,7 @@
 
             const accessToken = localStorage.getItem('accessToken');
             const currentUserId = localStorage.getItem('userId');
-            const apiKey = 'YOUR_API_KEY';
+            const apiKey = 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683';
 
             fetch(`/v1/api/users/${userId}`, {
                 method: 'DELETE',

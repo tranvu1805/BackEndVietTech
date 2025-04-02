@@ -311,6 +311,9 @@ const getAllProducts_Admin = async (req, res) => {
         else if (sort === 'price_desc') sortOption.product_price = -1;
         else if (sort === 'stock_asc') sortOption.product_stock = 1;
         else if (sort === 'stock_desc') sortOption.product_stock = -1;
+        else if (sort === 'name_asc') sortOption.product_name = 1;
+        else if (sort === 'name_desc') sortOption.product_name = -1;
+
 
         const products = await Product.find(filter)
             .sort(sortOption) // 👈 thêm dòng này
