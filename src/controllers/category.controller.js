@@ -49,7 +49,10 @@ const getAllCategories = async (req, res) => {
 
 const getAllCategories_Admin = async (req, res) => {
     try {
-        const { page = 1, limit = 10, search = "", type = "" } = req.query;
+        const { page = 1, limit = 10, search = "", type = "",
+            sortBy = "createdAt",
+            sortOrder = "desc",
+        } = req.query;
 
         const query = {};
 
@@ -67,9 +70,17 @@ const getAllCategories_Admin = async (req, res) => {
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
+        const sortOption = {};
+        sortOption[sortBy] = sortOrder === "asc" ? 1 : -1;
+
+        
+        console.log("sortOption", req.query);
+        
+
         const [categories, totalCategories] = await Promise.all([
             Category.find(query)
                 .populate("parent_category")
+                .sort(sortOption)
                 .skip(skip)
                 .limit(parseInt(limit))
                 .lean(),
@@ -78,16 +89,17 @@ const getAllCategories_Admin = async (req, res) => {
 
         return {
             success: true,
-            data: {
-                categories,
-                currentPage: parseInt(page),
-                totalPages: Math.ceil(totalCategories / limit),
-                totalCategories,
-                limit: parseInt(limit),
-                search,
-                type,
-            },
+            categories,
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(totalCategories / limit),
+            totalCategories,
+            limit: parseInt(limit),
+            search,
+            type,
+            sortBy,
+            sortOrder,
         };
+
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }

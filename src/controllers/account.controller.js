@@ -5,16 +5,28 @@ const moment = require("moment");
 class AccountController {
   async getAllAccounts(req, res, next) {
     try {
-        const { page = 1, limit = 10 } = req.query;
-        const result = await AccountService.getAllAccounts(parseInt(page), parseInt(limit));
-        console.log("🛠️ Kết quả lấy danh sách tài khoản:", result);
-        
-        return result.data.accounts;
-
+      const {
+        page = 1,
+        limit = 10,
+        search = "",
+        role = "",
+        status = ""
+      } = req.query;
+  
+      const result = await AccountService.getAllAccounts(
+        parseInt(page),
+        parseInt(limit),
+        search,
+        role,
+        status
+      );
+  
+      return result.data; // ✅ Trả toàn bộ data, không chỉ accounts
     } catch (error) {
-        return next(error);
+      return next(error);
     }
-}
+  }
+  
 
   async getAccount(req, res, next) {
     try {
@@ -32,7 +44,7 @@ class AccountController {
     }
   }
 
-    
+
 
 
   // ✅ Cập nhật tài khoản theo ID
@@ -71,8 +83,8 @@ class AccountController {
       return res.status(500).json({ message: "Internal Server Error" });
     }
   }
-   /** ✅ Xử lý quên mật khẩu */
-   async forgotPasswordHandler(req, res) {
+  /** ✅ Xử lý quên mật khẩu */
+  async forgotPasswordHandler(req, res) {
     try {
       await AccountService.forgotPasswordHandler(req, res);
     } catch (error) {
@@ -80,23 +92,23 @@ class AccountController {
     }
   }
   /** ✅ Đổi mật khẩu trực tiếp */
-async changePassword(req, res, next) {
-  try {
+  async changePassword(req, res, next) {
+    try {
       const { accountId, newPassword } = req.body;
 
       if (!mongoose.Types.ObjectId.isValid(accountId)) {
-          return res.status(400).json({ message: "ID tài khoản không hợp lệ!" });
+        return res.status(400).json({ message: "ID tài khoản không hợp lệ!" });
       }
       if (!newPassword || newPassword.length < 6) {
-          return res.status(400).json({ message: "Mật khẩu mới phải có ít nhất 6 ký tự!" });
+        return res.status(400).json({ message: "Mật khẩu mới phải có ít nhất 6 ký tự!" });
       }
 
       const result = await AccountService.changePassword(accountId, newPassword);
       return res.status(result.code).json(result);
-  } catch (error) {
+    } catch (error) {
       return next(error);
+    }
   }
-}
 }
 
 module.exports = new AccountController();
