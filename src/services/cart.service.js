@@ -290,7 +290,7 @@ class CartService {
             item.productId.toString() === productId.toString() &&
             (detailsVariantId
               ? item.detailsVariantId?.toString() ===
-                detailsVariantId.toString()
+              detailsVariantId.toString()
               : !item.detailsVariantId)
         );
 
@@ -416,7 +416,7 @@ class CartService {
       }
 
       if (item.detailsVariantId) {
-        const variant = await DetailsVariant.findById(item.detailsVariantId);
+        const variant = await detailsVariantModel.findById(item.detailsVariantId);
         if (!variant) {
           return {
             code: 404,
@@ -434,7 +434,7 @@ class CartService {
         }
 
         // Giảm tồn kho của variant
-        await DetailsVariant.updateOne(
+        await detailsVariantModel.updateOne(
           { _id: item.detailsVariantId },
           { $inc: { stock: -item.quantity } }
         );
@@ -478,13 +478,41 @@ class CartService {
     if (discount_code) {
       discount = await discountRepo.findOne({
         code: discount_code,
-        is_active: true,
-        expiration_date: { $gte: new Date() }, // Kiểm tra chưa hết hạn
-      });
+        isDraft: false,
+        startDate: { $lte: new Date() },
+        endDate: { $gte: new Date() },
+      }).lean();
 
       if (discount) {
-        discountAmount = discount.discount_amount;
+        if (discount.minOrderValue && total < discount.minOrderValue) {
+          return {
+            code: 400,
+            message: `Đơn hàng chưa đủ giá trị tối thiểu để áp dụng mã giảm giá.`,
+            status: "error",
+          };
+        }
+
+        if (discount.usageLimit && discount.usageCount >= discount.usageLimit) {
+          return {
+            code: 400,
+            message: `Mã giảm giá đã được sử dụng hết lượt.`,
+            status: "error",
+          };
+        }
+
+        // Tính discountAmount
+        if (discount.discountType === "percentage") {
+          discountAmount = (discount.discountValue / 100) * total;
+          if (discount.maxDiscountAmount) {
+            discountAmount = Math.min(discountAmount, discount.maxDiscountAmount);
+          }
+        } else if (discount.discountType === "fixed") {
+          discountAmount = discount.discountValue;
+        } else if (discount.discountType === "shipping") {
+          discountAmount = shippingFee;
+        }
       }
+
     }
 
     total -= discountAmount; // Trừ vào tổng tiền
@@ -543,6 +571,14 @@ class CartService {
       discount_code: discount_code || null,
       discount_amount: discountAmount || 0, // Số tiền đã giảm
     });
+
+    if (discount) {
+      await discountRepo.updateOne(
+        { _id: discount._id },
+        { $inc: { usageCount: 1 } }
+      );
+    }
+
 
     // await currentCart.deleteOne()
     return newBill;

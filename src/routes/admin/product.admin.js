@@ -1,9 +1,10 @@
 const express = require("express");
-const { getAllCategories_Admin } = require("../../controllers/category.controller");
+// const { getAllCategories_Admin } = require("../../controllers/category.controller");
 const { getAllProducts_Admin, getProductById_Admin, exportProductsToExcel, getTopSellingProducts, markAsDraft_Admin, toggleProductStatus_Admin } = require("../../controllers/product.controller");
 const asyncHandler = require("../../helpers/asyncHandler");
 const detailsVariantModel = require("../../models/detailsVariant.model");
 const attributeModel = require("../../models/attribute.model");
+const { getAllCategories } = require("../../services/category.service");
 const router = express.Router();
 
 
@@ -44,7 +45,11 @@ router.put("/:id/toggle-status", asyncHandler(toggleProductStatus_Admin));
 router.get("/create", async (req, res) => {
     try {
         // Lấy tất cả danh mục từ cơ sở dữ liệu
-        const categories = await getAllCategories_Admin();
+        const inputCategories = await getAllCategories();
+        let categories = inputCategories.categories
+        console.log("check categories: ", categories.categories);
+        
+
         const attributes = await attributeModel.find(); // hoặc theo category nếu cần
         console.log("check attributes: ", attributes);
 
@@ -62,7 +67,8 @@ router.get("/edit/:id", async (req, res) => {
         const rawProduct = await getProductById_Admin(id);
         const product = rawProduct.toObject(); // ✅ chuyển thành object thường
 
-        const categories = await getAllCategories_Admin();
+        const inputCategories = await getAllCategories();
+        const categories = inputCategories.categories;
         const attributes = await attributeModel.find();
 
         if (!product) {

@@ -9,11 +9,23 @@ const BillSchema = new mongoose.Schema(
             type: Types.ObjectId,
             required: true,
         },
-        products: {
-            type: Array,
-            required: true,
-            default: [],
-        },
+        products: [
+            {
+                productId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "Product"
+                },
+                name: String,
+                price: Number,
+                quantity: Number,
+                image: String,
+                detailsVariantId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "DetailsVariant" // KHÔNG ĐƯỢC GÕ SAI TÊN MODEL!
+                },
+                isSelected: Boolean
+            }
+        ],
         total: {
             type: Number,
         },

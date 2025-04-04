@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VietTech - Hệ thống quản lý</title>
+    <link rel="icon" href="/uploads/mini_logo.ico" type="image/png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* :root {
+            --primary: #0d6efd;
+            --primary-dark: #0b5ed7;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --sidebar-bg: #1f2937;
+            --sidebar-text: #e5e7eb;
+            --header-height: 60px;
+        } */
+
+        body {
+            background-color: #f5f7fb;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+       
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- Sidebar -->
+            <%- include('partials/header') %>
+
+                <!-- Main Content -->
+                <div class="col main-content">
+                    <!-- Top Navigation Bar -->
+                    <nav class="top-navbar">
+                        <h4 class="mb-0">Báo cáo tổng quan</h4>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <button class="notification-btn" type="button">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="notification-badge">3</span>
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="user-dropdown border-0" type="button" id="userDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="user-avatar me-2">V</div>
+                                    <span class="d-none d-md-inline">Admin</span>
+                                    <i class="fas fa-chevron-down ms-2 small"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài
+                                            đặt</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="#" onclick="logout()"><i
+                                                class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <!-- Dashboard Cards - Now with margin for spacing -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-xl-3 col-md-6">
+                            <div class="dashboard-card">
+                                <div class="icon-container bg-orders">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                                <div>
+                                    <div class="card-title">Tổng đơn hàng</div>
+                                    <div class="card-value">
+                                        <%= report.totalOrders.toLocaleString('vi-VN') %>
+                                    </div>
+                                    <div class="card-subtitle">
+                                        <i class="fas fa-arrow-up text-success"></i>
+                                        <span>12% so với tháng trước</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6">
+                            <div class="dashboard-card">
+                                <div class="icon-container bg-users">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div>
+                                    <div class="card-title">Tổng người dùng</div>
+                                    <div class="card-value">
+                                        <%= report.totalUsers.toLocaleString('vi-VN') %>
+                                    </div>
+                                    <div class="card-subtitle">
+                                        <i class="fas fa-arrow-up text-success"></i>
+                                        <span>8% so với tháng trước</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6">
+                            <div class="dashboard-card">
+                                <div class="icon-container bg-products">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <div>
+                                    <div class="card-title">Tổng sản phẩm</div>
+                                    <div class="card-value">
+                                        <%= report.totalProducts.toLocaleString('vi-VN') %>
+                                    </div>
+                                    <div class="card-subtitle">
+                                        <i class="fas fa-arrow-up text-success"></i>
+                                        <span>5% so với tháng trước</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6">
+                            <div class="dashboard-card">
+                                <div class="icon-container bg-income">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div>
+                                    <div class="card-title">Tổng doanh thu</div>
+                                    <div class="card-value">
+                                        <%= report.totalRevenue.toLocaleString('vi-VN', { maximumFractionDigits: 0 }) %>
+                                            ₫
+
+                                    </div>
+                                    <div class="card-subtitle">
+                                        <i class="fas fa-arrow-up text-success"></i>
+                                        <span>15% so với tháng trước</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section (Improved) -->
+                    <div class="row g-4">
+                        <!-- Biểu đồ Doanh thu -->
+                        <div class="col-lg-6">
+                            <div class="chart-container">
+                                <div class="chart-header">
+                                    <h5 class="chart-title">Doanh thu theo tháng</h5>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-secondary">Năm nay</button>
+                                        <button class="btn btn-sm btn-outline-secondary">Năm trước</button>
+                                    </div>
+                                </div>
+                                <canvas id="revenueChart" height="250"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Biểu đồ Đơn hàng -->
+                        <div class="col-lg-6">
+                            <div class="chart-container">
+                                <div class="chart-header">
+                                    <h5 class="chart-title">Số lượng đơn hàng theo tháng</h5>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-secondary">Năm nay</button>
+                                        <button class="btn btn-sm btn-outline-secondary">Năm trước</button>
+                                    </div>
+                                </div>
+                                <canvas id="ordersChart" height="250"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Biểu đồ Người dùng -->
+                        <div class="col-lg-6">
+                            <div class="chart-container">
+                                <div class="chart-header">
+                                    <h5 class="chart-title">Người dùng mới theo tháng</h5>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-secondary">Năm nay</button>
+                                        <button class="btn btn-sm btn-outline-secondary">Năm trước</button>
+                                    </div>
+                                </div>
+                                <canvas id="usersChart" height="250"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Biểu đồ Sản phẩm bán chạy (Mới) -->
+                        <div class="col-lg-6">
+                            <div class="chart-container">
+                                <div class="chart-header">
+                                    <h5 class="chart-title">Sản phẩm bán chạy</h5>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-secondary">Tuần này</button>
+                                        <button class="btn btn-sm btn-outline-secondary">Tháng này</button>
+                                    </div>
+                                </div>
+                                <canvas id="productsChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/v1/api/admin/reports/chart-data')
+                .then(res => res.json())
+                .then(json => {
+                    const { revenueData, orderData, userData } = json.data;
+                    console.log("Dữ liệu biểu đồ:", revenueData);
+
+                    const months = [
+                        'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4',
+                        'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8',
+                        'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+                    ];
+
+                    // Doanh thu
+                    new Chart(document.getElementById('revenueChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: months,
+                            datasets: [{
+                                label: 'Doanh thu (VND)',
+                                data: revenueData,
+                                backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                                borderColor: 'rgba(13, 110, 253, 1)',
+                                borderWidth: 1,
+                                borderRadius: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            animation: {
+                                duration: 1500,
+                                easing: 'easeOutQuart'
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    },
+                                    ticks: {
+                                        callback: val => val.toLocaleString('vi-VN') + ' ₫'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    padding: 12,
+                                    titleFont: {
+                                        size: 14
+                                    },
+                                    bodyFont: {
+                                        size: 13
+                                    },
+                                    callbacks: {
+                                        label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString('vi-VN')} ₫`
+                                    }
+                                },
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+
+                    // Đơn hàng
+                    new Chart(document.getElementById('ordersChart'), {
+                        type: 'line',
+                        data: {
+                            labels: months,
+                            datasets: [{
+                                label: 'Đơn hàng',
+                                data: orderData,
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                tension: 0.3,
+                                fill: true,
+                                pointRadius: 4,
+                                pointBackgroundColor: 'rgba(40, 167, 69, 1)',
+                                pointBorderColor: 'white',
+                                pointBorderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            animation: {
+                                duration: 1500,
+                                easing: 'easeOutQuart'
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    padding: 12
+                                },
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+
+                    // Người dùng
+                    new Chart(document.getElementById('usersChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: months,
+                            datasets: [{
+                                label: 'Người dùng mới',
+                                data: userData,
+                                backgroundColor: 'rgba(255, 193, 7, 0.7)',
+                                borderColor: 'rgba(255, 193, 7, 1)',
+                                borderWidth: 1,
+                                borderRadius: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            animation: {
+                                duration: 1500,
+                                easing: 'easeOutQuart'
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    padding: 12
+                                },
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+
+                    // Sản phẩm bán chạy (Mới)
+                    new Chart(document.getElementById('productsChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Laptop Gaming', 'Điện thoại', 'Tablet', 'Máy tính bàn', 'Phụ kiện'],
+                            datasets: [{
+                                data: [35, 25, 20, 10, 10],
+                                backgroundColor: [
+                                    'rgba(13, 110, 253, 0.7)',
+                                    'rgba(40, 167, 69, 0.7)',
+                                    'rgba(255, 193, 7, 0.7)',
+                                    'rgba(220, 53, 69, 0.7)',
+                                    'rgba(108, 117, 125, 0.7)'
+                                ],
+                                borderColor: 'white',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            animation: {
+                                duration: 1500,
+                                easing: 'easeOutQuart'
+                            },
+                            plugins: {
+                                tooltip: {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    padding: 12,
+                                    callbacks: {
+                                        label: ctx => `${ctx.label}: ${ctx.raw}%`
+                                    }
+                                },
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        padding: 15,
+                                        font: {
+                                            size: 12
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(err => console.error('Lỗi khi tải dữ liệu biểu đồ:', err));
+        });
+    </script>
+</body>
+
+</html>

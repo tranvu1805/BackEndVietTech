@@ -1,7 +1,17 @@
 "use strict";
+const { readVietnameseNumber } = require("../auth/middlewares/vnNumber");
 const logModel = require("../models/log.model");
 const BillService = require("../services/bill.service");
 const ExcelJS = require("exceljs");
+const ejs = require('ejs');
+const path = require('path');
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+
+
+const logoPath = path.join(__dirname, '../../uploads/logo_viettech.png'); // đường dẫn thật
+const logoData = fs.readFileSync(logoPath);
+const logoBase64 = `data:image/png;base64,${logoData.toString('base64')}`;
 
 class BillController {
   static async getBillById(req, res, next) {
@@ -20,7 +30,7 @@ class BillController {
       const { status } = req.body;
       const userId = req.user.userId || req.user._id;
       console.log("check userId: ", userId);
-      
+
       const oldBill = await BillService.getBillById({ billId });
 
       const updatedBill = await BillService.updateBillStatus({
@@ -217,6 +227,84 @@ class BillController {
       return res.status(500).json({ message: "Internal Server Error", error });
     }
   }
+
+  static async renderInvoicePage(req, res, next) {
+    try {
+      const { billId } = req.params;
+
+      // Lấy đơn hàng theo ID
+      let bill = await BillService.getBillById({ billId });
+      console.log("check bill create", bill);
+
+
+      if (!bill) {
+        return res.status(404).send("Không tìm thấy đơn hàng.");
+      }
+
+      // Populate thông tin biến thể của từng sản phẩm trong đơn
+      // bill = await bill.populate("products.detailsVariantId").execPopulate?.();
+
+      // (Optional) Nếu muốn populate thêm `variantDetails.variantId`, thì dùng nested populate thủ công
+
+      res.render("admin/invoice", {
+        bill,
+        logoPath: "/uploads/logo_viettech.png",
+        companyName: "CÔNG TY TNHH VietTech",
+        issuedDate: new Date(bill.createdAt).toLocaleDateString("vi-VN"),
+        totalInWords: readVietnameseNumber(bill.total) + " đồng",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
+
+
+  static async downloadInvoice(req, res, next) {
+    try {
+      const { id } = req.params;
+      const bill = await BillService.getBillById({ billId: id });
+      if (!bill) return res.status(404).send('Không tìm thấy đơn hàng');
+
+      const totalInWords = readVietnameseNumber(bill.total);
+
+      const html = await ejs.renderFile(
+        path.join(__dirname, '../../views/admin/invoice.ejs'),
+        {
+          bill,
+          logoPath: logoBase64, // ✅ dùng ảnh base64
+          companyName: "CÔNG TY TNHH VietTech",
+          issuedDate: new Date(bill.createdAt).toLocaleDateString('vi-VN'),
+          totalInWords
+        }
+      );
+
+      // Tùy chọn: Ghi ra HTML để debug
+      // fs.writeFileSync('test-invoice.html', html);
+
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] // ✅ nên thêm nếu deploy trên Linux
+      });
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+
+      const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+      await browser.close();
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="invoice-${bill.order_code}.pdf"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      res.end(pdfBuffer);
+
+    } catch (err) {
+      console.error('Error generating invoice PDF:', err);
+      next(err);
+    }
+  }
+
+
 }
 
 module.exports = BillController;

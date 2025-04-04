@@ -52,3 +52,37 @@ document.addEventListener('DOMContentLoaded', function() {
       passwordInput.type = 'password';
     }
   }
+
+  async function logout() {
+    try {
+        const refreshToken = localStorage.getItem("refreshToken"); // Lấy refreshToken từ localStorage
+        console.log("refreshToken", refreshToken);
+
+
+        const response = await fetch("/v1/api/access/logout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ refreshToken }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log("✅ Logout thành công:", data.message);
+
+            // Xóa token khỏi trình duyệt
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            sessionStorage.clear(); // Xóa tất cả session nếu cần
+
+            // Chuyển hướng về trang đăng nhập
+            window.location.href = "/";
+        } else {
+            console.error("❌ Lỗi khi logout:", data.message);
+        }
+    } catch (error) {
+        console.error("❌ Lỗi logout trên client:", error);
+    }
+}

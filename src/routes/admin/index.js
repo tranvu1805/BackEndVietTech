@@ -17,6 +17,8 @@ router.use("/products", require("./product.admin"));
 router.use("/categories", require("./category.admin"));
 router.use("/bills", require("./bill.admin"));
 router.use("/user", require("./user.admin"));
+router.use("/reports", require("./reports.admin"));
+router.use("/discounts", require("./discount.admin"));
 
 
 router.get('/dashboard', (req, res) => {

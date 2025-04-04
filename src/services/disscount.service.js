@@ -1,10 +1,15 @@
 "use strict";
 
+const categoryModel = require("../models/category.model");
 const { discountRepo } = require("../models/disscount.model");
+const { getCategoriesWithProductCount } = require("./category.service");
+const mongoose = require("mongoose");
 
 class DiscountService {
 
-  static async createDiscount({ code, discount_amount, min_order_value, expiration_date, is_active }) {
+  static async createDiscount(data) {
+    const { code } = data;
+
     const existingDiscount = await discountRepo.findOne({ code });
     if (existingDiscount) {
       return {
@@ -14,13 +19,7 @@ class DiscountService {
       };
     }
 
-    const newDiscount = await discountRepo.create({
-      code,
-      discount_amount,
-      min_order_value,
-      expiration_date,
-      is_active: is_active ?? true, // Mặc định là true nếu không truyền
-    });
+    const newDiscount = await discountRepo.create(data);
 
     return {
       message: "Discount code created successfully",
@@ -30,7 +29,11 @@ class DiscountService {
   }
 
   static async getAllDiscounts() {
-    const discounts = await discountRepo.find({});
+    const discounts = await discountRepo.find({})
+      .populate("appliedProducts")
+      .populate("appliedCategories")
+      .lean();
+
     return {
       message: "Fetched all discount codes successfully",
       statusCode: 200,
@@ -38,9 +41,7 @@ class DiscountService {
     };
   }
 
-  // Cập nhật mã giảm giá
   static async updateDiscount(oldCode, updateData) {
-    //đảm bảo code mới không trùng
     if (updateData.code) {
       const existingDiscount = await discountRepo.findOne({ code: updateData.code });
       if (existingDiscount && existingDiscount.code !== oldCode) {
@@ -60,7 +61,7 @@ class DiscountService {
 
     if (!updatedDiscount) {
       return {
-        code: 404,
+        statusCode: 404,
         message: "Discount code not found",
         status: "error",
       };
@@ -73,7 +74,6 @@ class DiscountService {
     };
   }
 
-  // Xóa mã giảm giá
   static async deleteDiscount(code) {
     const discount = await discountRepo.findOneAndDelete({ code });
 
@@ -92,12 +92,9 @@ class DiscountService {
     };
   }
 
-  // kiểm tra code dùng được ko
   static async validateDiscountCode(code) {
-    // Tìm mã giảm giá mà không lọc `expiration_date`
     const discount = await discountRepo.findOne({ code });
 
-    // Nếu không tìm thấy mã giảm giá
     if (!discount) {
       return {
         statusCode: 404,
@@ -106,16 +103,15 @@ class DiscountService {
       };
     }
 
-    // Kiểm tra nếu mã đã hết hạn
-    if (new Date(discount.expiration_date) < new Date()) {
+    const now = new Date();
+    if (discount.isDraft || now < discount.startDate || now > discount.endDate) {
       return {
         statusCode: 400,
-        message: "Discount code has expired",
+        message: "Discount code is not active",
         status: "error",
       };
     }
 
-    // Nếu hợp lệ
     return {
       message: "Discount code is valid",
       statusCode: 200,
@@ -123,6 +119,45 @@ class DiscountService {
     };
   }
 
+  static async getDiscounts(filter, sort, skip, limit) {
+    const discounts = await discountRepo.find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate("appliedProducts")
+      .lean();
+
+    for (let discount of discounts) {
+      if (discount.appliedCategories && discount.appliedCategories.length > 0) {
+        const categoryIds = discount.appliedCategories.map(id => new mongoose.Types.ObjectId(id));
+        const categories = await categoryModel.aggregate([
+          { $match: { _id: { $in: categoryIds } } },
+          {
+            $lookup: {
+              from: 'Products',
+              localField: '_id',
+              foreignField: 'category',
+              as: 'Products'
+            }
+          },
+          {
+            $addFields: {
+              productCount: { $size: '$Products' }
+            }
+          },
+          { $project: { products: 0 } }
+        ]);
+
+        discount.appliedCategories = categories;
+      }
+    }
+
+    return discounts;
+  }
+
+  static async countDiscounts(filter) {
+    return discountRepo.countDocuments(filter);
+  }
 }
 
 module.exports = DiscountService;
