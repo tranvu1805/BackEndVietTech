@@ -220,7 +220,7 @@
                                         <i class="fas fa-money-bill-wave"></i>
                                     </div>
                                     <h5 class="card-title">Doanh thu</h5>
-                                    <h3>46.5M</h3>
+                                    <h3>loading...</h3>
                                     <p class="mb-0"><i class="fas fa-arrow-up"></i> 8% so với tháng trước</p>
                                 </div>
                             </div>
@@ -232,7 +232,7 @@
                                         <i class="fas fa-users"></i>
                                     </div>
                                     <h5 class="card-title">Khách hàng mới</h5>
-                                    <h3>125</h3>
+                                    <h3>loading...</h3>
                                     <p class="mb-0"><i class="fas fa-arrow-up"></i> 5% so với tháng trước</p>
                                 </div>
                             </div>
@@ -244,7 +244,7 @@
                                         <i class="fas fa-box-open"></i>
                                     </div>
                                     <h5 class="card-title">Sản phẩm</h5>
-                                    <h3>198</h3>
+                                    <h3>loading...</h3>
                                     <p class="mb-0"><i class="fas fa-arrow-up"></i> 3% so với tháng trước</p>
                                 </div>
                             </div>
@@ -510,49 +510,53 @@
             }
 
 
-            async function loadRevenue() {
-                try {
-                    const now = new Date();
-                    const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString(); // đầu tháng
-                    const endDate = new Date().toISOString(); // hôm nay
+            // async function loadRevenue() {
+            //     try {
+            //         const now = new Date();
+            //         const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString(); // đầu tháng
+            //         const endDate = new Date().toISOString(); // hôm nay
 
-                    const res = await fetch(`/v1/api/bill/revenue?startDate=${startDate}&endDate=${endDate}`, {
-                        headers: {
-                            authorization: accessToken,
-                            'x-client-id': userId,
-                            'x-api-key': apiKey
-                        }
-                    });
-                    const data = await res.json();
+            //         const res = await fetch(`/v1/api/bill/revenue?startDate=${startDate}&endDate=${endDate}`, {
+            //             headers: {
+            //                 authorization: accessToken,
+            //                 'x-client-id': userId,
+            //                 'x-api-key': apiKey
+            //             }
+            //         });
+            //         const data = await res.json();
 
-                    console.log("check revenue", data);
+            //         console.log("check revenue", data);
 
-                    const revenue = Math.floor(data.totalRevenue) || 0; // Làm tròn xuống để loại bỏ số thập phân
-                    document.querySelector(".card-stats.bg-success h3").innerText = revenue.toLocaleString('vi-VN') + ' ₫';
-                } catch (error) {
-                    console.error("Lỗi khi load doanh thu:", error);
-                }
-            }
+            //         const revenue = Math.floor(data.totalRevenue) || 0;
+            //         document.querySelector(".card-stats.bg-success h3").innerText = revenue.toLocaleString('vi-VN', {
+            //             maximumFractionDigits: 0
+            //         }) + ' ₫';
+
+            //     } catch (error) {
+            //         console.error("Lỗi khi load doanh thu:", error);
+            //     }
+            // }
 
 
 
-            async function loadTotalOrders() {
-                try {
-                    const res = await fetch('/v1/api/bill', {
-                        headers: {
-                            authorization: accessToken,
-                            'x-client-id': userId,
-                            'x-api-key': apiKey
-                        }
-                    });
-                    const data = await res.json();
-                    console.log('check order', data);
+            // async function loadTotalOrders() {
+            //     try {
+            //         const res = await fetch('/v1/api/bill', {
+            //             headers: {
+            //                 authorization: accessToken,
+            //                 'x-client-id': userId,
+            //                 'x-api-key': apiKey
+            //             }
+            //         });
+            //         const data = await res.json();
+            //         console.log('check order', data);
 
-                    document.querySelector(".card-stats.bg-primary h3").innerText = data.metadata.length;
-                } catch (error) {
-                    console.error("Lỗi khi load đơn hàng:", error);
-                }
-            }
+            //         document.querySelector(".card-stats.bg-primary h3").innerText = data.metadata.length.toLocaleString('vi-VN');
+
+            //     } catch (error) {
+            //         console.error("Lỗi khi load đơn hàng:", error);
+            //     }
+            // }
 
             async function loadRecentOrders() {
                 try {
@@ -590,7 +594,9 @@
         <td><span class="badge bg-success">${bill.payment_method?.toUpperCase()}</span></td>
         <td>
           <div class="btn-group">
-            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+            <button class="btn btn-sm btn-outline-primary" onclick="viewOrderDetail('${bill._id}')">
+                 <i class="fas fa-eye"></i>
+            </button>
           </div>
         </td>
       </tr>
@@ -605,10 +611,8 @@
 
             document.addEventListener("DOMContentLoaded", async function () {
                 const accessToken = localStorage.getItem("accessToken");
-                await loadRevenue();
-                await loadTotalOrders();
-                await loadRecentOrders();
-                await loadTopSellingProducts();
+                // await loadRevenue();
+                // await loadTotalOrders();
 
 
                 if (!accessToken) {
@@ -623,6 +627,11 @@
                     console.log("⚠ AccessToken đã hết hạn, đang làm mới...");
                     await refreshAccessToken(); // Gọi hàm làm mới token
                 }
+                await loadDashboardReport();
+                await loadChartData(); // ✅ Thêm dòng này
+                await loadTopSellingProducts();
+                await loadRecentOrders();
+
             });
 
             // Hàm kiểm tra `accessToken` có hết hạn không
@@ -661,7 +670,7 @@
           <td>${p.product_name}</td>
           <td>${p.totalSold}</td>
           <td>${p.product_stock}</td>
-         <td>${(p.totalSold * p.product_price * 25589).toLocaleString('vi-VN')} ₫</td>
+         <td>${(p.totalSold * p.product_price).toLocaleString('vi-VN')} ₫</td>
 
         </tr>
       `).join("");
@@ -740,6 +749,92 @@
                     }
                 }
             });
+
+            function viewOrderDetail(orderId) {
+                window.location.href = `/v1/api/admin/bills/${orderId}`;
+            }
+
+
+            async function loadDashboardReport() {
+                try {
+                    const res = await fetch("/v1/api/admin/reports/data", {
+                        headers: {
+                            authorization: accessToken,
+                            "x-client-id": userId,
+                            "x-api-key": apiKey
+                        }
+                    });
+
+                    const { report } = await res.json(); // { report: { totalOrders, totalRevenue, ... } }
+                    console.log("check report", report);
+
+                    if (!report) throw new Error("Không có dữ liệu");
+
+                    // Gán vào các thẻ dashboard
+                    document.querySelector(".card-stats.bg-primary h3").innerText =
+                        report.totalOrders.toLocaleString("vi-VN");
+
+                    document.querySelector(".card-stats.bg-success h3").innerText =
+                        Math.floor(report.totalRevenue).toLocaleString("vi-VN", { maximumFractionDigits: 0 }) + " ₫";
+
+                    document.querySelector(".card-stats.bg-info h3").innerText =
+                        report.totalUsers.toLocaleString("vi-VN");
+
+                    document.querySelector(".card-stats.bg-warning h3").innerText =
+                        report.totalProducts.toLocaleString("vi-VN");
+
+                    // Hiển thị top-selling
+                    document.getElementById("top-selling-body").innerHTML = report.topSelling.map(p => `
+            <tr>
+                <td>${p.product_name}</td>
+                <td>${p.totalSold}</td>
+                <td>${p.product_stock}</td>
+                <td>${(p.totalSold * p.product_price).toLocaleString('vi-VN')} ₫</td>
+            </tr>
+        `).join("");
+
+                    // Hiển thị đơn hàng gần đây
+                    document.getElementById("recent-orders-body").innerHTML = report.recentOrders.map(bill => `
+            <tr>
+                <td>#${bill._id}</td>
+                <td>${bill.receiver_name || "Không rõ"}</td>
+                <td>${new Date(bill.createdAt).toLocaleDateString()}</td>
+                <td>${bill.total.toLocaleString()}₫</td>
+                <td><span class="badge bg-warning">${bill.status}</span></td>
+                <td><span class="badge bg-success">${bill.payment_method?.toUpperCase()}</span></td>
+                <td><div class="btn-group"><button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button></div></td>
+            </tr>
+        `).join("");
+
+                } catch (error) {
+                    console.error("❌ Lỗi khi tải dashboard:", error);
+                }
+            }
+
+            async function loadChartData() {
+                try {
+                    const res = await fetch("/v1/api/admin/reports/chart-data", {
+                        headers: {
+                            authorization: accessToken,
+                            "x-client-id": userId,
+                            "x-api-key": apiKey
+                        }
+                    });
+
+                    const { success, data } = await res.json();
+                    if (!success || !data) throw new Error("Dữ liệu không hợp lệ");
+
+                    console.log("📊 Dữ liệu biểu đồ:", data);
+
+                    // Gán lại dữ liệu cho biểu đồ
+                    revenueChart.data.datasets[0].data = data.revenueData.map(val => Math.floor(val / 1000000)); // chuyển về triệu VND
+                    revenueChart.update();
+                } catch (error) {
+                    console.error("❌ Lỗi khi tải dữ liệu biểu đồ:", error);
+                }
+            }
+
+
 
         </script>
 </body>

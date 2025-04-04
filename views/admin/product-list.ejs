@@ -23,42 +23,40 @@
                 <!-- Main Content -->
                 <div class="col-md-10 col-lg-10 ms-auto main-content">
                     <!-- Top Navbar -->
-                    <nav class="navbar navbar-expand-lg top-navbar mb-4">
-                        <div class="container-fluid">
-                            <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#sidebarMenu">
-                                <span class="navbar-toggler-icon"></span>
-                            </button>
-
-                            <div class="ms-auto d-flex align-items-center">
-                                <div class="dropdown">
-                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                                        data-bs-toggle="dropdown">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-                                                style="width: 40px; height: 40px;font-weight: bold;">V</div>
-                                            <span>Admin</span>
-                                        </div>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a>
-                                        </li>
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài
-                                                đặt</a></li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li><a class="dropdown-item" href="#" onclick="logout()"><i
-                                                    class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
-                                    </ul>
-                                </div>
+                    <nav class="top-navbar">
+                        <h4 class="mb-0">Quản lý Sản phẩm</h4>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <button class="notification-btn" type="button">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="notification-badge">3</span>
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="user-dropdown border-0" type="button" id="userDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="user-avatar me-2">A</div>
+                                    <span class="d-none d-md-inline">Admin</span>
+                                    <i class="fas fa-chevron-down ms-2 small"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài
+                                            đặt</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="#" onclick="logout()"><i
+                                                class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                                </ul>
                             </div>
                         </div>
                     </nav>
 
                     <!-- Page Header -->
                     <div class="page-header">
-                        <h4 class="mb-0">Quản lý Sản phẩm</h4>
+                      
                         <a href="/v1/api/admin/products/create" class="btn btn-success">
                             <i class="fas fa-plus me-1"></i> Thêm sản phẩm mới
                         </a>

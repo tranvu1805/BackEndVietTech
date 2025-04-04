@@ -1,5 +1,7 @@
+const { log } = require("console");
 const categoryModel = require("../models/category.model");
 const Category = require("../models/category.model");
+const productModel = require("../models/product.model");
 
 // Tạo một danh mục mới
 const createCategory = async (req, res) => {
@@ -40,18 +42,39 @@ const createCategory = async (req, res) => {
 // Lấy tất cả danh mục
 const getAllCategories = async (req, res) => {
     try {
-        const categories = await Category.find().populate("parent_category");
-        res.status(200).json({ success: true, categories });
+        const categories = await Category.find().populate("parent_category").lean();
+
+        // Đếm số sản phẩm cho từng category
+        const categoriesWithCount = await Promise.all(
+            categories.map(async (category) => {
+                const count = await productModel.countDocuments({ category: category._id });
+                return {
+                    ...category,
+                    productCount: count
+                };
+            })
+        );
+
+        res.status(200).json({ success: true, categories: categoriesWithCount });
     } catch (error) {
+        console.error("Lỗi getAllCategories:", error);
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
+
 const getAllCategories_Admin = async (req, res) => {
+    console.log("check getAllCategories_Admin: ", res);
+
     try {
-        const { page = 1, limit = 10, search = "", type = "" } = req.query;
+        const { page = 1, limit = 10, search = "", type = "",
+            sortBy = "createdAt",
+            sortOrder = "desc",
+        } = req.query;
 
         const query = {};
+
+        console.log("query", res);
 
         // Tìm kiếm theo tên
         if (search) {
@@ -67,9 +90,17 @@ const getAllCategories_Admin = async (req, res) => {
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
+        const sortOption = {};
+        sortOption[sortBy] = sortOrder === "asc" ? 1 : -1;
+
+
+        console.log("sortOption", req.query);
+
+
         const [categories, totalCategories] = await Promise.all([
             Category.find(query)
                 .populate("parent_category")
+                .sort(sortOption)
                 .skip(skip)
                 .limit(parseInt(limit))
                 .lean(),
@@ -78,18 +109,19 @@ const getAllCategories_Admin = async (req, res) => {
 
         return {
             success: true,
-            data: {
-                categories,
-                currentPage: parseInt(page),
-                totalPages: Math.ceil(totalCategories / limit),
-                totalCategories,
-                limit: parseInt(limit),
-                search,
-                type,
-            },
+            categories,
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(totalCategories / limit),
+            totalCategories,
+            limit: parseInt(limit),
+            search,
+            type,
+            sortBy,
+            sortOrder,
         };
+
     } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
+        console.error("❌ Error fetching categories:", error);
     }
 };
 

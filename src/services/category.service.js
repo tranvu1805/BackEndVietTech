@@ -1,4 +1,6 @@
+const categoryModel = require("../models/category.model");
 const Category = require("../models/category.model");
+const mongoose = require("mongoose");
 
 // Tạo mới một danh mục
 const createCategory = async (data) => {
@@ -12,15 +14,84 @@ const createCategory = async (data) => {
 };
 
 // Lấy tất cả các danh mục
-const getAllCategories = async () => {
+// getAllCategories có hỗ trợ query
+const getAllCategories = async ({
+    page = 1,
+    limit = 100,
+    search = "",
+    type = "",
+    sortBy = "createdAt",
+    sortOrder = "desc",
+} = {}) => {
     try {
-        const categories = await Category.find().populate("parent_category");
-        return { success: true, categories };
+        const query = {};
+
+        if (search) {
+            query.name = { $regex: search, $options: "i" };
+        }
+
+        if (type === "parent") {
+            query.parent_category = null;
+        } else if (type === "child") {
+            query.parent_category = { $ne: null };
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const sortOption = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
+
+        const [categories, totalCategories] = await Promise.all([
+            Category.find(query)
+                .populate("parent_category")
+                .sort(sortOption)
+                .skip(skip)
+                .limit(parseInt(limit))
+                .lean(),
+            Category.countDocuments(query)
+        ]);
+
+        return {
+            success: true,
+            categories,
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(totalCategories / limit),
+            totalCategories,
+            limit: parseInt(limit),
+            search,
+            type,
+            sortBy,
+            sortOrder,
+        };
     } catch (error) {
         console.error("❌ Error fetching categories:", error);
         return { success: false, message: error.message };
     }
 };
+
+const getCategoriesWithProductCount = async (categoryIds) => {
+    return await categoryModel.aggregate([
+        {
+            $match: {
+                _id: { $in: categoryIds.map(id => new mongoose.Types.ObjectId(id)) }
+            }
+        },
+        {
+            $lookup: {
+                from: 'products',
+                localField: '_id',
+                foreignField: 'category',
+                as: 'products'
+            }
+        },
+        {
+            $addFields: {
+                productCount: { $size: '$products' }
+            }
+        },
+        {
+            $project: { products: 0 }
+        }
+    ]);
+}
 
 // Lấy một danh mục theo ID
 const getCategoryById = async (id) => {
@@ -69,6 +140,6 @@ module.exports = {
     getAllCategories,
     getCategoryById,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    getCategoriesWithProductCount,
 };
-    

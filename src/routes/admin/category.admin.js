@@ -3,37 +3,42 @@ const { getAllCategories_Admin } = require("../../controllers/category.controlle
 const categoryModel = require("../../models/category.model");
 const router = express.Router();
 router.get("/", async (req, res) => {
-    const result = await getAllCategories_Admin(req, res);
-    if (!result.success) return;
-  
-    const {
-      categories,
-      currentPage,
-      totalPages,
-      limit,
-      search,
-      type,
-    } = result.data;
-  
-    res.render("admin/categories-list", {
-      categories,
-      currentPage,
-      totalPages,
-      limit,
-      search,
-      type,
-    });
+  const result = await getAllCategories_Admin(req, res);
+  if (!result.success) return;
+
+  const {
+    categories,
+    currentPage,
+    totalPages,
+    limit,
+    search,
+    type,
+    sortBy,       // 🆕 thêm vào
+    sortOrder     // 🆕 thêm vào
+  } = result;
+
+  res.render("admin/categories-list", {
+    categories,
+    currentPage,
+    totalPages,
+    limit,
+    search,
+    type,
+    sortBy,
+    sortOrder
   });
-  
+});
+
+
 
 router.get("/create", async (req, res) => {
-    try {
-        const categories = await categoryModel.find({}); // Giả sử bạn đang dùng Mongoose
-        res.render("admin/category-form", { categories });
-    } catch (error) {
-        console.error("Lỗi khi lấy danh mục:", error);
-        res.render("admin/category-form", { categories: [] }); // Tránh truyền undefined
-    }
+  try {
+    const categories = await categoryModel.find({}); // Giả sử bạn đang dùng Mongoose
+    res.render("admin/category-form", { categories });
+  } catch (error) {
+    console.error("Lỗi khi lấy danh mục:", error);
+    res.render("admin/category-form", { categories: [] }); // Tránh truyền undefined
+  }
 });
 
 

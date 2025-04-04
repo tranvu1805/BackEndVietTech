@@ -4,6 +4,7 @@ const accountModel = require("../models/account.model");
 const moment = require("moment");
 const Image = require("../models/image.model");
 const nodemailer = require("nodemailer");
+const roleModel = require("../models/role.model");
 
 // Lưu trữ OTP tạm thời
 const otpStore = new Map();
@@ -18,24 +19,66 @@ const transporter = nodemailer.createTransport({
 });
 class AccountService {
   /** Lấy tất cả tài khoản với hỗ trợ phân trang */
-  static async getAllAccounts(page = 1, limit = 10) {
+  static async getAllAccounts(page = 1, limit = 10, search = "", role = "", status = "") {
     try {
       const skip = (page - 1) * limit;
-      const accounts = await accountModel
-        .find()
-        .populate("role_id", "name")
-        .populate("profile_image")
-        .select("-password")
-        .skip(skip)
-        .limit(limit);
+      const query = {};
 
-      const totalAccounts = await accountModel.countDocuments();
+      // 🔍 Tìm kiếm theo tên, username, email
+      if (search) {
+        query.$or = [
+          { full_name: { $regex: search, $options: "i" } },
+          { username: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+        ];
+      }
+
+      // 🧑‍💼 Lọc theo vai trò (role name)
+      if (role) {
+        const matchedRoles = await roleModel.find({ name: role });
+        if (matchedRoles.length > 0) {
+          query.role_id = matchedRoles[0]._id;
+        } else {
+          // Nếu role không khớp, trả về danh sách rỗng
+          return {
+            code: 200,
+            message: "No matching role found.",
+            status: "success",
+            data: { accounts: [], totalAccounts: 0, page, totalPages: 0 },
+          };
+        }
+      }
+
+      // 🔄 Lọc theo trạng thái
+      if (status) {
+        query.status = status;
+      }
+
+      const [accounts, totalAccounts] = await Promise.all([
+        accountModel
+          .find(query)
+          .populate("role_id", "name")
+          .populate("profile_image")
+          .select("-password")
+          .skip(skip)
+          .limit(limit),
+        accountModel.countDocuments(query),
+      ]);
 
       return {
         code: 200,
         message: "Accounts fetched successfully!",
         status: "success",
-        data: { accounts, totalAccounts, page, totalPages: Math.ceil(totalAccounts / limit) },
+        data: {
+          accounts,
+          totalAccounts,
+          page,
+          totalPages: Math.ceil(totalAccounts / limit),
+          search,
+          role,
+          status,
+          limit
+        },
       };
     } catch (error) {
       console.error("❌ Error fetching accounts:", error);
@@ -67,6 +110,7 @@ class AccountService {
       return { code: 500, message: error.message || "Internal Server Error", status: "error" };
     }
   }
+
 
   /** Cập nhật tài khoản */
   static async updateAccount(accountId, updateData) {

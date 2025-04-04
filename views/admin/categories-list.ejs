@@ -357,26 +357,51 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <!-- Tìm kiếm danh mục -->
-                            <form method="GET" class="search-box" action="/v1/api/admin/categories/">
-                                <i class="fas fa-search"></i>
-                                <input type="text" name="search" class="form-control" placeholder="Tìm kiếm danh mục..."
-                                    value="<%= search %>">
+                            <form method="GET" action="/v1/api/admin/categories"
+                                class="row g-2 align-items-center mb-4">
+                                <div class="col-md-4">
+                                    <input type="text" name="search" class="form-control"
+                                        placeholder="Tìm kiếm tên danh mục..." value="<%= search || '' %>">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <select name="type" class="form-select">
+                                        <option value="">-- Tất cả loại --</option>
+                                        <option value="parent" <%=type==='parent' ? 'selected' : '' %>>Danh mục chính
+                                        </option>
+                                        <option value="child" <%=type==='child' ? 'selected' : '' %>>Danh mục con
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <select name="sortBy" class="form-select">
+                                        <option value="name" <%=sortBy==='name' ? 'selected' : '' %>>Tên</option>
+                                        <option value="createdAt" <%=sortBy==='createdAt' ? 'selected' : '' %>>Ngày tạo
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <select name="sortOrder" class="form-select">
+                                        <option value="asc" <%=sortOrder==='asc' ? 'selected' : '' %>>Tăng dần</option>
+                                        <option value="desc" <%=sortOrder==='desc' ? 'selected' : '' %>>Giảm dần
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
                             </form>
 
+
+
+
                         </div>
-                        <div class="col-md-6 d-flex justify-content-end">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-filter me-1"></i> Lọc
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-sort me-1"></i> Sắp xếp
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-download me-1"></i> Xuất
-                                </button>
-                            </div>
-                        </div>
+
                     </div>
 
                     <!-- Categories Table -->
@@ -463,11 +488,11 @@
 
 
 
-                                                    <button type="button" class="btn btn-sm btn-danger"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#deleteModal<%= category._id %>">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
+                                                        <!-- <button type="button" class="btn btn-sm btn-danger"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#deleteModal<%= category._id %>">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button> -->
                                                 </div>
                                             </td>
                                         </tr>

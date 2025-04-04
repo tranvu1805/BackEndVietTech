@@ -6,121 +6,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Quản Trị Hệ Thống - Quản Lý Người Dùng</title>
     <link rel="icon" href="/uploads/mini_logo.ico" type="image/png">
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet 22" href="/css/style.css">
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Reusing most of the styles from the previous page */
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #2ecc71;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --light-color: #ecf0f1;
-            --dark-color: #2c3e50;
-        }
-
-        
-
-        /* Additional user-specific styles */
-        .user-avatar-large {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--secondary-color);
-        }
-
-        .status-active {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .status-inactive {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .status-suspended {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
     <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar -->
             <%- include('partials/header') %>
 
-                <!-- Main Content -->
                 <div class="col-md-10 col-lg-10 ms-auto main-content">
-                    <!-- Top Navbar -->
-                    <nav class="navbar navbar-expand-lg top-navbar mb-4">
-                        <div class="container-fluid">
-                            <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#sidebarMenu">
-                                <span class="navbar-toggler-icon"></span>
+                    <!-- Navbar -->
+                    <nav class="top-navbar d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">Quản lý người dùng</h4>
+                        <div class="d-flex align-items-center">
+                            <button class="notification-btn me-3">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge">3</span>
                             </button>
-
-                            <div class="ms-auto d-flex align-items-center">
-                                <div class="dropdown">
-                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                                        data-bs-toggle="dropdown">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-                                                style="width: 40px; height: 40px;font-weight: bold;">V</div>
-                                            <span>Admin</span>
-                                        </div>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a>
-                                        </li>
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài
-                                                đặt</a></li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>
-                                                Đăng xuất</a></li>
-                                    </ul>
-                                </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                    data-bs-toggle="dropdown">
+                                    <i class="fas fa-user-circle me-1"></i> Admin
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">Hồ sơ</a></li>
+                                    <li><a class="dropdown-item" href="#">Cài đặt</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="#">Đăng xuất</a></li>
+                                </ul>
                             </div>
                         </div>
                     </nav>
 
                     <!-- Page Header -->
-                    <div class="page-header">
-                        <h4 class="mb-0">Quản lý Người Dùng</h4>
+                    <div class="page-header d-flex justify-content-between align-items-center mb-4">
                         <a href="/v1/api/admin/users/create" class="btn btn-success">
                             <i class="fas fa-plus me-1"></i> Thêm nhân viên
                         </a>
                     </div>
 
-                    <!-- Search and Filter -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="text" class="form-control" placeholder="Tìm kiếm người dùng...">
+                    <!-- Search & Filter -->
+                    <div class="row mb-4 align-items-end g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Tìm kiếm</label>
+                            <div class="input-group">
+                                <input type="text" name="search" class="form-control" value="<%= search %>"
+                                    placeholder="Tên người dùng">
+                                <button class="btn btn-outline-primary"><i class="fas fa-search"></i></button>
                             </div>
                         </div>
-                        <div class="col-md-6 d-flex justify-content-end">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-filter me-1"></i> Lọc
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-sort me-1"></i> Sắp xếp
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-download me-1"></i> Xuất
-                                </button>
-                            </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Vai trò</label>
+                            <select name="role" class="form-select">
+                                <option value="">Tất cả</option>
+                                <% roles.forEach(r=> { %>
+                                    <option value="<%= r.name %>" <%=role===r.name ? 'selected' : '' %>><%= r.name %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Trạng thái</label>
+                            <select name="status" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option value="active" <%=status==='active' ? 'selected' : '' %>>Hoạt động</option>
+                                <option value="inactive" <%=status==='inactive' ? 'selected' : '' %>>Không hoạt động
+                                </option>
+                                <option value="suspended" <%=status==='suspended' ? 'selected' : '' %>>Tạm khóa</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label invisible">Lọc</label>
+                            <button class="btn btn-outline-primary w-100"><i class="fas fa-filter me-1"></i>
+                                Lọc</button>
                         </div>
                     </div>
 
@@ -131,32 +96,32 @@
                                 <thead>
                                     <tr>
                                         <th class="ps-3">ID</th>
-                                        <th>Thông tin người dùng</th>
+                                        <th>Họ tên</th>
                                         <th>Vai trò</th>
                                         <th>Email</th>
                                         <th>Trạng thái</th>
-                                        <th>Ngày tạo</th>
                                         <th class="text-end pe-3">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <% users.forEach(user=> { %>
                                         <tr>
-                                            <td class="ps-3"><small class="text-muted">
-                                                    <%= user._id %>
-                                                </small></td>
+                                            <td class="ps-3">
+                                                <%= user._id.toString().slice(0, 8) %>...
+
+                                            </td>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <div class="me-2"
-                                                        style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;">
+                                                    <div class="rounded-circle bg-light text-center me-2"
+                                                        style="width: 40px; height: 40px;">
                                                         <% if (user.profile_image) { %>
-                                                            <img src="<%= user.profile_image.url %>" alt="Profile"
-                                                                style="width: 100%; height: 100%; object-fit: cover;">
+                                                            <img src="<%= user.profile_image.url %>"
+                                                                class="img-fluid rounded-circle"
+                                                                style="object-fit: cover; width: 100%; height: 100%;">
                                                             <% } else { %>
-                                                                <div class="user-avatar"
-                                                                    style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                                                <span class="d-block pt-2 text-secondary">
                                                                     <%= user.full_name.charAt(0).toUpperCase() %>
-                                                                </div>
+                                                                </span>
                                                                 <% } %>
                                                     </div>
                                                     <div>
@@ -169,230 +134,212 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>
-                                                <%= user.role_id.name %>
-                                            </td>
+                                            <td><span class="badge bg-info">
+                                                    <%= user.role_id.name %>
+                                                </span></td>
                                             <td>
                                                 <%= user.email %>
                                             </td>
                                             <td>
                                                 <% let statusClass='' ; switch(user.status) { case 'active' :
-                                                    statusClass='status-active' ; break; case 'inactive' :
-                                                    statusClass='status-inactive' ; break; case 'suspended' :
-                                                    statusClass='status-suspended' ; break; } %>
+                                                    statusClass='bg-success' ; break; case 'inactive' :
+                                                    statusClass='bg-secondary' ; break; case 'suspended' :
+                                                    statusClass='bg-warning text-dark' ; break; } %>
                                                     <span class="badge <%= statusClass %>">
                                                         <%= user.status %>
                                                     </span>
                                             </td>
-                                            <td>
-                                                <% if (user.createdAt) { %>
-                                                    <%= new Date(user.createdAt).toLocaleDateString('vi-VN') %>
-                                                        <% } else { %>
-                                                            <span class="text-muted">--</span>
-                                                            <% } %>
-                                            </td>
-
                                             <td class="text-end pe-3">
-                                                <div class="action-buttons">
-                                                    <button type="button" class="btn btn-sm btn-warning me-1"
+                                                <div class="d-flex justify-content-end align-items-center gap-2">
+                                                    <button class="btn btn-sm btn-outline-primary"
                                                         data-user='<%- JSON.stringify(user) %>'
-                                                        onclick="handleEditUser(this)">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-danger"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#deleteUserModal<%= user._id %>">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
+                                                        onclick="handleEditUser(this)"><i
+                                                            class="fas fa-edit"></i></button>
+                                                    <div class="form-check form-switch m-0">
+                                                        <input class="form-check-input user-status-switch"
+                                                            type="checkbox" role="switch" id="switch_<%= user._id %>"
+                                                            data-user-id="<%= user._id %>" <%=user.status==='active'
+                                                            ? 'checked' : '' %>>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
-
-                                        <!-- Delete Confirmation Modal -->
-                                        <div class="modal fade" id="deleteUserModal<%= user._id %>" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Xác nhận xóa</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <p>Bạn có chắc chắn muốn xóa người dùng "<%= user.full_name %>"?
-                                                        </p>
-                                                        <p class="text-danger"><small>Thao tác này không thể hoàn
-                                                                tác.</small></p>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary"
-                                                            data-bs-dismiss="modal">Hủy</button>
-                                                        <button class="btn btn-danger"
-                                                            onclick="deleteUser('<%= user._id %>')">
-                                                            Xác nhận xóa
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <% }); %>
+                                        <% }) %>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- Edit User Modal -->
+                    <!-- Modal Chỉnh sửa người dùng -->
                     <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel"
                         aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <form id="editUserForm" class="modal-content" enctype="multipart/form-data">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editUserModalLabel">Chỉnh sửa người dùng</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Đóng"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <input type="hidden" name="user_id" id="edit_user_id">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <form id="editUserForm" enctype="multipart/form-data">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editUserModalLabel">Chỉnh sửa người dùng</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Đóng"></button>
+                                    </div>
+                                    <div class="modal-body row g-3">
+                                        <input type="hidden" id="edit_user_id" name="user_id">
 
-                                    <div class="row">
-                                        <div class="col-md-4 text-center">
-                                            <img id="edit_profile_preview" class="user-avatar-large mb-3" src=""
-                                                alt="Profile Image">
-                                            <input type="file" name="profile_image" id="edit_profile_image"
-                                                class="form-control">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Họ tên</label>
+                                            <input type="text" class="form-control" id="edit_full_name" required>
                                         </div>
-                                        <div class="col-md-8">
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label">Tên đầy đủ</label>
-                                                    <input type="text" name="full_name" class="form-control"
-                                                        id="edit_full_name" required>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label">Tên đăng nhập</label>
-                                                    <input type="text" name="username" class="form-control"
-                                                        id="edit_username" required>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label">Email</label>
-                                                    <input type="email" name="email" class="form-control"
-                                                        id="edit_email" required>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label">Số điện thoại</label>
-                                                    <input type="tel" name="phone" class="form-control" id="edit_phone"
-                                                        required>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label">Vai trò</label>
-                                                    <select class="form-select" id="edit_role_id" name="role_id"
-                                                        required>
-                                                        <% roles.forEach(role=> { %>
-                                                            <option value="<%= role._id %>">
-                                                                <%= role.name %>
-                                                            </option>
-                                                            <% }); %>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label">Trạng thái</label>
-                                                    <select class="form-select" id="edit_status" name="status" required>
-                                                        <option value="active">Hoạt động</option>
-                                                        <option value="inactive">Không hoạt động</option>
-                                                        <option value="suspended">Tạm khóa</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Địa chỉ</label>
-                                                <textarea name="address" class="form-control" id="edit_address"
-                                                    rows="2"></textarea>
-                                            </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Username</label>
+                                            <input type="text" class="form-control" id="edit_username" required>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="edit_email" required>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Số điện thoại</label>
+                                            <input type="text" class="form-control" id="edit_phone">
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <label class="form-label">Địa chỉ</label>
+                                            <input type="text" class="form-control" id="edit_address">
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Vai trò</label>
+                                            <select class="form-select" id="edit_role_id">
+                                                <% roles.forEach(role=> { %>
+                                                    <option value="<%= role._id %>">
+                                                        <%= role.name %>
+                                                    </option>
+                                                    <% }) %>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Trạng thái</label>
+                                            <select class="form-select" id="edit_status">
+                                                <option value="active">Hoạt động</option>
+                                                <option value="inactive">Không hoạt động</option>
+                                                <option value="suspended">Tạm khóa</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Ảnh đại diện</label>
+                                            <input type="file" class="form-control" id="edit_profile_image"
+                                                accept="image/*">
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Xem trước ảnh</label><br>
+                                            <img id="edit_profile_preview" src="" alt="Preview" class="img-thumbnail"
+                                                style="width: 150px;">
                                         </div>
                                     </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Đóng</button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
                     </div>
 
-                    <!-- Pagination -->
-                    <nav>
-                        <ul class="pagination">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" aria-label="Previous">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Next">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
+
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <% for (let i=1; i <=totalPages; i++) { %>
+                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                    <a class="page-link"
+                                        href="?page=<%= i %>&limit=<%= limit %>&search=<%= search %>&role=<%= role %>&status=<%= status %>">
+                                        <%= i %>
+                                    </a>
+                                </li>
+                                <% } %>
                         </ul>
                     </nav>
+
                 </div>
         </div>
     </div>
 
-    <!-- Bootstrap and other scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function deleteUser(userId) {
-            if (!confirm("Bạn có chắc chắn muốn xóa người dùng này?")) return;
+        // Xử lý nút Lọc
+        document.querySelector('.btn-outline-primary.w-100').addEventListener('click', function (e) {
+            e.preventDefault();
+            const search = document.querySelector('input[name="search"]').value;
+            const role = document.querySelector('select[name="role"]').value;
+            const status = document.querySelector('select[name="status"]').value;
 
-            const accessToken = localStorage.getItem('accessToken');
-            const currentUserId = localStorage.getItem('userId');
-            const apiKey = 'YOUR_API_KEY';
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (role) params.append('role', role);
+            if (status) params.append('status', status);
 
-            fetch(`/v1/api/users/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': accessToken,
-                    'x-client-id': currentUserId,
-                    'x-api-key': apiKey
+            window.location.href = `/v1/api/admin/user/list?${params.toString()}`;
+        });
+
+        // Bật/Tắt trạng thái người dùng
+        document.querySelectorAll('.user-status-switch').forEach(switchEl => {
+            switchEl.addEventListener('change', async function () {
+                const userId = this.dataset.userId;
+                const newStatus = this.checked ? 'active' : 'inactive';
+
+                const confirmText = this.checked ? 'Chuyển sang trạng thái HOẠT ĐỘNG?' : 'Chuyển sang KHÔNG HOẠT ĐỘNG?';
+                if (!confirm(confirmText)) {
+                    this.checked = !this.checked;
+                    return;
                 }
-            })
-                .then(res => res.json())
-                .then(data => {
+
+                try {
+                    const res = await fetch(`/v1/api/users/${userId}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('accessToken'),
+                            'x-client-id': localStorage.getItem('userId'),
+                            'x-api-key': 'YOUR_API_KEY'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+
+                    const data = await res.json();
                     if (data.success) {
-                        alert('Xóa người dùng thành công!');
+                        alert('Cập nhật trạng thái thành công!');
                         location.reload();
                     } else {
-                        alert('Không thể xóa: ' + (data.message || 'Lỗi không xác định.'));
+                        alert('Cập nhật thất bại: ' + (data.message || 'Không rõ nguyên nhân.'));
                     }
-                })
-                .catch(err => {
+                } catch (err) {
                     console.error(err);
-                    alert('Lỗi khi kết nối tới server.');
-                });
-        }
+                    alert('Lỗi kết nối đến máy chủ.');
+                }
+            });
+        });
 
+        // Xử lý hiển thị Modal Edit User
         function handleEditUser(btn) {
             const user = JSON.parse(btn.getAttribute('data-user'));
 
-            // Set form values
             document.getElementById('edit_user_id').value = user._id;
             document.getElementById('edit_full_name').value = user.full_name;
             document.getElementById('edit_username').value = user.username;
             document.getElementById('edit_email').value = user.email;
-            document.getElementById('edit_phone').value = user.phone;
-            document.getElementById('edit_address').value = user.address;
+            document.getElementById('edit_phone').value = user.phone || '';
+            document.getElementById('edit_address').value = user.address || '';
             document.getElementById('edit_role_id').value = user.role_id._id;
             document.getElementById('edit_status').value = user.status;
 
-            // Profile image preview
             const preview = document.getElementById('edit_profile_preview');
-            if (user.profile_image) {
+            if (user.profile_image?.url) {
                 preview.src = user.profile_image.url;
             } else {
                 preview.src = `/api/placeholder/150/150?text=${user.full_name.charAt(0)}`;
@@ -401,8 +348,8 @@
             new bootstrap.Modal(document.getElementById('editUserModal')).show();
         }
 
-        // Profile image preview
-        document.getElementById('edit_profile_image').addEventListener('change', function (e) {
+        // Preview ảnh đại diện khi chọn ảnh
+        document.getElementById('edit_profile_image')?.addEventListener('change', function (e) {
             const file = e.target.files[0];
             const preview = document.getElementById('edit_profile_preview');
 
@@ -415,8 +362,8 @@
             }
         });
 
-        // Submit edit form
-        document.getElementById('editUserForm').addEventListener('submit', function (e) {
+        // Submit form chỉnh sửa người dùng
+        document.getElementById('editUserForm')?.addEventListener('submit', function (e) {
             e.preventDefault();
 
             const formData = new FormData();
@@ -435,16 +382,12 @@
                 formData.append('profile_image', imageFile);
             }
 
-            const accessToken = localStorage.getItem('accessToken');
-            const currentUserId = localStorage.getItem('userId');
-            const apiKey = 'YOUR_API_KEY';
-
             fetch(`/v1/api/users/${userId}`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': accessToken,
-                    'x-client-id': currentUserId,
-                    'x-api-key': apiKey
+                    'Authorization': localStorage.getItem('accessToken'),
+                    'x-client-id': localStorage.getItem('userId'),
+                    'x-api-key': 'YOUR_API_KEY'
                 },
                 body: formData
             })
@@ -454,15 +397,17 @@
                         alert('Cập nhật người dùng thành công!');
                         location.reload();
                     } else {
-                        alert('Lỗi cập nhật: ' + (data.message || 'Không rõ nguyên nhân.'));
+                        alert('Lỗi: ' + (data.message || 'Không rõ nguyên nhân.'));
                     }
                 })
                 .catch(err => {
                     console.error(err);
-                    alert('Lỗi kết nối đến máy chủ.');
+                    alert('Lỗi kết nối máy chủ.');
                 });
         });
     </script>
+
+
 </body>
 
 </html>

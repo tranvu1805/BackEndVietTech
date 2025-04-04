@@ -414,7 +414,7 @@
                 <div class="page-header">
                     <h1 class="page-title">
                         <i class="fas fa-edit me-2"></i>
-                        <%= action %> Sản Phẩm
+                        <%= action === 'Edit' ? 'Sửa' : 'Thêm'  %> Sản Phẩm
                     </h1>
                     <a href="/v1/api/admin/products/list" class="btn btn-outline-secondary shadow-sm back-button">
                         <i class="fas fa-arrow-left"></i> Quay lại danh sách

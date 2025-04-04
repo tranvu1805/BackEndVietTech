@@ -8,27 +8,30 @@ const router = express.Router();
 // Admin page hiển thị danh sách
 router.get("/list", async (req, res, next) => {
     try {
-        const users = await accountController.getAllAccounts(req, res, next);
-      
+       
 
-        const roles = await roleModel.find().lean(); // ✅ lấy danh sách vai trò
-
-
-        console.log("check users: ", users);
-
+        const result = await accountController.getAllAccounts(req, res, next);
+        const roles = await roleModel.find().lean();
+        console.log("📋 Danh sách người dùng:", result.accounts);
+        
 
         res.render("admin/user-list", {
-            users: users, // ✅ truyền thêm biến users vào view
-            roles, // ✅ truyền thêm biến roles vào view
-            currentPage: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10,
-            search: req.query.search || ""
+            users: result.accounts,
+            roles,
+            currentPage: result.page,
+            totalPages: result.totalPages,
+            totalAccounts: result.totalAccounts,
+            limit: result.limit,
+            search: result.search,
+            role: result.role,
+            status: result.status
         });
     } catch (error) {
-        console.error("Error loading users:", error);
-        res.status(500).send("Error loading users!");
+        console.error("❌ Error loading users:", error);
+        res.status(500).send("Lỗi khi tải danh sách người dùng!");
     }
 });
+
 
 // router.get('/admin/users/create', accessController.renderCreateForm); // optional
 
