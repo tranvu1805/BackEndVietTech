@@ -1,11 +1,11 @@
 const reviewService = require("../services/review.service");
-
+const mongoose = require('mongoose'); 
 class ReviewController {
     // Thêm review mới
     static async addReview(req, res) {
         try {
             const { account_id, product_id, contents_review, rating, image_ids } = req.body;
-            
+
             // Kiểm tra rating có hợp lệ không
             if (typeof rating !== 'number' || rating < 1 || rating > 5) {
                 return res.status(400).json({ success: false, message: "Rating phải là một số trong khoảng từ 1 đến 5" });
@@ -62,7 +62,7 @@ class ReviewController {
             }
 
             const updatedReview = await reviewService.updateReview(reviewId, contents_review, rating, image_ids);
-            
+
             if (!updatedReview) {
                 return res.status(404).json({ success: false, message: "Không tìm thấy review để cập nhật" });
             }
@@ -72,6 +72,19 @@ class ReviewController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+    // Lấy thống kê số lượng đánh giá và trung bình sao theo product_id
+      // Thống kê số lượng người đánh giá và trung bình sao
+      static async getReviewStatsByProduct(req, res) {
+        try {
+            const { productId } = req.params;
+            const stats = await reviewService.getReviewStatsByProductId(productId);
+
+            res.status(200).json({ success: true, data: stats });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
 }
 
 module.exports = ReviewController;
