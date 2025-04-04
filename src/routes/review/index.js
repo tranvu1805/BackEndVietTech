@@ -8,6 +8,9 @@ const {authentication}=require("../../auth/authUtils")
 router.get("/getReviewsByProduct/:productId", ReviewController.getReviewsByProduct);
 // Lấy tất cả review
 router.get("/getAll", ReviewController.getAllReviews);
+// Lấy thống kê số lượng đánh giá và trung bình sao theo productId
+router.get("/getReviewStats/:productId", ReviewController.getReviewStatsByProduct);
+
 // Lấy danh sách review theo accountId và productId
 router.get("/getReview/:accountId/:productId", ReviewController.getReviews);
 
