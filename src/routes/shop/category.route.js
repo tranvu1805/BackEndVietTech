@@ -12,6 +12,7 @@ const {
 } = require("../../controllers/category.controller");
 // const { route } = require("./category.route");
 
+//fix library import
 const { authentication } = require("../../auth/authUtils");
 
 router.get("/:id/attributes", getAttributesByCategory);
