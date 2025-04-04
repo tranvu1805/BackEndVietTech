@@ -238,14 +238,32 @@
                         <tr class="total-row">
                             <td colspan="4" class="text-left">Tổng cộng</td>
                             <td class="text-right" colspan="2">
-                                <%= bill.total.toLocaleString() %> ₫
+                                <%= (bill.total + (bill.discount_amount || 0)).toLocaleString() %> ₫
                             </td>
                         </tr>
-                        <tr>
-                            <td colspan="6" class="text-left" style="border-bottom: none; font-style: italic;">
-                                Bằng chữ: <%= totalInWords %>
-                            </td>
-                        </tr>
+                        <% if (bill.discount_amount && bill.discount_amount> 0) { %>
+                            <tr>
+                                <td colspan="4" class="text-left">Mã giảm giá: <strong>
+                                        <%= bill.discount_code %>
+                                    </strong></td>
+                                <td class="text-right" colspan="2">
+                                    -<%= bill.discount_amount.toLocaleString() %> ₫
+                                </td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="4" class="text-left">Tổng thanh toán sau giảm</td>
+                                <td class="text-right" colspan="2">
+                                    <%= bill.total.toLocaleString() %> ₫
+                                </td>
+                            </tr>
+                            <% } %>
+
+
+                                <tr>
+                                    <td colspan="6" class="text-left" style="border-bottom: none; font-style: italic;">
+                                        Bằng chữ: <%= totalInWords %>
+                                    </td>
+                                </tr>
 
             </tbody>
         </table>
