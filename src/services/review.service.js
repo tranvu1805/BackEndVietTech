@@ -2,23 +2,34 @@ const Review = require("../models/review.model");
 const ReviewReport = require("../models/review_report.model");
 const Image = require("../models/image.model");
 const User = require("../models/account.model"); // Thêm dòng này
-
+const mongoose = require('mongoose');
 class ReviewService {
     static async addReview(account_id, product_id, contents_review, rating, image_ids = []) {
         try {
+            // Kiểm tra xem tài khoản đã đánh giá sản phẩm này chưa
+            const existingReview = await Review.findOne({ account_id, product_id });
+    
+            if (existingReview) {
+                return {
+                    success: false,
+                    message: "Bạn đã đánh giá sản phẩm này trước đó!"
+                };
+            }
+    
+            // Nếu chưa có đánh giá, tạo mới review
             const newReview = new Review({
                 account_id,
                 product_id,
                 contents_review,
-                rating, // Thêm trường rating
+                rating,  // Thêm trường rating
                 image_ids  // Lưu danh sách ảnh nếu có
             });
-
+    
             await newReview.save();
-
+    
             // Lấy thông tin chi tiết của ảnh nếu có
             const images = await Image.find({ _id: { $in: image_ids } });
-
+    
             return {
                 success: true,
                 message: "Review added successfully",
@@ -48,7 +59,7 @@ class ReviewService {
             throw new Error("Lỗi khi thêm review: " + error.message);
         }
     }
-
+    
     static async getReviewsByProductId(productId) {
         try {
             // Lấy danh sách review_id đã bị báo cáo
@@ -156,6 +167,41 @@ class ReviewService {
             };
         } catch (error) {
             throw new Error("Lỗi khi cập nhật review: " + error.message);
+        }
+    }
+    // Thống kê số lượng người đánh giá và trung bình sao
+    static async getReviewStatsByProductId(productId) {
+        try {
+            // Chuyển productId thành ObjectId (chắc chắn sử dụng đúng cú pháp)
+            const productObjectId = new mongoose.Types.ObjectId(productId); // Đảm bảo sử dụng đúng cú pháp
+    
+            const stats = await Review.aggregate([
+                { $match: { product_id: productObjectId } }, // Lọc theo sản phẩm (chuyển đổi productId thành ObjectId)
+                {
+                    $group: {
+                        _id: "$product_id",
+                        totalReviews: { $sum: 1 },                  // Tổng số đánh giá
+                        averageRating: { $avg: "$rating" }          // Trung bình rating
+                    }
+                }
+            ]);
+    
+            if (stats.length === 0) {
+                return {
+                    totalReviews: 0,
+                    averageRating: 0
+                };
+            }
+    
+            // Làm tròn số sao trung bình đến 1 chữ số sau dấu phẩy
+            const averageRating = Math.round(stats[0].averageRating * 10) / 10;
+    
+            return {
+                totalReviews: stats[0].totalReviews,
+                averageRating
+            };
+        } catch (error) {
+            throw new Error("Lỗi khi thống kê đánh giá: " + error.message);
         }
     }
 }

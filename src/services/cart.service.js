@@ -290,7 +290,7 @@ class CartService {
             item.productId.toString() === productId.toString() &&
             (detailsVariantId
               ? item.detailsVariantId?.toString() ===
-              detailsVariantId.toString()
+                detailsVariantId.toString()
               : !item.detailsVariantId)
         );
 
@@ -416,7 +416,9 @@ class CartService {
       }
 
       if (item.detailsVariantId) {
-        const variant = await detailsVariantModel.findById(item.detailsVariantId);
+        const variant = await detailsVariantModel.findById(
+          item.detailsVariantId
+        );
         if (!variant) {
           return {
             code: 404,
@@ -483,22 +485,6 @@ class CartService {
         endDate: { $gte: new Date() },
       }).lean();
 
-      console.log("Discount code:", discount_code);
-      console.log("Discount repo:", discountRepo);
-      
-      console.log("Discount code 1:", discount);
-
-      if (discount) {
-        if (discount.usedByUsers?.some(id => id.toString() === userId.toString())) {
-          return {
-            code: 400,
-            message: "Bạn đã sử dụng mã giảm giá này rồi.",
-            status: "error",
-          };
-        }
-      }
-
-
       if (discount) {
         if (discount.minOrderValue && total < discount.minOrderValue) {
           return {
@@ -520,7 +506,10 @@ class CartService {
         if (discount.discountType === "percentage") {
           discountAmount = (discount.discountValue / 100) * total;
           if (discount.maxDiscountAmount) {
-            discountAmount = Math.min(discountAmount, discount.maxDiscountAmount);
+            discountAmount = Math.min(
+              discountAmount,
+              discount.maxDiscountAmount
+            );
           }
         } else if (discount.discountType === "fixed") {
           discountAmount = discount.discountValue;
@@ -528,7 +517,6 @@ class CartService {
           discountAmount = shippingFee;
         }
       }
-
 
     }
    
@@ -601,7 +589,6 @@ class CartService {
         }
       );
     }
-
 
 
     // await currentCart.deleteOne()
@@ -872,6 +859,8 @@ class CartService {
 
   static async deleteUserCart({ userId, productId, variantId }) {
     try {
+      console.log("Deleting from cart:", { userId, productId, variantId });
+
       const userExists = await Account.exists({ _id: userId });
       if (!userExists) {
         throw new NotFoundError("User not found");
@@ -889,33 +878,45 @@ class CartService {
         cart_state: "active",
       };
 
-      let pullCondition = { productId };
+      // Tìm giỏ hàng trước khi xóa để kiểm tra
+      const userCart = await cart.findOne(query);
+      if (!userCart) {
+        throw new NotFoundError("Cart not found");
+      }
 
-      // Nếu có variantId, thêm điều kiện tìm kiếm
+      console.log(
+        "Current cart products:",
+        JSON.stringify(userCart.cart_products, null, 2)
+      );
+
+      let pullCondition;
+
+      // Xây dựng điều kiện xóa dựa trên sự hiện diện của variantId
       if (variantId) {
+        // Với sản phẩm có biến thể
+        console.log(`Deleting product ${productId} with variant ${variantId}`);
         pullCondition = {
-          productId,
+          productId: productId,
           detailsVariantId: variantId,
         };
       } else {
+        // Với sản phẩm không có biến thể
+        console.log(`Deleting product ${productId} without variant`);
         pullCondition = {
           productId,
-          $or: [
-            { detailsVariantId: null },
-            { detailsVariantId: { $exists: false } }
-          ]
+          detailsVariantId: { $exists: false }, // Không có biến thể
         };
       }
 
 
-      const updateSet = {
+      console.log("Pull condition:", JSON.stringify(pullCondition, null, 2));
+
+      // Thực hiện xóa sản phẩm khỏi giỏ hàng
+      const result = await cart.updateOne(query, {
         $pull: {
           cart_products: pullCondition,
         },
       };
-
-      console.log("Update set:", updateSet);
-
 
       const deleteCart = await cart.updateOne(query, updateSet);
       return deleteCart;
@@ -928,8 +929,6 @@ class CartService {
   //get cart
   static async getListUserCart({ userId }) {
     try {
-      console.log("Getting cart for user:", userId);
-
       // Tìm giỏ hàng
       const userCart = await cart.findOne({
         cart_userId: userId,
@@ -939,8 +938,6 @@ class CartService {
       if (!userCart) {
         return null;
       }
-
-      console.log("Raw cart data:", JSON.stringify(userCart, null, 2));
 
       // Lấy danh sách productIds để truy vấn một lần
       const productIds = userCart.cart_products.map((item) => item.productId);
