@@ -470,7 +470,7 @@ class CartService {
       );
     }
 
-    const shippingFee = 35;
+    const shippingFee = 35000;
     total += shippingFee;
 
     // Kiểm tra mã giảm giá
@@ -484,6 +484,22 @@ class CartService {
         startDate: { $lte: new Date() },
         endDate: { $gte: new Date() },
       }).lean();
+
+      console.log("Discount code:", discount_code);
+      console.log("Discount repo:", discountRepo);
+
+      console.log("Discount code 1:", discount);
+
+      if (discount) {
+        if (discount.usedByUsers?.some(id => id.toString() === userId.toString())) {
+          return {
+            code: 400,
+            message: "Bạn đã sử dụng mã giảm giá này rồi.",
+            status: "error",
+          };
+        }
+      }
+
 
       if (discount) {
         if (discount.minOrderValue && total < discount.minOrderValue) {
@@ -519,7 +535,7 @@ class CartService {
       }
 
     }
-   
+
 
     console.log("Discount amount:", discountAmount);
 
@@ -591,7 +607,15 @@ class CartService {
     }
 
 
-    // await currentCart.deleteOne()
+    currentCart.cart_products = currentCart.cart_products.filter(p => !p.isSelected);
+
+   
+    if (currentCart.cart_products.length === 0) {
+      await currentCart.deleteOne();
+    } else {
+      await currentCart.save();
+    }
+
     return newBill;
   }
 
