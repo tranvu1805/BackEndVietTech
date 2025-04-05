@@ -8,21 +8,39 @@ const mongoose = require("mongoose");
 class DiscountService {
 
   static async createDiscount(data) {
-    const { code } = data;
+    // Chuẩn hóa input từ form HTML
+    const cleanedData = {
+      ...data,
+      isDraft: data.isDraft === "on",
+      discountValue: Number(data.discountValue),
+      maxDiscountAmount: data.maxDiscountAmount ? Number(data.maxDiscountAmount) : undefined,
+      minOrderValue: data.minOrderValue ? Number(data.minOrderValue) : undefined,
+      usageLimit: data.usageLimit ? Number(data.usageLimit) : undefined,
+      appliedProducts: Array.isArray(data.appliedProducts)
+        ? data.appliedProducts
+        : data.appliedProducts ? [data.appliedProducts] : [],
+      appliedCategories: Array.isArray(data.appliedCategories)
+        ? data.appliedCategories
+        : data.appliedCategories ? [data.appliedCategories] : [],
+    };
 
-    const existingDiscount = await discountRepo.findOne({ code });
-    if (existingDiscount) {
-      return {
-        statusCode: 400,
-        message: "Discount code already exists",
-        status: "error",
-      };
+    const { code } = cleanedData;
+
+    if (code) {
+      const existingDiscount = await discountRepo.findOne({ code });
+      if (existingDiscount) {
+        return {
+          statusCode: 400,
+          message: "Mã khuyến mãi đã tồn tại",
+          status: "error",
+        };
+      }
     }
 
-    const newDiscount = await discountRepo.create(data);
+    const newDiscount = await discountRepo.create(cleanedData);
 
     return {
-      message: "Discount code created successfully",
+      message: "Tạo mã khuyến mãi thành công",
       statusCode: 201,
       metadata: newDiscount,
     };
@@ -41,20 +59,21 @@ class DiscountService {
     };
   }
 
-  static async updateDiscount(oldCode, updateData) {
+  static async updateDiscount(discountId, updateData) {
     if (updateData.code) {
       const existingDiscount = await discountRepo.findOne({ code: updateData.code });
-      if (existingDiscount && existingDiscount.code !== oldCode) {
+
+      if (existingDiscount && existingDiscount._id.toString() !== discountId) {
         return {
           statusCode: 400,
-          message: "Discount code already exists",
+          message: "Mã giảm giá đã tồn tại",
           status: "error",
         };
       }
     }
 
-    const updatedDiscount = await discountRepo.findOneAndUpdate(
-      { code: oldCode },
+    const updatedDiscount = await discountRepo.findByIdAndUpdate(
+      discountId,
       { $set: updateData },
       { new: true }
     );
@@ -62,17 +81,18 @@ class DiscountService {
     if (!updatedDiscount) {
       return {
         statusCode: 404,
-        message: "Discount code not found",
+        message: "Không tìm thấy khuyến mãi",
         status: "error",
       };
     }
 
     return {
-      message: "Discount updated successfully",
+      message: "Cập nhật khuyến mãi thành công",
       statusCode: 200,
       metadata: updatedDiscount,
     };
   }
+
 
   static async deleteDiscount(code) {
     const discount = await discountRepo.findOneAndDelete({ code });

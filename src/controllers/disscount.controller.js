@@ -7,6 +7,8 @@ const DiscountService = require("../services/disscount.service");
 
 class DiscountController {
     static async createDiscount(req, res, next) {
+        console.log("Create discount request body:", req.body);
+
         try {
             const data = req.body;
             const result = await DiscountService.createDiscount(data);
@@ -128,6 +130,26 @@ class DiscountController {
             res.status(500).send("Lỗi khi load trang tạo khuyến mãi.");
         }
     }
+
+    static async getEditDiscountPage(req, res) {
+        try {
+            const discount = await discountRepo.findById(req.params.id)
+                .populate('appliedProducts')
+                .populate('appliedCategories');
+
+            if (!discount) {
+                return res.status(404).send('Khuyến mãi không tồn tại');
+            }
+
+            res.render('admin/discount-form', {
+                isEdit: true,
+                discount,
+            });
+        } catch (err) {
+            console.error('Lỗi lấy khuyến mãi để sửa:', err);
+            res.status(500).send('Lỗi server');
+        }
+    };
 }
 
 module.exports = DiscountController;

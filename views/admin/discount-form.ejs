@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Quản Trị Hệ Thống - Thêm Mới Khuyến Mãi</title>
+    <title>Quản Trị Hệ Thống - <%= isEdit ? 'Chỉnh sửa' : 'Thêm Mới' %> Khuyến Mãi</title>
     <link rel="icon" href="/uploads/mini_logo.ico" type="image/png">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,7 +26,9 @@
                 <div class="col-md-10 col-lg-10 ms-auto main-content">
                     <!-- Top Navbar -->
                     <nav class="top-navbar">
-                        <h4 class="mb-0">Thêm Mới Khuyến Mãi</h4>
+                        <h4 class="mb-0">
+                            <%= isEdit ? 'Chỉnh sửa' : 'Thêm Mới' %> Khuyến Mãi
+                        </h4>
                         <div class="d-flex align-items-center">
                             <div class="me-3">
                                 <button class="notification-btn" type="button">
@@ -59,7 +61,8 @@
                     <!-- Page Header -->
                     <div class="page-header d-flex justify-content-between align-items-center">
                         <h5 class="page-title">
-                            <i class="fas fa-tag me-2 text-primary"></i>Thêm khuyến mãi mới
+                            <i class="fas fa-tag me-2 text-primary"></i>
+                            <%= isEdit ? 'Chỉnh sửa khuyến mãi' : 'Thêm khuyến mãi mới' %>
                         </h5>
                         <a href="/v1/api/admin/discounts/list" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
@@ -69,7 +72,10 @@
                     <!-- Add Discount Form -->
                     <div class="card shadow-sm">
                         <div class="card-body">
-                            <form id="addDiscountForm" action="/v1/api/admin/discounts/create" method="POST">
+                            <form id="addDiscountForm"
+                                action="<%= isEdit ? '/v1/api/disscount/' + discount._id : '/v1/api/disscount/' %>"
+                                method="<%= isEdit ? 'PUT' : 'POST' %>" enctype="multipart/form-data">
+
                                 <div class="row g-4">
                                     <!-- Thông tin cơ bản -->
                                     <div class="col-lg-8">
@@ -84,8 +90,10 @@
                                                     <div class="col-md-6">
                                                         <label for="name" class="form-label">Tên khuyến mãi <span
                                                                 class="text-danger">*</span></label>
-                                                        <input type="text" class="form-control" id="name" name="name"
-                                                            required placeholder="VD: Khuyến mãi mùa hè">
+                                                        <input type="text" id="name" name="name" class="form-control"
+                                                            value="<%= discount?.name || '' %>" required
+                                                            placeholder="VD: Khuyến mãi mùa hè">
+
                                                     </div>
 
                                                     <!-- Mã code -->
@@ -93,7 +101,9 @@
                                                         <label for="code" class="form-label">Mã giảm giá</label>
                                                         <div class="input-group">
                                                             <input type="text" class="form-control" id="code"
-                                                                name="code" placeholder="VD: SUMMER2025">
+                                                                name="code" value="<%= discount?.code || '' %>"
+                                                                placeholder="VD: SUMMER2025">
+
                                                             <button class="btn btn-outline-secondary" type="button"
                                                                 id="generateCode">
                                                                 <i class="fas fa-magic me-1"></i> Tạo mã
@@ -107,8 +117,10 @@
                                                     <div class="col-12">
                                                         <label for="description" class="form-label">Mô tả</label>
                                                         <textarea class="form-control" id="description"
-                                                            name="description" rows="3"
-                                                            placeholder="Mô tả chi tiết về khuyến mãi này..."></textarea>
+                                                            name="description"
+                                                            rows="3"><%= discount?.description || '' %></textarea>
+
+
                                                     </div>
 
                                                     <!-- Loại khuyến mãi -->
@@ -117,12 +129,18 @@
                                                             <span class="text-danger">*</span></label>
                                                         <select class="form-select" id="discountType"
                                                             name="discountType" required>
-                                                            <option value="" selected disabled>Chọn loại khuyến mãi
-                                                            </option>
-                                                            <option value="percentage">Giảm theo phần trăm (%)</option>
-                                                            <option value="fixed">Giảm số tiền cố định (₫)</option>
-                                                            <option value="shipping">Miễn phí vận chuyển</option>
+                                                            <option value="" disabled <%=!discount?.discountType
+                                                                ? 'selected' : '' %>>Chọn loại khuyến mãi</option>
+                                                            <option value="percentage"
+                                                                <%=discount?.discountType==='percentage' ? 'selected'
+                                                                : '' %>>Phần trăm</option>
+                                                            <option value="fixed" <%=discount?.discountType==='fixed'
+                                                                ? 'selected' : '' %>>Số tiền cố định (₫)</option>
+                                                            <option value="shipping"
+                                                                <%=discount?.discountType==='shipping' ? 'selected' : ''
+                                                                %>>Miễn phí vận chuyển</option>
                                                         </select>
+
                                                     </div>
 
                                                     <!-- Giá trị khuyến mãi -->
@@ -131,7 +149,9 @@
                                                                 class="text-danger">*</span></label>
                                                         <div class="input-group">
                                                             <input type="number" class="form-control" id="discountValue"
-                                                                name="discountValue" min="0" required>
+                                                                name="discountValue" min="0"
+                                                                value="<%= discount?.discountValue || '' %>">
+
                                                             <span class="input-group-text" id="valueSymbol">%</span>
                                                         </div>
                                                     </div>
@@ -145,7 +165,8 @@
                                                                     class="far fa-calendar-alt"></i></span>
                                                             <input type="datetime-local"
                                                                 class="form-control date-picker" id="startDate"
-                                                                name="startDate" required>
+                                                                name="startDate"
+                                                                value="<%= discount?.startDate ? new Date(discount.startDate).toISOString().slice(0,16) : '' %>">
                                                         </div>
                                                     </div>
 
@@ -158,7 +179,8 @@
                                                                     class="far fa-calendar-alt"></i></span>
                                                             <input type="datetime-local"
                                                                 class="form-control date-picker" id="endDate"
-                                                                name="endDate" required>
+                                                                name="endDate"
+                                                                value="<%= discount?.endDate ? new Date(discount.endDate).toISOString().slice(0,16) : '' %>">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -179,7 +201,9 @@
                                                             tối thiểu</label>
                                                         <div class="input-group">
                                                             <input type="number" class="form-control" id="minOrderValue"
-                                                                name="minOrderValue" min="0">
+                                                                name="minOrderValue" min="0"
+                                                                value="<%= discount?.minOrderValue || '' %>">
+
                                                             <span class="input-group-text">₫</span>
                                                         </div>
                                                         <div class="form-text">Để trống nếu không giới hạn</div>
@@ -191,7 +215,9 @@
                                                             tối đa</label>
                                                         <div class="input-group">
                                                             <input type="number" class="form-control"
-                                                                id="maxDiscountAmount" name="maxDiscountAmount" min="0">
+                                                                id="maxDiscountAmount" name="maxDiscountAmount" min="0"
+                                                                value="<%= discount?.maxDiscountAmount || '' %>">
+
                                                             <span class="input-group-text">₫</span>
                                                         </div>
                                                         <div class="form-text">Chỉ áp dụng cho loại giảm giá phần trăm
@@ -203,7 +229,9 @@
                                                         <label for="usageLimit" class="form-label">Giới hạn số lần sử
                                                             dụng</label>
                                                         <input type="number" class="form-control" id="usageLimit"
-                                                            name="usageLimit" min="1">
+                                                            name="usageLimit" min="1"
+                                                            value="<%= discount?.usageLimit || '' %>">
+
                                                         <div class="form-text">Để trống nếu không giới hạn</div>
                                                     </div>
 
@@ -213,11 +241,17 @@
                                                             hàng</label>
                                                         <select class="form-select" id="customerType"
                                                             name="customerType">
-                                                            <option value="all">Tất cả khách hàng</option>
-                                                            <option value="new">Khách hàng mới</option>
-                                                            <option value="existing">Khách hàng hiện có</option>
-                                                            <option value="vip">Khách hàng VIP</option>
+                                                            <option value="all" <%=discount?.customerType==='all'
+                                                                ? 'selected' : '' %>>Tất cả khách hàng</option>
+                                                            <option value="new" <%=discount?.customerType==='new'
+                                                                ? 'selected' : '' %>>Khách hàng mới</option>
+                                                            <option value="existing"
+                                                                <%=discount?.customerType==='existing' ? 'selected' : ''
+                                                                %>>Khách hàng hiện có</option>
+                                                            <option value="vip" <%=discount?.customerType==='vip'
+                                                                ? 'selected' : '' %>>Khách hàng VIP</option>
                                                         </select>
+
                                                     </div>
 
                                                     <!-- Phạm vi áp dụng -->
@@ -225,14 +259,18 @@
                                                         <label class="form-label">Phạm vi áp dụng</label>
                                                         <div class="form-check">
                                                             <input class="form-check-input" type="radio" name="applyTo"
-                                                                id="applyToAll" value="all" checked>
+                                                                id="applyToAll" value="all" <%=discount?.applyTo==='all'
+                                                                || !discount?.applyTo ? 'checked' : '' %>>
                                                             <label class="form-check-label" for="applyToAll">
                                                                 Áp dụng cho tất cả sản phẩm
                                                             </label>
                                                         </div>
                                                         <div class="form-check">
+
                                                             <input class="form-check-input" type="radio" name="applyTo"
-                                                                id="applyToSpecificProducts" value="specific_products">
+                                                                id="applyToSpecificProducts" value="specific_products"
+                                                                <%=discount?.applyTo==='specific_products' ? 'checked'
+                                                                : '' %>>
                                                             <label class="form-check-label"
                                                                 for="applyToSpecificProducts">
                                                                 Áp dụng cho sản phẩm cụ thể
@@ -241,7 +279,9 @@
                                                         <div class="form-check">
                                                             <input class="form-check-input" type="radio" name="applyTo"
                                                                 id="applyToSpecificCategories"
-                                                                value="specific_categories">
+                                                                value="specific_categories"
+                                                                <%=discount?.applyTo==='specific_categories' ? 'checked'
+                                                                : '' %>>
                                                             <label class="form-check-label"
                                                                 for="applyToSpecificCategories">
                                                                 Áp dụng cho danh mục cụ thể
@@ -341,8 +381,11 @@
                                                 <div class="mb-3">
                                                     <label class="form-label">Trạng thái</label>
                                                     <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" id="isDraft"
-                                                            name="isDraft" checked>
+                                                        <input type="checkbox" name="isDraft" id="isDraft"
+                                                            class="form-check-input" <%=discount?.isDraft !==false
+                                                            ? 'checked' : '' %>>
+
+
                                                         <label class="form-check-label" for="isDraft">
                                                             <span class="text-success" id="statusLabel">Bản nháp</span>
                                                         </label>
@@ -418,6 +461,87 @@
                 dateFormat: "Y-m-d H:i",
                 time_24hr: true
             });
+
+            document.getElementById('addDiscountForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const form = e.target;
+                const formData = new FormData(form);
+
+                const apiUrl = form.getAttribute('action');
+                const isEdit = apiUrl.includes('/disscount/') && form.getAttribute('method') !== 'POST';
+
+                const accessToken = localStorage.getItem('accessToken');
+                const userId = localStorage.getItem('userId');
+                const apiKey = 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a1b...'; // thay bằng key thật
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-1"></i> Đang lưu...';
+                submitBtn.disabled = true;
+
+
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: isEdit ? 'PUT' : 'POST',
+                        body: JSON.stringify(Object.fromEntries(formData)),
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'authorization': accessToken,
+                            'x-client-id': userId,
+                            'x-api-key': apiKey
+                        }
+                    });
+
+                    const data = await response.json();
+                    console.log('Response:', data);
+                    console.log("Status:", response);
+
+                    if (response.ok && data.statusCode === 200) {
+                        showModal(`Khuyến mãi đã được ${isEdit ? 'cập nhật' : 'thêm'} thành công!`, true);
+
+                        setTimeout(() => {
+                            window.location.href = '/v1/api/admin/discounts/list';
+                        }, 1500);
+                    } else {
+                        showModal(data.message || 'Không thể lưu khuyến mãi!', false);
+                    }
+
+                } catch (err) {
+                    console.error('❌ Submit error:', err);
+                    showToast('Lỗi!', 'Đã xảy ra lỗi kết nối. Vui lòng thử lại!', 'error');
+                }
+
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+
+
+            function showToast(title, message, type = 'success') {
+                const container = document.querySelector('.toast-container') || (() => {
+                    const c = document.createElement('div');
+                    c.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                    c.style.zIndex = 9999;
+                    document.body.appendChild(c);
+                    return c;
+                })();
+
+                const toast = document.createElement('div');
+                toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : 'success'} border-0`;
+                toast.setAttribute('role', 'alert');
+                toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        <strong>${title}</strong> ${message}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Đóng"></button>
+    </div>
+  `;
+                container.appendChild(toast);
+                new bootstrap.Toast(toast, { delay: 3000 }).show();
+            }
+
 
             // Hiển thị/ẩn container lựa chọn sản phẩm/danh mục
             document.querySelectorAll('input[name="applyTo"]').forEach(radio => {
@@ -637,7 +761,44 @@
         }
 
 
+        function showModal(message, isSuccess = true) {
+            const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
+            const modalTitle = document.getElementById('notificationModalLabel');
+            const modalBody = document.getElementById('notificationMessage');
+
+            modalTitle.textContent = isSuccess ? 'Thành công' : 'Thất bại';
+            modalBody.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas ${isSuccess ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'} fa-2x me-3"></i>
+            <span>${message}</span>
+        </div>
+    `;
+
+            modal.show();
+        }
+
+
     </script>
+
+    <!-- Modal Thông báo -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationModalLabel">Thông báo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body" id="notificationMessage">
+                    <!-- Nội dung sẽ được cập nhật bằng JS -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đã hiểu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

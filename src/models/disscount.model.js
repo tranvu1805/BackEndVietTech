@@ -45,6 +45,13 @@ const DiscountSchema = new mongoose.Schema(
                 ref: "Category",
             },
         ],
+        usedByUsers: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Account'
+            }
+        ],
+
 
         usageLimit: { type: Number },
         usageCount: { type: Number, default: 0 },

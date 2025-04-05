@@ -235,37 +235,52 @@
                         </td>
                     </tr>
                     <% }) %>
-                        <tr class="total-row">
-                            <td colspan="4" class="text-left">Tổng cộng</td>
-                            <td class="text-right" colspan="2">
-                                <%= (bill.total + (bill.discount_amount || 0)).toLocaleString() %> ₫
-                            </td>
-                        </tr>
-                        <% if (bill.discount_amount && bill.discount_amount> 0) { %>
+
+                        <% const shipFee=bill.shipping_fee || 0; %>
+
+                            <!-- Hiển thị phí vận chuyển -->
                             <tr>
-                                <td colspan="4" class="text-left">Mã giảm giá: <strong>
-                                        <%= bill.discount_code %>
-                                    </strong></td>
+                                <td colspan="4" class="text-left">Phí vận chuyển</td>
                                 <td class="text-right" colspan="2">
-                                    -<%= bill.discount_amount.toLocaleString() %> ₫
+                                    <%= shipFee.toLocaleString() %> ₫
                                 </td>
                             </tr>
+
+                            <!-- Tổng cộng đã bao gồm phí vận chuyển -->
                             <tr class="total-row">
-                                <td colspan="4" class="text-left">Tổng thanh toán sau giảm</td>
+                                <td colspan="4" class="text-left">Tổng cộng</td>
                                 <td class="text-right" colspan="2">
-                                    <%= bill.total.toLocaleString() %> ₫
+                                    <%= (bill.total + (bill.discount_amount || 0)).toLocaleString() %> ₫
                                 </td>
                             </tr>
-                            <% } %>
 
-
+                            <% if (bill.discount_amount && bill.discount_amount> 0) { %>
                                 <tr>
-                                    <td colspan="6" class="text-left" style="border-bottom: none; font-style: italic;">
-                                        Bằng chữ: <%= totalInWords %>
+                                    <td colspan="4" class="text-left">
+                                        Mã giảm giá: <strong>
+                                            <%= bill.discount_code %>
+                                        </strong>
+                                    </td>
+                                    <td class="text-right" colspan="2">
+                                        -<%= bill.discount_amount.toLocaleString() %> ₫
                                     </td>
                                 </tr>
+                                <tr class="total-row">
+                                    <td colspan="4" class="text-left">Tổng thanh toán sau giảm</td>
+                                    <td class="text-right" colspan="2">
+                                        <%= bill.total.toLocaleString() %> ₫
+                                    </td>
+                                </tr>
+                                <% } %>
 
+                                    <tr>
+                                        <td colspan="6" class="text-left"
+                                            style="border-bottom: none; font-style: italic;">
+                                            Bằng chữ: <%= totalInWords %>
+                                        </td>
+                                    </tr>
             </tbody>
+
         </table>
 
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">

@@ -483,6 +483,22 @@ class CartService {
         endDate: { $gte: new Date() },
       }).lean();
 
+      console.log("Discount code:", discount_code);
+      console.log("Discount repo:", discountRepo);
+      
+      console.log("Discount code 1:", discount);
+
+      if (discount) {
+        if (discount.usedByUsers?.some(id => id.toString() === userId.toString())) {
+          return {
+            code: 400,
+            message: "Bạn đã sử dụng mã giảm giá này rồi.",
+            status: "error",
+          };
+        }
+      }
+
+
       if (discount) {
         if (discount.minOrderValue && total < discount.minOrderValue) {
           return {
@@ -513,7 +529,11 @@ class CartService {
         }
       }
 
+
     }
+   
+
+    console.log("Discount amount:", discountAmount);
 
     total -= discountAmount; // Trừ vào tổng tiền
 
@@ -575,9 +595,13 @@ class CartService {
     if (discount) {
       await discountRepo.updateOne(
         { _id: discount._id },
-        { $inc: { usageCount: 1 } }
+        {
+          $inc: { usageCount: 1 },
+          $addToSet: { usedByUsers: userId }, // 👈 chỉ thêm nếu chưa có
+        }
       );
     }
+
 
 
     // await currentCart.deleteOne()
@@ -853,6 +877,13 @@ class CartService {
         throw new NotFoundError("User not found");
       }
 
+      console.log("Deleting product from cart:", {
+        userId,
+        productId,
+        variantId,
+      });
+
+
       const query = {
         cart_userId: userId,
         cart_state: "active",
@@ -869,15 +900,22 @@ class CartService {
       } else {
         pullCondition = {
           productId,
-          detailsVariantId: { $exists: false }, // Không có biến thể
+          $or: [
+            { detailsVariantId: null },
+            { detailsVariantId: { $exists: false } }
+          ]
         };
       }
+
 
       const updateSet = {
         $pull: {
           cart_products: pullCondition,
         },
       };
+
+      console.log("Update set:", updateSet);
+
 
       const deleteCart = await cart.updateOne(query, updateSet);
       return deleteCart;
