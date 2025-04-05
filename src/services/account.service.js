@@ -279,27 +279,39 @@ class AccountService {
     }
   }
 
-  /** Đổi mật khẩu khi có mật khẩu mới */
-  static async changePassword(accountId, newPassword) {
-    try {
-      if (!accountId || !newPassword) throw new Error("Thiếu thông tin cần thiết!");
-
-      // Mã hóa mật khẩu mới
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-      // Cập nhật mật khẩu mới vào database
-      const updatedAccount = await accountModel.findByIdAndUpdate(accountId, { password: hashedPassword }, { new: true });
-
-      if (!updatedAccount) {
-        return { code: 404, message: "Tài khoản không tồn tại!", status: "error" };
-      }
-
-      return { code: 200, message: "Mật khẩu đã được cập nhật thành công!", status: "success" };
-    } catch (error) {
-      console.error("❌ Lỗi khi đổi mật khẩu:", error);
-      return { code: 500, message: error.message || "Lỗi hệ thống!", status: "error" };
+/** Đổi mật khẩu có kiểm tra mật khẩu cũ */
+static async changePassword(accountId, oldPassword, newPassword) {
+  try {
+    if (!accountId || !oldPassword || !newPassword) {
+      throw new Error("Thiếu thông tin cần thiết!");
     }
+
+    // Tìm tài khoản theo ID
+    const account = await accountModel.findById(accountId);
+    if (!account) {
+      return { code: 404, message: "Tài khoản không tồn tại!", status: "error" };
+    }
+
+    // So sánh mật khẩu cũ
+    const isMatch = await bcrypt.compare(oldPassword, account.password);
+    if (!isMatch) {
+      return { code: 400, message: "Mật khẩu cũ không đúng!", status: "error" };
+    }
+
+    // Mã hóa mật khẩu mới
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Cập nhật mật khẩu mới
+    account.password = hashedPassword;
+    await account.save();
+
+    return { code: 200, message: "Mật khẩu đã được cập nhật thành công!", status: "success" };
+  } catch (error) {
+    console.error("❌ Lỗi khi đổi mật khẩu:", error);
+    return { code: 500, message: error.message || "Lỗi hệ thống!", status: "error" };
   }
+}
+
 }
 
 module.exports = AccountService;
