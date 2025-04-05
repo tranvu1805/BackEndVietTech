@@ -940,7 +940,7 @@ class CartService {
         $pull: {
           cart_products: pullCondition,
         },
-      };
+      });
 
       const deleteCart = await cart.updateOne(query, updateSet);
       return deleteCart;
