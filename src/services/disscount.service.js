@@ -60,15 +60,48 @@ class DiscountService {
   }
 
   static async updateDiscount(discountId, updateData) {
-    if (updateData.code) {
-      const existingDiscount = await discountRepo.findOne({ code: updateData.code });
+    const currentDiscount = await discountRepo.findById(discountId);
 
-      if (existingDiscount && existingDiscount._id.toString() !== discountId) {
+    if (!currentDiscount) {
+      return {
+        statusCode: 404,
+        message: "Không tìm thấy khuyến mãi",
+        status: "error",
+      };
+    }
+
+    // Nếu mã code được cập nhật
+    if (updateData.code && updateData.code !== currentDiscount.code) {
+      const existingDiscount = await discountRepo.findOne({
+        code: updateData.code,
+        _id: { $ne: discountId }
+      });
+
+      if (existingDiscount) {
         return {
           statusCode: 400,
           message: "Mã giảm giá đã tồn tại",
           status: "error",
         };
+      }
+    }
+
+    // Giả sử discount đã được áp dụng thì không cho sửa code hoặc giá trị giảm
+    const hasBeenUsed = currentDiscount.usageCount > 0;
+    const sensitiveFields = ['code', 'discountValue', 'discountType'];
+
+    if (hasBeenUsed) {
+      for (const field of sensitiveFields) {
+        if (
+          updateData[field] !== undefined &&
+          updateData[field] !== currentDiscount[field]
+        ) {
+          return {
+            statusCode: 400,
+            message: `Không thể thay đổi trường '${field}' vì mã khuyến mãi đã được sử dụng.`,
+            status: "error",
+          };
+        }
       }
     }
 
@@ -78,20 +111,13 @@ class DiscountService {
       { new: true }
     );
 
-    if (!updatedDiscount) {
-      return {
-        statusCode: 404,
-        message: "Không tìm thấy khuyến mãi",
-        status: "error",
-      };
-    }
-
     return {
       message: "Cập nhật khuyến mãi thành công",
       statusCode: 200,
       metadata: updatedDiscount,
     };
   }
+
 
 
   static async deleteDiscount(code) {

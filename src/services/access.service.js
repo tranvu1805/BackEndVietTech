@@ -93,9 +93,9 @@ static async login({ username, password }) {
       const publicKey = crypto.randomBytes(64).toString("hex");
 
       const tokens = await createToKenPair(
-        { userId: account._id, email },
+        { userId: account._id, email, role: account.role_id.name, },
         publicKey,
-        privateKey
+        privateKey,
       );
 
       await KeyTokenService.createKeyToken({

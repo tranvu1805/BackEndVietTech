@@ -10,6 +10,7 @@ const productModel = require("../models/product.model");
 
 const detailsVariantModel = require("../models/detailsVariant.model");
 const attributeModel = require("../models/attribute.model");
+const { billRepo } = require("../models/bill.model");
 
 
 
@@ -252,7 +253,7 @@ const getAllProducts_Admin = async (req, res) => {
             minPrice,
             maxPrice,
             page = 1,
-            limit = 5,
+            limit = 8,
             sort
         } = req.query;
 
@@ -415,107 +416,130 @@ const toggleProductStatus_Admin = async (req, res) => {
     }
 };
 
+const hasBeenOrdered = async (productId) => {
+    const bill = await billRepo.findOne({
+        "products.productId": productId
+    });
+    return !!bill;
+};
 
 
 // 🟢 4. Cập nhật sản phẩm
 const updateProduct = async (req, res) => {
     try {
-        let {
-            product_name,
-            product_description,
-            product_price,
-            product_stock,
-            category,
-            combinations,
-            variant_prices,
-            variant_stocks,
-            isDraft,
-            isPulished,
-        } = req.body;
-
-        const product_thumbnail = req.file ? req.file.path : undefined;
-
-        // Tìm sản phẩm
-        const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(404).json({ success: false, message: "Product not found" });
+      let {
+        product_name,
+        product_description,
+        product_price,
+        product_stock,
+        category,
+        combinations,
+        variant_prices,
+        variant_stocks,
+        isDraft,
+        isPulished,
+      } = req.body;
+  
+      const product_thumbnail = req.file ? req.file.path : undefined;
+  
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+        return res.status(404).json({ success: false, message: "Product not found" });
+      }
+  
+      // 👉 Kiểm tra xem đã từng có đơn hàng chưa
+      const isOrdered = await hasBeenOrdered(product._id);
+  
+      if (isOrdered) {
+        // ❌ Không cho sửa những trường quan trọng
+        if (product_name && product_name !== product.product_name) {
+          return res.status(400).json({
+            success: false,
+            message: "Không thể thay đổi tên sản phẩm đã từng bán",
+          });
         }
-
-        // Cập nhật thông tin cơ bản
-        product.product_name = product_name;
-        product.product_description = product_description;
-        product.product_price = product_price;
-        product.product_stock = product_stock;
-        product.category = category;
-        if (product_thumbnail) product.product_thumbnail = product_thumbnail;
-
-        if (combinations && variant_prices && variant_stocks) {
-            try {
-                // Parse lại combinations từ JSON
-                combinations = combinations.map((c, index) => {
-                    const parsedCombination = JSON.parse(c);
-                    return {
-                        combination: parsedCombination,
-                        price: Number(variant_prices[index]),
-                        stock: Number(variant_stocks[index])
-                    };
-                });
-            } catch (err) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Dữ liệu combinations hoặc giá/kho không hợp lệ."
-                });
-            }
-
-            // Tạo lại variant_attributes
-            const attributeMap = {};
-            combinations.forEach(combo => {
-                Object.entries(combo.combination).forEach(([key, value]) => {
-                    if (!attributeMap[key]) attributeMap[key] = new Set();
-                    attributeMap[key].add(value);
-                });
+  
+        if (product_price && product_price != product.product_price) {
+          return res.status(400).json({
+            success: false,
+            message: "Không thể thay đổi giá sản phẩm đã từng bán",
+          });
+        }
+  
+        if (combinations || variant_prices || variant_stocks) {
+          return res.status(400).json({
+            success: false,
+            message: "Không thể cập nhật biến thể sản phẩm đã từng bán",
+          });
+        }
+      }
+  
+      // ✅ Cập nhật các trường được phép
+      product.product_description = product_description || product.product_description;
+      product.product_stock = product_stock || product.product_stock;
+      product.category = category || product.category;
+      if (product_thumbnail) product.product_thumbnail = product_thumbnail;
+  
+      // ✅ Nếu chưa từng bán thì mới cho update biến thể
+      if (!isOrdered && combinations && variant_prices && variant_stocks) {
+        try {
+          combinations = combinations.map((c, index) => {
+            const parsedCombination = JSON.parse(c);
+            return {
+              combination: parsedCombination,
+              price: Number(variant_prices[index]),
+              stock: Number(variant_stocks[index]),
+            };
+          });
+  
+          const attributeMap = {};
+          combinations.forEach(combo => {
+            Object.entries(combo.combination).forEach(([key, value]) => {
+              if (!attributeMap[key]) attributeMap[key] = new Set();
+              attributeMap[key].add(value);
             });
-
-            const variant_attributes = Object.entries(attributeMap).map(([key, valueSet]) => ({
-                variantName: key,
-                values: Array.from(valueSet)
-            }));
-
-            try {
-                // Xoá biến thể cũ
-                await detailsVariantModel.deleteMany({ productId: product._id });
-
-                // Tạo lại biến thể mới
-                const { attributeIds } = await ProductService.createVariantsAndCombinations(
-                    product._id,
-                    variant_attributes,
-                    combinations,
-                    product_name
-                );
-
-                product.attributeIds = attributeIds;
-            } catch (err) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Lỗi khi cập nhật biến thể: " + err.message
-                });
-            }
+          });
+  
+          const variant_attributes = Object.entries(attributeMap).map(([key, valueSet]) => ({
+            variantName: key,
+            values: Array.from(valueSet),
+          }));
+  
+          await detailsVariantModel.deleteMany({ productId: product._id });
+  
+          const { attributeIds } = await ProductService.createVariantsAndCombinations(
+            product._id,
+            variant_attributes,
+            combinations,
+            product.product_name // giữ nguyên name nếu bị khóa
+          );
+  
+          product.attributeIds = attributeIds;
+        } catch (err) {
+          return res.status(400).json({
+            success: false,
+            message: "Lỗi khi cập nhật biến thể: " + err.message,
+          });
         }
-        product.isDraft = isDraft === 'on';
-        product.isPulished = isPulished === 'on';
-
-
-        await product.save();
-        return res.status(200).json({
-            success: true,
-            message: "Cập nhật sản phẩm thành công",
-            product
-        });
+      }
+  
+      product.isDraft = isDraft === 'on';
+      product.isPulished = isPulished === 'on';
+  
+      await product.save();
+      return res.status(200).json({
+        success: true,
+        message: isOrdered
+          ? "Cập nhật giới hạn: sản phẩm đã từng bán nên không thể thay đổi tên, giá và biến thể"
+          : "Cập nhật sản phẩm thành công",
+        product,
+      });
     } catch (error) {
-        console.error("❌ Lỗi updateProduct:", error);
-        return res.status(500).json({ success: false, message: error.message });
+      console.error("❌ Lỗi updateProduct:", error);
+      return res.status(500).json({ success: false, message: error.message });
     }
-};
+  };
+  
 
 
 // 🟢 5. Xóa sản phẩm

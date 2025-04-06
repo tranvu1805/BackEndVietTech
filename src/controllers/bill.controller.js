@@ -107,8 +107,14 @@ class BillController {
     console.log("check limit", limit);
 
     if (search) {
-      filter.order_code = { $regex: search, $options: "i" };
+      const numericSearch = search.replace(/[^0-9]/g, "");
+      if (!isNaN(numericSearch) && numericSearch !== "") {
+        filter.order_code = Number(numericSearch);
+      } else {
+        filter.receiver_name = { $regex: search, $options: "i" };
+      }
     }
+
 
     if (status) {
       filter.status = status;
@@ -301,6 +307,23 @@ class BillController {
     } catch (err) {
       console.error('Error generating invoice PDF:', err);
       next(err);
+    }
+  }
+
+  static async getBillsByUserId(req, res, next) {
+    try {
+      const { userId } = req.params;
+      console.log("userId: ", userId);
+      
+      const bills = await BillService.getBillsByUserId({ userId });
+
+      return res.status(200).json({
+        message: "Lấy danh sách hóa đơn theo userId thành công",
+        statusCode: 200,
+        metadata: bills
+      });
+    } catch (error) {
+      next(error);
     }
   }
 

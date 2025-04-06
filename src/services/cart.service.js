@@ -935,7 +935,7 @@ class CartService {
 
       console.log("Pull condition:", JSON.stringify(pullCondition, null, 2));
 
-      // Thực hiện xóa sản phẩm khỏi giỏ hàng
+
       const result = await cart.updateOne(query, {
         $pull: {
           cart_products: pullCondition,

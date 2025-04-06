@@ -18,14 +18,62 @@ class DiscountController {
         }
     }
 
+    // Trong DiscountController
     static async getAllDiscounts(req, res) {
         try {
-            const response = await DiscountService.getAllDiscounts();
-            return res.status(response.statusCode).json(response);
+            const { search, status, sort, page = 1, limit = 20 } = req.query;
+
+            const filter = {};
+            const now = new Date();
+
+            if (search) {
+                filter.name = { $regex: search, $options: "i" };
+            }
+
+            if (status === "active") {
+                filter.isDraft = false;
+                filter.startDate = { $lte: now };
+                filter.endDate = { $gte: now };
+            } else if (status === "scheduled") {
+                filter.isDraft = false;
+                filter.startDate = { $gt: now };
+            } else if (status === "expired") {
+                filter.isDraft = false;
+                filter.endDate = { $lt: now };
+            } else if (status === "draft") {
+                filter.isDraft = true;
+            }
+
+            const sortOptions = {
+                discount_asc: { discountValue: 1 },
+                discount_desc: { discountValue: -1 },
+                start_date_asc: { startDate: 1 },
+                start_date_desc: { startDate: -1 },
+                name_asc: { name: 1 },
+                name_desc: { name: -1 }
+            };
+
+            const sortQuery = sortOptions[sort] || { createdAt: -1 };
+            const skip = (parseInt(page) - 1) * parseInt(limit);
+
+            const [discounts, total] = await Promise.all([
+                DiscountService.getDiscounts(filter, sortQuery, skip, parseInt(limit)),
+                DiscountService.countDiscounts(filter)
+            ]);
+
+            return res.status(200).json({
+                success: true,
+                total,
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(total / limit),
+                data: discounts
+            });
         } catch (error) {
+            console.error("Lỗi khi getAllDiscounts:", error);
             return res.status(500).json({ message: "Internal Server Error", error });
         }
     }
+
 
     static async updateDiscount(req, res) {
         try {
@@ -150,6 +198,30 @@ class DiscountController {
             res.status(500).send('Lỗi server');
         }
     };
+
+    static async toggleDiscountStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const discount = await discountRepo.findById(id);
+
+            if (!discount) {
+                return res.status(404).json({ success: false, message: "Không tìm thấy khuyến mãi" });
+            }
+
+            discount.isDraft = !discount.isDraft;
+            await discount.save();
+
+            return res.status(200).json({
+                success: true,
+                message: `Đã ${discount.isDraft ? 'chuyển sang Bản nháp' : 'kích hoạt'} thành công`,
+                metadata: discount
+            });
+        } catch (error) {
+            console.error('toggleDiscountStatus error:', error);
+            return res.status(500).json({ success: false, message: "Lỗi server khi cập nhật trạng thái" });
+        }
+    }
+
 }
 
 module.exports = DiscountController;

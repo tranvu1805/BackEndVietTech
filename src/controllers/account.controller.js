@@ -1,6 +1,7 @@
 const AccountService = require("../services/account.service");
 const mongoose = require("mongoose");
 const moment = require("moment");
+const Image = require("../models/image.model");
 
 class AccountController {
   async getAllAccounts(req, res, next) {
@@ -12,7 +13,7 @@ class AccountController {
         role = "",
         status = ""
       } = req.query;
-  
+
       const result = await AccountService.getAllAccounts(
         parseInt(page),
         parseInt(limit),
@@ -20,13 +21,13 @@ class AccountController {
         role,
         status
       );
-  
+
       return result.data; // ✅ Trả toàn bộ data, không chỉ accounts
     } catch (error) {
       return next(error);
     }
   }
-  
+
 
   async getAccount(req, res, next) {
     try {
@@ -92,26 +93,61 @@ class AccountController {
     }
   }
   /** ✅ Đổi mật khẩu sau khi kiểm tra mật khẩu cũ */
-async changePassword(req, res, next) {
-  try {
-    const { accountId, oldPassword, newPassword } = req.body;
+  async changePassword(req, res, next) {
+    try {
+      const { accountId, oldPassword, newPassword } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(accountId)) {
-      return res.status(400).json({ message: "ID tài khoản không hợp lệ!" });
-    }
-    if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: "Thiếu mật khẩu cũ hoặc mới!" });
-    }
-    if (newPassword.length < 6) {
-      return res.status(400).json({ message: "Mật khẩu mới phải có ít nhất 6 ký tự!" });
-    }
+      if (!mongoose.Types.ObjectId.isValid(accountId)) {
+        return res.status(400).json({ message: "ID tài khoản không hợp lệ!" });
+      }
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({ message: "Thiếu mật khẩu cũ hoặc mới!" });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "Mật khẩu mới phải có ít nhất 6 ký tự!" });
+      }
 
-    const result = await AccountService.changePassword(accountId, oldPassword, newPassword);
-    return res.status(result.code).json(result);
-  } catch (error) {
-    return next(error);
+      const result = await AccountService.changePassword(accountId, oldPassword, newPassword);
+      return res.status(result.code).json(result);
+    } catch (error) {
+      return next(error);
+    }
   }
-}
+
+
+  async adminUpdateAccount(req, res) {
+    try {
+      const accountId = req.params.id;
+      const updateData = req.body;
+
+      console.log("file Dtaa", req.file);
+      
+
+      // Nếu có ảnh → upload trước → tạo record image → gán ID vào profile_image
+      if (req.file) {
+        const image = new Image({
+          file_name: req.file.originalname,
+          file_path: req.file.path,
+          file_size: req.file.size,
+          file_type: req.file.mimetype,
+          url: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`,
+        });
+
+        await image.save();
+        updateData.profile_image = image._id; // ⚠️ Gán ObjectId, không phải object
+      }
+
+      const result = await AccountService.updateAccount(accountId, updateData);
+
+      return res.status(result.code).json({
+        success: true,
+        message: result.message,
+        data: result.data
+      });
+    } catch (error) {
+      return res.status(500).json({ message: "Server error", error: error.message });
+    }
+  }
 
 }
 

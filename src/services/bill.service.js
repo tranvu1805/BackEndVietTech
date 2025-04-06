@@ -163,7 +163,49 @@ class BillService {
     }
   }
 
+  static async getBillsByUserId({ userId }) {
+    try {
+      if (!userId) {
+        return {
+          message: "Thiếu userId",
+          bills: []
+        };
+      }
 
+      const bills = await billRepo.find({ user_id : userId }).lean();
+      console.log("bills", bills);
+      
+
+      for (const bill of bills) {
+        for (const product of bill.products) {
+          const productDoc = await productModel.findById(product.productId).lean();
+          product.product_name = productDoc ? productDoc.product_name : "Sản phẩm không tồn tại";
+
+          // Lấy thông tin biến thể nếu có
+          if (product.detailsVariantId) {
+            const detailVariant = await detailsVariantModel
+              .findById(product.detailsVariantId)
+              .populate("variantDetails.variantId", "name")
+              .lean();
+
+            product.variant_attributes = detailVariant?.variantDetails || [];
+          }
+        }
+      }
+
+      return {
+        message: "Lấy danh sách đơn hàng theo userId thành công",
+        bills
+      };
+
+    } catch (error) {
+      return {
+        message: "Internal Server Error",
+        error: error.message || "Lỗi không xác định",
+        bills: []
+      };
+    }
+  }
 
 
 }
