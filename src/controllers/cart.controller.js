@@ -65,7 +65,6 @@ class CartController {
     const { productId, detailsVariantId } = req.body;
 
     console.log("productId", req.body);
-    
 
     new SuccessResponse({
       message: "Cart deleted successfully",
