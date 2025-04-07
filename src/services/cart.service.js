@@ -470,7 +470,7 @@ class CartService {
       );
     }
 
-    const shippingFee = 35000;
+    const shippingFee = 35;
     total += shippingFee;
 
     // Kiểm tra mã giảm giá
@@ -478,28 +478,14 @@ class CartService {
     let discount = null;
 
     if (discount_code) {
-      discount = await discountRepo.findOne({
-        code: discount_code,
-        isDraft: false,
-        startDate: { $lte: new Date() },
-        endDate: { $gte: new Date() },
-      }).lean();
-
-      console.log("Discount code:", discount_code);
-      console.log("Discount repo:", discountRepo);
-
-      console.log("Discount code 1:", discount);
-
-      if (discount) {
-        if (discount.usedByUsers?.some(id => id.toString() === userId.toString())) {
-          return {
-            code: 400,
-            message: "Bạn đã sử dụng mã giảm giá này rồi.",
-            status: "error",
-          };
-        }
-      }
-
+      discount = await discountRepo
+        .findOne({
+          code: discount_code,
+          isDraft: false,
+          startDate: { $lte: new Date() },
+          endDate: { $gte: new Date() },
+        })
+        .lean();
 
       if (discount) {
         if (discount.minOrderValue && total < discount.minOrderValue) {
@@ -533,11 +519,7 @@ class CartService {
           discountAmount = shippingFee;
         }
       }
-
     }
-
-
-    console.log("Discount amount:", discountAmount);
 
     total -= discountAmount; // Trừ vào tổng tiền
 
@@ -599,23 +581,11 @@ class CartService {
     if (discount) {
       await discountRepo.updateOne(
         { _id: discount._id },
-        {
-          $inc: { usageCount: 1 },
-          $addToSet: { usedByUsers: userId }, // 👈 chỉ thêm nếu chưa có
-        }
+        { $inc: { usageCount: 1 } }
       );
     }
 
-
-    currentCart.cart_products = currentCart.cart_products.filter(p => !p.isSelected);
-
-   
-    if (currentCart.cart_products.length === 0) {
-      await currentCart.deleteOne();
-    } else {
-      await currentCart.save();
-    }
-
+    // await currentCart.deleteOne()
     return newBill;
   }
 
@@ -890,13 +860,6 @@ class CartService {
         throw new NotFoundError("User not found");
       }
 
-      console.log("Deleting product from cart:", {
-        userId,
-        productId,
-        variantId,
-      });
-
-
       const query = {
         cart_userId: userId,
         cart_state: "active",
@@ -927,23 +890,40 @@ class CartService {
         // Với sản phẩm không có biến thể
         console.log(`Deleting product ${productId} without variant`);
         pullCondition = {
-          productId,
-          detailsVariantId: { $exists: false }, // Không có biến thể
+          productId: productId,
+          $or: [
+            { detailsVariantId: { $exists: false } },
+            { detailsVariantId: null },
+          ],
         };
       }
 
-
       console.log("Pull condition:", JSON.stringify(pullCondition, null, 2));
 
-
+      // Thực hiện xóa sản phẩm khỏi giỏ hàng
       const result = await cart.updateOne(query, {
         $pull: {
           cart_products: pullCondition,
         },
       });
 
-      const deleteCart = await cart.updateOne(query, updateSet);
-      return deleteCart;
+      console.log("Delete result:", result);
+
+      // Kiểm tra kết quả và cập nhật cart_count_product nếu cần
+      const updatedCart = await cart.findOne(query);
+      if (updatedCart) {
+        updatedCart.cart_count_product = updatedCart.cart_products.length;
+        await updatedCart.save();
+      }
+
+      return {
+        success: result.modifiedCount > 0,
+        message:
+          result.modifiedCount > 0
+            ? "Product removed from cart successfully"
+            : "No product was removed from cart",
+        modifiedCount: result.modifiedCount,
+      };
     } catch (error) {
       console.error("Error deleting from cart:", error);
       throw error;
