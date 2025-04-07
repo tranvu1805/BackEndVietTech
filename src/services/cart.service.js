@@ -584,7 +584,14 @@ class CartService {
         { $inc: { usageCount: 1 } }
       );
     }
-
+    currentCart.cart_products = currentCart.cart_products.filter(
+      (p) => !p.isSelected
+    );
+    if (currentCart.cart_products.length === 0) {
+      await currentCart.deleteOne();
+    } else {
+      await currentCart.save();
+    }
     // await currentCart.deleteOne()
     return newBill;
   }
