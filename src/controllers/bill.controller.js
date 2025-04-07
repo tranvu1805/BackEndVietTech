@@ -28,6 +28,8 @@ class BillController {
     try {
       const { billId } = req.params;
       const { status } = req.body;
+      console.log("check req", req.user);
+      
       const userId = req.user.userId || req.user._id;
       console.log("check userId: ", userId);
 

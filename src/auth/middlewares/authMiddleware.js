@@ -36,20 +36,19 @@ const authentication = async (req, res, next) => {
             return res.redirect("/");
         }
 
-        const account = await accountModel.findById(userId).populate("role_id");
-        if (!account) {
-            console.error("❌ Không tìm thấy người dùng");
-            return res.redirect("/");
-        }
+      
 
 
+
+        const account = await accountModel.findById(decoded.userId).populate("role_id");
+        if (!account) return res.redirect("/");
 
         req.user = {
-            userId,
+            ...decoded,
             username: account.username,
             full_name: account.full_name,
             email: account.email,
-            role: account.role_id?.name || "Unknown" // Gán role vào req.user
+            role: account.role_id?.name || "Unknown"
         };
 
         console.log("✅ Final user object in req.user:", req.user);

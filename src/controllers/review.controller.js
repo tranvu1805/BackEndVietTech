@@ -1,5 +1,7 @@
+const reviewModel = require("../models/review.model");
+const review_reportModel = require("../models/review_report.model");
 const reviewService = require("../services/review.service");
-const mongoose = require('mongoose'); 
+const mongoose = require('mongoose');
 class ReviewController {
     // Thêm review mới
     static async addReview(req, res) {
@@ -73,8 +75,8 @@ class ReviewController {
         }
     }
     // Lấy thống kê số lượng đánh giá và trung bình sao theo product_id
-      // Thống kê số lượng người đánh giá và trung bình sao
-      static async getReviewStatsByProduct(req, res) {
+    // Thống kê số lượng người đánh giá và trung bình sao
+    static async getReviewStatsByProduct(req, res) {
         try {
             const { productId } = req.params;
             const stats = await reviewService.getReviewStatsByProductId(productId);
@@ -84,6 +86,32 @@ class ReviewController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+
+    static async getReviewManagementPage(req, res) {
+        try {
+            const reviews = await reviewModel.find()
+                .populate("account_id", "username")
+                .populate("product_id", "product_name")
+                .populate("image_ids", "url") // Đảm bảo Image schema có field `url`
+                .sort({ createdAt: -1 })
+                .lean();
+
+            const reports = await review_reportModel.find()
+                .populate("account_id", "username")
+                .populate("review_id", "contents_review") // có thể hiển thị nội dung review trong báo cáo nếu cần
+                .sort({ createdAt: -1 })
+                .lean();
+
+            res.render("admin/review-list", {
+                reviews,
+                reports,
+                title: "Quản lý đánh giá sản phẩm"
+            });
+        } catch (err) {
+            console.error("Lỗi khi load trang quản lý đánh giá:", err);
+            res.status(500).send("Đã xảy ra lỗi.");
+        }
+    };
 
 }
 

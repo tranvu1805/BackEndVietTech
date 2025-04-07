@@ -73,7 +73,7 @@ class DiscountController {
             return res.status(500).json({ message: "Internal Server Error", error });
         }
     }
-
+ 
 
     static async updateDiscount(req, res) {
         try {
