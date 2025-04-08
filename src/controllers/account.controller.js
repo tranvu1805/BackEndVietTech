@@ -10,7 +10,7 @@ class AccountController {
         page = 1,
         limit = 10,
         search = "",
-        role = "",
+        role = "Customer",
         status = ""
       } = req.query;
 

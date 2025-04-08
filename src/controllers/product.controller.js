@@ -451,7 +451,6 @@ const updateProduct = async (req, res) => {
       const isOrdered = await hasBeenOrdered(product._id);
   
       if (isOrdered) {
-        // ❌ Không cho sửa những trường quan trọng
         if (product_name && product_name !== product.product_name) {
           return res.status(400).json({
             success: false,
@@ -471,7 +470,7 @@ const updateProduct = async (req, res) => {
             success: false,
             message: "Không thể cập nhật biến thể sản phẩm đã từng bán",
           });
-        }
+        } 
       }
   
       // ✅ Cập nhật các trường được phép

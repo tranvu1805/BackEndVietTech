@@ -170,6 +170,8 @@ class DiscountController {
             const categories = await categoryModel.find().lean();
 
             res.render('admin/discount-form', {
+                isEdit: false,
+                discount: {},
                 products,
                 categories,
             });

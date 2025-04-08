@@ -166,7 +166,8 @@
                                     </div>
                                     <div class="card-body p-0">
                                         <div class="table-responsive">
-                                            <table class="table table-striped table-bordered align-middle mb-0" id="reviewsTable">
+                                            <table class="table table-striped table-bordered align-middle mb-0"
+                                                id="reviewsTable">
 
                                                 <thead class="table-light">
                                                     <tr>
@@ -237,19 +238,31 @@
                                         </div>
                                     </div>
                                     <div class="card-footer d-flex justify-content-between align-items-center">
-                                        <div>Hiển thị <strong>1-10</strong> trong <strong>
-                                                <%= reviews.length %>
-                                            </strong> đánh giá</div>
-                                        <nav aria-label="Page navigation">
+                                        <div>
+                                            Hiển thị <strong>
+                                                <%= (currentReviewPage - 1) * 10 + 1 %> - <%= (currentReviewPage - 1) *
+                                                        10 + reviews.length %>
+                                            </strong>
+                                            trong <strong>
+                                                <%= totalReviews %>
+                                            </strong> đánh giá
+                                        </div>
+
+                                        <nav>
                                             <ul class="pagination mb-0">
-                                                <li class="page-item disabled"><a class="page-link" href="#">Trước</a>
-                                                </li>
-                                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                                <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                                                <% for (let i=1; i <=totalReviewPages; i++) { %>
+                                                    <li
+                                                        class="page-item <%= i === currentReviewPage ? 'active' : '' %>">
+                                                        <a class="page-link"
+                                                            href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, page: i, reportPage: currentReportPage }).toString() %>">
+                                                            <%= i %>
+                                                        </a>
+                                                    </li>
+                                                    <% } %>
                                             </ul>
                                         </nav>
+
+
                                     </div>
                                 </div>
                             </div>
@@ -288,7 +301,8 @@
                                     </div>
                                     <div class="card-body p-0">
                                         <div class="table-responsive">
-                                            <table class="table table-striped table-bordered align-middle mb-0" id="reportsTable">
+                                            <table class="table table-striped table-bordered align-middle mb-0"
+                                                id="reportsTable">
 
                                                 <thead class="table-light">
                                                     <tr>
@@ -345,19 +359,30 @@
                                         </div>
                                     </div>
                                     <div class="card-footer d-flex justify-content-between align-items-center">
-                                        <div>Hiển thị <strong>1-10</strong> trong <strong>
-                                                <%= reports.length %>
-                                            </strong> báo cáo</div>
-                                        <nav aria-label="Page navigation">
+                                        <div>
+                                            Hiển thị <strong>
+                                                <%= (currentReportPage - 1) * 10 + 1 %> - <%= (currentReportPage - 1) *
+                                                        10 + reports.length %>
+                                            </strong>
+                                            trong <strong>
+                                                <%= totalReports %>
+                                            </strong> báo cáo
+                                        </div>
+
+                                        <nav>
                                             <ul class="pagination mb-0">
-                                                <li class="page-item disabled"><a class="page-link" href="#">Trước</a>
-                                                </li>
-                                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                                <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                                                <% for (let i=1; i <=totalReportPages; i++) { %>
+                                                    <li
+                                                        class="page-item <%= i === currentReportPage ? 'active' : '' %>">
+                                                        <a class="page-link"
+                                                            href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, reportPage: i, page: currentReviewPage }).toString() %>">
+                                                            <%= i %>
+                                                        </a>
+                                                    </li>
+                                                    <% } %>
                                             </ul>
                                         </nav>
+
                                     </div>
                                 </div>
                             </div>

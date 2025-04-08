@@ -86,32 +86,50 @@ class ReviewController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
-
     static async getReviewManagementPage(req, res) {
         try {
-            const reviews = await reviewModel.find()
-                .populate("account_id", "username")
-                .populate("product_id", "product_name")
-                .populate("image_ids", "url") // Đảm bảo Image schema có field `url`
-                .sort({ createdAt: -1 })
-                .lean();
+            const page = parseInt(req.query.page) || 1;
+            const reportPage = parseInt(req.query.reportPage) || 1;
+            const limit = 10;
 
-            const reports = await review_reportModel.find()
-                .populate("account_id", "username")
-                .populate("review_id", "contents_review") // có thể hiển thị nội dung review trong báo cáo nếu cần
-                .sort({ createdAt: -1 })
-                .lean();
+            const [totalReviews, reviews, totalReports, reports] = await Promise.all([
+                reviewModel.countDocuments(),
+                reviewModel.find()
+                    .populate("account_id", "username")
+                    .populate("product_id", "product_name")
+                    .populate("image_ids", "url")
+                    .sort({ createdAt: -1 })
+                    .skip((page - 1) * limit)
+                    .limit(limit)
+                    .lean(),
+                review_reportModel.countDocuments(),
+                review_reportModel.find()
+                    .populate("account_id", "username")
+                    .populate("review_id", "contents_review")
+                    .sort({ createdAt: -1 })
+                    .skip((reportPage - 1) * limit)
+                    .limit(limit)
+                    .lean()
+            ]);
 
             res.render("admin/review-list", {
                 reviews,
                 reports,
-                title: "Quản lý đánh giá sản phẩm"
+                totalReviewPages: Math.ceil(totalReviews / limit),
+                totalReportPages: Math.ceil(totalReports / limit),
+                currentReviewPage: page,
+                currentReportPage: reportPage,
+                totalReviews,
+                totalReports,
+                query: req.query
             });
         } catch (err) {
             console.error("Lỗi khi load trang quản lý đánh giá:", err);
             res.status(500).send("Đã xảy ra lỗi.");
         }
-    };
+    }
+
+
 
 }
 

@@ -470,7 +470,7 @@ class CartService {
       );
     }
 
-    const shippingFee = 35;
+    const shippingFee = 35000;
     total += shippingFee;
 
     // Kiểm tra mã giảm giá
