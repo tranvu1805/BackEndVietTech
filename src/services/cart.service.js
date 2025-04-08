@@ -449,12 +449,12 @@ class CartService {
       const date = new Date();
       const createDate = moment(date).format("YYYYMMDDHHmmss");
       const orderInfo = `Thanh toán đơn hàng ${orderCode}`;
-    
+
       let vnp_Params = {
         vnp_Version: "2.1.0",
         vnp_Command: "pay",
         vnp_TmnCode: vnpayConfig.vnp_TmnCode,
-        vnp_Amount: Math.round(total * 100), // VNPay yêu cầu số tiền tính bằng cent
+        vnp_Amount: Math.round(total * 100),
         vnp_CurrCode: "VND",
         vnp_TxnRef: orderCode.toString(),
         vnp_OrderInfo: orderInfo,
@@ -464,14 +464,14 @@ class CartService {
         vnp_IpAddr: "127.0.0.1",
         vnp_CreateDate: createDate,
       };
-    
+
       // 🔹 Loại bỏ các tham số null, undefined hoặc rỗng
       Object.keys(vnp_Params).forEach((key) => {
         if (!vnp_Params[key]) {
           delete vnp_Params[key];
         }
       });
-    
+
       // 🔹 Sắp xếp tham số theo thứ tự alphabet (cần phải sort lại trước khi ký)
       const sortedParams = Object.keys(vnp_Params)
         .sort()
@@ -479,31 +479,35 @@ class CartService {
           acc[key] = vnp_Params[key];
           return acc;
         }, {});
-    
+
       // 🔹 Tạo chuỗi query để ký
-      const signData = Object.keys(sortedParams)
-        .map((key) => `${key}=${encodeURIComponent(sortedParams[key])}`) // Sử dụng encodeURIComponent để mã hóa tham số
+      // const signData = Object.keys(sortedParams)
+      //   .map((key) => `${key}=${encodeURIComponent(sortedParams[key])}`) // Sử dụng encodeURIComponent để mã hóa tham số
+      //   .join("&");
+      const signData = Object.entries(sortedParams)
+        .map(([key, value]) => `${key}=${value}`) // KHÔNG encode
         .join("&");
-    
+
+
       console.log("🔹 Chuỗi signData để ký:", signData);
-    
+
       // 🔹 Ký SHA512 với vnp_HashSecret chính xác
       const hmac = crypto.createHmac("sha512", vnpayConfig.vnp_HashSecret);
       const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
-    
+
       // 🔹 Thêm chữ ký vào tham số
       const finalParams = { ...sortedParams, vnp_SecureHash: signed };
-    
+
       console.log("🔹 Dữ liệu sau khi ký___:", finalParams);
-    
+
       // 🔹 Tạo paymentUrl với mã hóa URL đúng cách
       const paymentUrl = `${vnpayConfig.vnp_Url}?${qs.stringify(finalParams, { encode: true })}`;
-    
+
       console.log("🔹 Payment URL:", paymentUrl);
-      
+
       return { code: 200, status: "redirect", paymentUrl };
-    }    
-    
+    }
+
 
     const newBill = await billRepo.create({
       user_id: currentCart.cart_userId,
