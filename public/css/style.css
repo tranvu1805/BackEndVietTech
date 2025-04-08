@@ -14,6 +14,20 @@ body {
     color: #333;
 }
 
+.fixed-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 16.666667%;
+    /* Tương ứng col-md-2 (2/12) */
+    z-index: 1040;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+
+
 .sidebar {
     background-color: var(--primary-color);
     min-height: 100vh;
@@ -45,7 +59,11 @@ body {
 }
 
 .main-content {
+    margin-left: 16.666667%;
+    /* Tránh bị đè bởi sidebar cố định */
     padding: 20px;
+    overflow-y: auto;
+    height: 100vh;
 }
 
 .page-header {
@@ -53,7 +71,7 @@ body {
     padding-bottom: 15px;
     margin-bottom: 20px;
     display: flex;
-    justify-content: space-between;
+    justify-content: end;
     align-items: center;
 }
 
@@ -79,6 +97,7 @@ body {
     font-weight: 600;
     background-color: rgba(0, 0, 0, 0.02);
     border-top: none;
+    white-space: nowrap;
 }
 
 .table-hover tbody tr:hover {
@@ -143,6 +162,13 @@ body {
     border: 1px solid #ced4da;
 }
 
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff !important;
+    font-weight: bold;
+}
+
+
 .search-box i {
     position: absolute;
     left: 15px;
@@ -177,6 +203,7 @@ body {
     font-size: 0.75rem;
     padding: 3px 8px;
     border-radius: 12px;
+    white-space: nowrap;
 }
 
 .stock-high {
@@ -241,6 +268,11 @@ body {
     padding: 15px;
 }
 
+.container-fluid,
+.row {
+    position: relative;
+}
+
 .mini-container:hover {
     border-radius: 20px;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
@@ -269,3 +301,300 @@ body {
     /* Tăng kích thước hình ảnh hoặc icon khi hover */
 }
 
+
+.switch-toggle {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+}
+
+.switch-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 34px;
+    transition: .4s;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+.switch-toggle input:checked+.switch-slider {
+    background-color: #28a745;
+}
+
+.switch-toggle input:checked+.switch-slider:before {
+    transform: translateX(22px);
+}
+
+.variant-button-wrapper {
+    display: flex;
+    /* justify-content: center;
+    align-items: center; */
+
+}
+
+.sidebar-header {
+    padding: 20px 15px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header img {
+    height: 45px;
+}
+
+.sidebar-menu {
+    padding: 10px 0;
+    list-style: none;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin: 5px 0;
+    padding: 0 10px;
+}
+
+.sidebar-menu li a {
+    color: var(--sidebar-text);
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: all 0.3s;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-menu li a:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-left: 3px solid var(--primary);
+    transform: translateX(2px);
+}
+
+.sidebar-menu li a.active {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-left: 3px solid var(--primary);
+    font-weight: 500;
+}
+
+.sidebar-menu li a i {
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+/* Main Content Styles - Improved */
+.main-content {
+    margin-left: 250px;
+    padding: 25px;
+    min-height: 100vh;
+}
+
+/* Header Styles - Improved */
+.top-navbar {
+    background-color: white;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 18px 25px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-navbar h4 {
+    font-weight: 600;
+    color: var(--dark);
+    margin: 0;
+}
+
+/* Dashboard Cards - Improved */
+.dashboard-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    padding: 25px;
+    margin-bottom: 25px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.09);
+}
+
+.card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--secondary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.card-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(to right, #333, #666);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.card-subtitle {
+    font-size: 0.85rem;
+    color: var(--secondary);
+    display: flex;
+    align-items: center;
+}
+
+.card-subtitle i {
+    margin-right: 5px;
+}
+
+.icon-container {
+    width: 70px;
+    height: 70px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    margin-right: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.bg-orders {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.bg-users {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.bg-products {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+}
+
+.bg-income {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+/* Chart Container - Improved */
+.chart-container {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    padding: 25px;
+    margin-top: 25px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+}
+
+.chart-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.09);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.chart-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--dark);
+}
+
+/* User Profile Section - Improved */
+.user-dropdown {
+    padding: 8px 15px;
+    border-radius: 50px;
+    background-color: #f8f9fa;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.user-dropdown:hover {
+    background-color: #e9ecef;
+}
+/*  */
+
+.notification-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    color: var(--dark);
+    transition: all 0.3s;
+    position: relative;
+}
+
+.notification-btn:hover {
+    background-color: #e9ecef;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--danger);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Row spacings and layout improvements */
+.row.g-4 {
+    margin-bottom: 20px;
+}
+
+/* Additional chart animation */
+canvas {
+    transition: opacity 0.5s;
+}
+
+canvas:hover {
+    opacity: 0.9;
+}

@@ -19,11 +19,11 @@ app.use(cookieParser());
 //     secret: process.env.secret_key, // Chuỗi bí mật để mã hóa session
 //     resave: false,
 //     saveUninitialized: false,
-//     cookie: { secure: false } // Đặt `true` nếu dùng HTTPS
+//     cookie: { secure: false } // Đặt true nếu dùng HTTPS
 // }));
 
 
-// console.log(`Process::`,process.env);
+// console.log(Process::,process.env);
 app.use(express.json()); // 🛠 Middleware giúp đọc request body JSON
 app.use(express.urlencoded({ extended: true })); // 🛠 Hỗ trợ form-data
 app.use("/", require("./src/routes/index"));
@@ -44,7 +44,7 @@ require("./src/dbs/init.mongodb");
 // const {checkOverload }=require('./src/helpers/check.connect')
 // checkOverload ()
 // //init routes
-app.use('/',require('./src/routes/index'))
+app.use('/', require('./src/routes/index'))
 
 const shopRoutes = require("./src/routes/");
 const productRoutes = require("./src/routes/shop/product.route");
@@ -67,5 +67,13 @@ app.use((req, res, next) => {
 //     },
 //   });
 // });
+const fs = require("fs");
+const filePath = path.join(__dirname, "public", "OneSignalSDKWorker.js");
+
+if (fs.existsSync(filePath)) {
+  console.log("✅ File OneSignalSDKWorker.js tồn tại và sẽ được serve!");
+} else {
+  console.log("❌ File không tồn tại:", filePath);
+}
 
 module.exports = app;

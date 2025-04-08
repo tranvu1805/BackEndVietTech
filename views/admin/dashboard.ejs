@@ -12,6 +12,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         /* Custom styles */
         :root {
@@ -57,9 +59,19 @@
             text-align: center;
         }
 
-        .main-content {
-            padding: 20px;
+        .container-fluid,
+        .row {
+            position: relative;
         }
+
+        .main-content {
+            margin-left: 16.666667%;
+            /* Tránh bị đè bởi sidebar cố định */
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
 
         .card-stats {
             transition: all 0.3s;
@@ -196,7 +208,7 @@
                                         <i class="fas fa-shopping-bag"></i>
                                     </div>
                                     <h5 class="card-title">Tổng đơn hàng</h5>
-                                    <h3>236</h3>
+                                    <h3>loading...</h3>
                                     <p class="mb-0"><i class="fas fa-arrow-up"></i> 12% so với tháng trước</p>
                                 </div>
                             </div>
@@ -208,7 +220,7 @@
                                         <i class="fas fa-money-bill-wave"></i>
                                     </div>
                                     <h5 class="card-title">Doanh thu</h5>
-                                    <h3>46.5M</h3>
+                                    <h3>loading...</h3>
                                     <p class="mb-0"><i class="fas fa-arrow-up"></i> 8% so với tháng trước</p>
                                 </div>
                             </div>
@@ -220,7 +232,7 @@
                                         <i class="fas fa-users"></i>
                                     </div>
                                     <h5 class="card-title">Khách hàng mới</h5>
-                                    <h3>125</h3>
+                                    <h3>loading...</h3>
                                     <p class="mb-0"><i class="fas fa-arrow-up"></i> 5% so với tháng trước</p>
                                 </div>
                             </div>
@@ -232,7 +244,7 @@
                                         <i class="fas fa-box-open"></i>
                                     </div>
                                     <h5 class="card-title">Sản phẩm</h5>
-                                    <h3>198</h3>
+                                    <h3>loading...</h3>
                                     <p class="mb-0"><i class="fas fa-arrow-up"></i> 3% so với tháng trước</p>
                                 </div>
                             </div>
@@ -256,7 +268,8 @@
                                     <div class="chart-container">
                                         <!-- Chart canvas would go here, using a placeholder -->
                                         <div class="d-flex justify-content-center align-items-center h-100 bg-light">
-                                            <p class="text-muted">Biểu đồ doanh thu theo tháng</p>
+                                            <canvas id="revenueChart" class="w-100 h-100"></canvas>
+
                                         </div>
                                     </div>
                                 </div>
@@ -271,7 +284,8 @@
                                     <div class="chart-container">
                                         <!-- Pie chart canvas would go here, using a placeholder -->
                                         <div class="d-flex justify-content-center align-items-center h-100 bg-light">
-                                            <p class="text-muted">Biểu đồ phân bổ danh mục</p>
+                                            <canvas id="categoryChart" class="w-100 h-100"></canvas>
+
                                         </div>
                                     </div>
                                 </div>
@@ -424,6 +438,9 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <!-- In a real implementation, you would add Chart.js or other visualization libraries here -->
         <script>
+            const accessToken = localStorage.getItem('accessToken');
+            const userId = localStorage.getItem('userId');
+            const apiKey = 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683'
             async function logout() {
                 try {
                     const refreshToken = localStorage.getItem("refreshToken"); // Lấy refreshToken từ localStorage
@@ -493,45 +510,67 @@
             }
 
 
-            async function loadRevenue() {
-                try {
-                    const now = new Date();
-                    const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString(); // đầu tháng
-                    const endDate = new Date().toISOString(); // hôm nay
+            // async function loadRevenue() {
+            //     try {
+            //         const now = new Date();
+            //         const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString(); // đầu tháng
+            //         const endDate = new Date().toISOString(); // hôm nay
 
-                    const res = await fetch(`/v1/api/bill/revenue?startDate=${startDate}&endDate=${endDate}`);
-                    const data = await res.json();
+            //         const res = await fetch(`/v1/api/bill/revenue?startDate=${startDate}&endDate=${endDate}`, {
+            //             headers: {
+            //                 authorization: accessToken,
+            //                 'x-client-id': userId,
+            //                 'x-api-key': apiKey
+            //             }
+            //         });
+            //         const data = await res.json();
 
-                    console.log("check revenue", data);
+            //         console.log("check revenue", data);
 
-                    const revenue = Math.floor(data.totalRevenue) || 0; // Làm tròn xuống để loại bỏ số thập phân
-                    document.querySelector(".card-stats.bg-success h3").innerText = revenue.toLocaleString('vi-VN') + ' ₫';
-                } catch (error) {
-                    console.error("Lỗi khi load doanh thu:", error);
-                }
-            }
+            //         const revenue = Math.floor(data.totalRevenue) || 0;
+            //         document.querySelector(".card-stats.bg-success h3").innerText = revenue.toLocaleString('vi-VN', {
+            //             maximumFractionDigits: 0
+            //         }) + ' ₫';
+
+            //     } catch (error) {
+            //         console.error("Lỗi khi load doanh thu:", error);
+            //     }
+            // }
 
 
 
-            async function loadTotalOrders() {
-                try {
-                    const res = await fetch('/v1/api/bill');
-                    const data = await res.json();
-                    console.log('check order', data);
+            // async function loadTotalOrders() {
+            //     try {
+            //         const res = await fetch('/v1/api/bill', {
+            //             headers: {
+            //                 authorization: accessToken,
+            //                 'x-client-id': userId,
+            //                 'x-api-key': apiKey
+            //             }
+            //         });
+            //         const data = await res.json();
+            //         console.log('check order', data);
 
-                    document.querySelector(".card-stats.bg-primary h3").innerText = data.metadata.length;
-                } catch (error) {
-                    console.error("Lỗi khi load đơn hàng:", error);
-                }
-            }
+            //         document.querySelector(".card-stats.bg-primary h3").innerText = data.metadata.length.toLocaleString('vi-VN');
+
+            //     } catch (error) {
+            //         console.error("Lỗi khi load đơn hàng:", error);
+            //     }
+            // }
 
             async function loadRecentOrders() {
                 try {
-                    const res = await fetch('/v1/api/bill');
+                    const res = await fetch('/v1/api/bill', {
+                        headers: {
+                            authorization: accessToken,
+                            'x-client-id': userId,
+                            'x-api-key': apiKey
+                        }
+                    });
                     const data = await res.json();
 
                     const bills = data.metadata || [];
-        
+
                     console.log("Kiểu dữ liệu bills:", typeof bills);
                     console.log("Giá trị bills:", bills);
 
@@ -555,7 +594,9 @@
         <td><span class="badge bg-success">${bill.payment_method?.toUpperCase()}</span></td>
         <td>
           <div class="btn-group">
-            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+            <button class="btn btn-sm btn-outline-primary" onclick="viewOrderDetail('${bill._id}')">
+                 <i class="fas fa-eye"></i>
+            </button>
           </div>
         </td>
       </tr>
@@ -570,10 +611,8 @@
 
             document.addEventListener("DOMContentLoaded", async function () {
                 const accessToken = localStorage.getItem("accessToken");
-                await loadRevenue();
-                await loadTotalOrders();
-                await loadRecentOrders();
-                await loadTopSellingProducts();
+                // await loadRevenue();
+                // await loadTotalOrders();
 
 
                 if (!accessToken) {
@@ -588,6 +627,11 @@
                     console.log("⚠ AccessToken đã hết hạn, đang làm mới...");
                     await refreshAccessToken(); // Gọi hàm làm mới token
                 }
+                await loadDashboardReport();
+                await loadChartData(); // ✅ Thêm dòng này
+                await loadTopSellingProducts();
+                await loadRecentOrders();
+
             });
 
             // Hàm kiểm tra `accessToken` có hết hạn không
@@ -603,7 +647,13 @@
 
             async function loadTopSellingProducts() {
                 try {
-                    const res = await fetch("/v1/api/shop/products/top-selling"); // Đảm bảo route này đúng và được authentication nếu cần
+                    const res = await fetch("/v1/api/shop/products/top-selling", {
+                        headers: {
+                            authorization: accessToken,
+                            'x-client-id': userId,
+                            'x-api-key': apiKey
+                        }
+                    });
                     const data = await res.json();
                     console.log("check top selling", data);
 
@@ -620,7 +670,7 @@
           <td>${p.product_name}</td>
           <td>${p.totalSold}</td>
           <td>${p.product_stock}</td>
-         <td>${(p.totalSold * p.product_price * 25589).toLocaleString('vi-VN')} ₫</td>
+         <td>${(p.totalSold * p.product_price).toLocaleString('vi-VN')} ₫</td>
 
         </tr>
       `).join("");
@@ -633,6 +683,157 @@
       `;
                 }
             }
+
+            const ctx = document.getElementById("revenueChart").getContext("2d");
+
+            const revenueChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: [
+                        "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4",
+                        "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8",
+                        "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+                    ],
+                    datasets: [{
+                        label: "Doanh thu (triệu VND)",
+                        data: [35, 40, 28, 55, 45, 60, 72, 65, 80, 90, 95, 110],
+                        fill: true,
+                        backgroundColor: "rgba(52, 152, 219, 0.2)",
+                        borderColor: "#3498db",
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return value + "M";
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            const ctx2 = document.getElementById("categoryChart").getContext("2d");
+
+            const categoryChart = new Chart(ctx2, {
+                type: "pie",
+                data: {
+                    labels: ["Điện thoại", "Laptop", "Phụ kiện", "Máy tính bảng", "Khác"],
+                    datasets: [{
+                        label: "Tỉ lệ sản phẩm",
+                        data: [40, 25, 15, 10, 10],
+                        backgroundColor: [
+                            "#3498db", // Điện thoại
+                            "#2ecc71", // Laptop
+                            "#f39c12", // Phụ kiện
+                            "#9b59b6", // Máy tính bảng
+                            "#e74c3c"  // Khác
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: "#333"
+                            }
+                        }
+                    }
+                }
+            });
+
+            function viewOrderDetail(orderId) {
+                window.location.href = `/v1/api/admin/bills/${orderId}`;
+            }
+
+
+            async function loadDashboardReport() {
+                try {
+                    const res = await fetch("/v1/api/admin/reports/data", {
+                        headers: {
+                            authorization: accessToken,
+                            "x-client-id": userId,
+                            "x-api-key": apiKey
+                        }
+                    });
+
+                    const { report } = await res.json(); // { report: { totalOrders, totalRevenue, ... } }
+                    console.log("check report", report);
+
+                    if (!report) throw new Error("Không có dữ liệu");
+
+                    // Gán vào các thẻ dashboard
+                    document.querySelector(".card-stats.bg-primary h3").innerText =
+                        report.totalOrders.toLocaleString("vi-VN");
+
+                    document.querySelector(".card-stats.bg-success h3").innerText =
+                        Math.floor(report.totalRevenue).toLocaleString("vi-VN", { maximumFractionDigits: 0 }) + " ₫";
+
+                    document.querySelector(".card-stats.bg-info h3").innerText =
+                        report.totalUsers.toLocaleString("vi-VN");
+
+                    document.querySelector(".card-stats.bg-warning h3").innerText =
+                        report.totalProducts.toLocaleString("vi-VN");
+
+                    // Hiển thị top-selling
+                    document.getElementById("top-selling-body").innerHTML = report.topSelling.map(p => `
+            <tr>
+                <td>${p.product_name}</td>
+                <td>${p.totalSold}</td>
+                <td>${p.product_stock}</td>
+                <td>${(p.totalSold * p.product_price).toLocaleString('vi-VN')} ₫</td>
+            </tr>
+        `).join("");
+
+                    // Hiển thị đơn hàng gần đây
+                    document.getElementById("recent-orders-body").innerHTML = report.recentOrders.map(bill => `
+            <tr>
+                <td>#${bill._id}</td>
+                <td>${bill.receiver_name || "Không rõ"}</td>
+                <td>${new Date(bill.createdAt).toLocaleDateString()}</td>
+                <td>${bill.total.toLocaleString()}₫</td>
+                <td><span class="badge bg-warning">${bill.status}</span></td>
+                <td><span class="badge bg-success">${bill.payment_method?.toUpperCase()}</span></td>
+                <td><div class="btn-group"><button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button></div></td>
+            </tr>
+        `).join("");
+
+                } catch (error) {
+                    console.error("❌ Lỗi khi tải dashboard:", error);
+                }
+            }
+
+            async function loadChartData() {
+                try {
+                    const res = await fetch("/v1/api/admin/reports/chart-data", {
+                        headers: {
+                            authorization: accessToken,
+                            "x-client-id": userId,
+                            "x-api-key": apiKey
+                        }
+                    });
+
+                    const { success, data } = await res.json();
+                    if (!success || !data) throw new Error("Dữ liệu không hợp lệ");
+
+                    console.log("📊 Dữ liệu biểu đồ:", data);
+
+                    // Gán lại dữ liệu cho biểu đồ
+                    revenueChart.data.datasets[0].data = data.revenueData.map(val => Math.floor(val / 1000000)); // chuyển về triệu VND
+                    revenueChart.update();
+                } catch (error) {
+                    console.error("❌ Lỗi khi tải dữ liệu biểu đồ:", error);
+                }
+            }
+
 
 
         </script>

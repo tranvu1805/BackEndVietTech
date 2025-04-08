@@ -6,9 +6,13 @@ const { ErrorResponse } = require("../core/error.response");
 
 class CartController {
   addToCart = async (req, res, next) => {
+    const userId = req.user?.id || req.body.userId;
+    const product = req.body;
+    console.log("product", product);
+
     new SuccessResponse({
       message: "Cart created successfully",
-      metadata: await CartService.addToCart(req.body),
+      metadata: await CartService.addToCart({ userId, product }),
     }).send(res);
   };
 
@@ -25,18 +29,50 @@ class CartController {
       metadata: await CartService.updateIsSelected(req.body),
     }).send(res);
   };
-  
 
   update = async (req, res, next) => {
-    new SuccessResponse({
-      message: "Cart updated successfully",
-      metadata: await CartService.updateUserCart(req.body),
-    }).send(res);
+    try {
+      // Lấy userId từ request
+      const userId = req.user?.id || req.body.userId;
+
+      // Lấy thông tin sản phẩm từ req.body.product
+      const { product } = req.body;
+
+      if (!userId) {
+        return next(new ErrorResponse("userId is required", 400));
+      }
+
+      if (!product || !product.productId) {
+        return next(new ErrorResponse("product information is required", 400));
+      }
+
+      // Log dữ liệu để debug
+      console.log("Updating cart with:", { userId, product });
+
+      // Truyền đúng cấu trúc dữ liệu vào service
+      const result = await CartService.updateUserCart({ userId, product });
+
+      new SuccessResponse({
+        message: "Cart updated successfully",
+        metadata: result,
+      }).send(res);
+    } catch (error) {
+      next(error);
+    }
   };
   delete = async (req, res, next) => {
+    const userId = req.user?.id || req.body.userId;
+    const { productId, detailsVariantId } = req.body;
+
+    console.log("productId", req.body);
+
     new SuccessResponse({
       message: "Cart deleted successfully",
-      metadata: await CartService.deleteUserCart(req.body),
+      metadata: await CartService.deleteUserCart({
+        userId,
+        productId,
+        variantId: detailsVariantId, // truyền dưới tên variantId cho service cũ nếu chưa refactor tên
+      }),
     }).send(res);
   };
 

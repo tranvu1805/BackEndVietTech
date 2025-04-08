@@ -11,10 +11,12 @@ const BillRoutes = require("./bill/index");
 const ImageRoutes = require("./image/index");
 const DisscountRoutes = require("./disscount/index");
 const adminRoutes = require("./admin/index");
+const logRoutes = require("./logs/index");
 const vnpayRoutes = require("./vnpay/index"); // Import route VNPay
 
-
 const accessController = require("../controllers/access.controller");
+const { asyncHandler } = require("../auth/checkAuth");
+const BillController = require("../controllers/bill.controller");
 
 
 // API versioning
@@ -29,6 +31,7 @@ router.use("/v1/api/post", require("./post"));
 router.use("/v1/api/disscount", DisscountRoutes);
 router.use("/v1/api/admin", adminRoutes);
 router.use("/v1/api/image", ImageRoutes);
+router.use("/v1/api/log",logRoutes);
 
 router.use("/v1/api/vnpay", vnpayRoutes); // Định tuyến VNPay API
 
@@ -39,6 +42,7 @@ router.get("/", (req, res) => {
 });
 
 router.post("/login", accessController.loginAdmin);
+router.get("/user/bills/:billId", asyncHandler(BillController.renderInvoicePage));
 
 router.use("/v1/api/cart", require("./cart"));
 

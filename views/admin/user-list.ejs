@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản Trị Hệ Thống - Quản Lý Người Dùng</title>
+    <link rel="icon" href="/uploads/mini_logo.ico" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet 22" href="/css/style.css">
+    <style>
+        body {
+            background-color: #f5f5f7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Sidebar styling */
+
+        /* Main content area */
+        .main-content {
+            padding: 25px;
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        /* Card styling */
+        .card {
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: none;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 16px 20px;
+        }
+
+        /* User profile image styling */
+       
+
+        /* Buttons styling */
+        .btn {
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background-color: #146c43;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Search form styling */
+        .search-filter-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 25px;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 6px;
+            padding: 0.6rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        /* Table styling */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .table thead th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            color: var(--secondary-color);
+            padding: 15px;
+        }
+
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        /* Status badges */
+        .badge {
+            padding: 0.6em 0.8em;
+            font-weight: 500;
+            border-radius: 6px;
+        }
+
+        /* User action buttons */
+        .action-buttons .btn {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Toast notifications */
+        .toast {
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        /* Pagination */
+        .pagination {
+            margin-top: 30px;
+        }
+
+       
+        /* Modal styling */
+        .modal-content {
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            background-color: #f8f9fa;
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        /* Navbar */
+        .top-navbar {
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 25px;
+        }
+
+        /* Notification styling */
+        .notification-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background-color: #f0f0f0;
+            color: var(--secondary-color);
+            transition: var(--transition);
+        }
+
+        .notification-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        /* Switch toggle */
+        .form-switch .form-check-input {
+            width: 2.5em;
+            height: 1.25em;
+            cursor: pointer;
+        }
+
+        .form-switch .form-check-input:checked {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .main-content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <%- include('partials/header') %>
+
+                <div class="col-md-10 col-lg-10 ms-auto main-content">
+                    <!-- Navbar -->
+                    <nav class="top-navbar">
+                        <h4 class="mb-0">Quản lý người dùng</h4>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <button class="notification-btn" type="button">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="notification-badge">3</span>
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="user-dropdown border-0" type="button" id="userDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="user-avatar me-2">A</div>
+                                    <span class="d-none d-md-inline">Admin</span>
+                                    <i class="fas fa-chevron-down ms-2 small"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài
+                                            đặt</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="#" onclick="logout()"><i
+                                                class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <!-- Page Header -->
+                    <!-- <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h6 class="text-muted">Quản lý danh sách và thông tin người dùng trong hệ thống</h6>
+                        <a href="/v1/api/admin/users/create" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i> Thêm nhân viên
+                        </a>
+                    </div> -->
+
+                    <!-- Search & Filter -->
+                    <div class="search-filter-section">
+                        <form class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><i class="fas fa-search me-1"></i>Tìm kiếm</label>
+                                <div class="input-group">
+                                    <input type="text" name="search" class="form-control" value="<%= search %>"
+                                        placeholder="Tên người dùng">
+                                    <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold"><i class="fas fa-user-tag me-1"></i>Vai
+                                    trò</label>
+                                <select name="role" class="form-select">
+                                    <option value="">Tất cả</option>
+                                    <% roles.forEach(r=> { %>
+                                        <option value="<%= r.name %>" <%=role===r.name ? 'selected' : '' %>><%= r.name
+                                                %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold"><i class="fas fa-toggle-on me-1"></i>Trạng
+                                    thái</label>
+                                <select name="status" class="form-select">
+                                    <option value="">Tất cả</option>
+                                    <option value="active" <%=status==='active' ? 'selected' : '' %>>Hoạt động</option>
+                                    <option value="inactive" <%=status==='inactive' ? 'selected' : '' %>>Không hoạt động
+                                    </option>
+                                    <option value="suspended" <%=status==='suspended' ? 'selected' : '' %>>Tạm khóa
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <button class="btn btn-primary w-100">
+                                    <i class="fas fa-filter me-1"></i> Lọc
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold">Danh sách người dùng</h6>
+                            <span class="badge bg-primary">
+                                <%= users.length %> người dùng
+                            </span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th class="ps-3">ID</th>
+                                            <th>Họ tên</th>
+                                            <th>Vai trò</th>
+                                            <th>Email</th>
+                                            <th>Trạng thái</th>
+                                            <th class="text-end pe-3">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% users.forEach(user=> { %>
+                                            <tr>
+                                                <td class="ps-3">
+                                                    <span class="badge bg-light text-dark">
+                                                        <%= user._id.toString().slice(0, 8) %>...
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="user-avatar me-2">
+                                                            <% if (user.profile_image) { %>
+                                                                <img src="<%= user.profile_image.url %>"
+                                                                    class="img-fluid rounded-circle"
+                                                                    style="object-fit: cover; width: 100%; height: 100%;">
+                                                                <% } else { %>
+                                                                    <span>
+                                                                        <%= user.full_name.charAt(0).toUpperCase() %>
+                                                                    </span>
+                                                                    <% } %>
+                                                        </div>
+                                                        <div>
+                                                            <div class="fw-bold">
+                                                                <%= user.full_name %>
+                                                            </div>
+                                                            <small class="text-muted">
+                                                                @<%= user.username %>
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info text-dark">
+                                                        <i class="fas fa-user-tag me-1"></i>
+                                                        <%= user.role_id.name %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <i class="fas fa-envelope me-1 text-muted"></i>
+                                                    <%= user.email %>
+                                                </td>
+                                                <td>
+                                                    <% let statusClass='' ; let statusIcon='' ; let statusText='' ;
+                                                        switch(user.status) { case 'active' : statusClass='bg-success' ;
+                                                        statusIcon='fa-check-circle' ; statusText='Hoạt động' ; break;
+                                                        case 'inactive' : statusClass='bg-secondary' ;
+                                                        statusIcon='fa-times-circle' ; statusText='Không hoạt động' ;
+                                                        break; case 'suspended' : statusClass='bg-warning text-dark' ;
+                                                        statusIcon='fa-exclamation-circle' ; statusText='Tạm khóa' ;
+                                                        break; } %>
+                                                        <span class="badge <%= statusClass %>">
+                                                            <i class="fas <%= statusIcon %> me-1"></i>
+                                                            <%= statusText %>
+                                                        </span>
+                                                </td>
+                                                <td class="text-end pe-3">
+                                                    <div
+                                                        class="d-flex justify-content-end align-items-center gap-2 action-buttons">
+                                                        <button class="btn btn-outline-primary"
+                                                            data-user='<%- JSON.stringify(user) %>'
+                                                            onclick="handleEditUser(this)">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <div class="form-check form-switch m-0">
+                                                            <input class="form-check-input user-status-switch"
+                                                                type="checkbox" role="switch"
+                                                                id="switch_<%= user._id %>"
+                                                                data-user-id="<%= user._id %>" <%=user.status==='active'
+                                                                ? 'checked' : '' %>>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Chỉnh sửa người dùng -->
+                    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <form id="editUserForm" enctype="multipart/form-data">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold" id="editUserModalLabel">
+                                            <i class="fas fa-user-edit me-2 text-primary"></i>Chỉnh sửa người dùng
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Đóng"></button>
+                                    </div>
+                                    <div class="modal-body row g-3">
+                                        <input type="hidden" id="edit_user_id" name="user_id">
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Họ tên</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                                <input type="text" class="form-control" id="edit_full_name" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Username</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-at"></i></span>
+                                                <input type="text" class="form-control" id="edit_username" disabled>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Email</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                                <input type="email" class="form-control" id="edit_email" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Số điện thoại</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                                <input type="text" class="form-control" id="edit_phone">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-semibold">Địa chỉ</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i
+                                                        class="fas fa-map-marker-alt"></i></span>
+                                                <input type="text" class="form-control" id="edit_address">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Vai trò</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                                                <select class="form-select" id="edit_role_id">
+                                                    <% roles.forEach(role=> { %>
+                                                        <option value="<%= role._id %>">
+                                                            <%= role.name %>
+                                                        </option>
+                                                        <% }) %>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Trạng thái</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-toggle-on"></i></span>
+                                                <select class="form-select" id="edit_status">
+                                                    <option value="active">Hoạt động</option>
+                                                    <option value="inactive">Không hoạt động</option>
+                                                    <option value="suspended">Tạm khóa</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Ảnh đại diện</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-image"></i></span>
+                                                <input type="file" class="form-control" id="edit_profile_image"
+                                                    accept="image/*">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Xem trước ảnh</label><br>
+                                            <div class="text-center">
+                                                <img id="edit_profile_preview" src="" alt="Preview"
+                                                    class="img-thumbnail"
+                                                    style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-1"></i> Lưu thay đổi
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            <i class="fas fa-times me-1"></i> Đóng
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    
+
+                    <nav>
+                        <ul class="pagination justify-content-center mt-4">
+                            <% for (let i=1; i <=totalPages; i++) { %>
+                                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                    <a class="page-link"
+                                        href="?page=<%= i %>&limit=<%= limit %>&search=<%= search %>&role=<%= role %>&status=<%= status %>">
+                                        <%= i %>
+                                    </a>
+                                </li>
+                                <% } %>
+                        </ul>
+                    </nav>
+
+                </div>
+        </div>
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Xử lý nút Lọc
+        document.querySelector('.btn-primary.w-100').addEventListener('click', function (e) {
+            e.preventDefault();
+            const search = document.querySelector('input[name="search"]').value;
+            const role = document.querySelector('select[name="role"]').value;
+            const status = document.querySelector('select[name="status"]').value;
+
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (role) params.append('role', role);
+            if (status) params.append('status', status);
+
+            window.location.href = `/v1/api/admin/user/list?${params.toString()}`;
+        });
+
+        // Bật/Tắt trạng thái người dùng
+        document.querySelectorAll('.user-status-switch').forEach(switchEl => {
+            switchEl.addEventListener('change', async function () {
+                const userId = this.dataset.userId;
+                const newStatus = this.checked ? 'active' : 'inactive';
+
+                const confirmText = this.checked ? 'Chuyển sang trạng thái HOẠT ĐỘNG?' : 'Chuyển sang KHÔNG HOẠT ĐỘNG?';
+                if (!confirm(confirmText)) {
+                    this.checked = !this.checked;
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`/v1/api/users/${userId}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('accessToken'),
+                            'x-client-id': localStorage.getItem('userId'),
+                            'x-api-key': 'YOUR_API_KEY'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Thành công!', 'Cập nhật trạng thái thành công!', 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showToast('Lỗi!', data.message || 'Không rõ nguyên nhân.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast('Lỗi!', 'Lỗi kết nối đến máy chủ.', 'error');
+                }
+            });
+        });
+
+        // Xử lý hiển thị Modal Edit User
+        function handleEditUser(btn) {
+            const user = JSON.parse(btn.getAttribute('data-user'));
+
+            document.getElementById('edit_user_id').value = user._id;
+            document.getElementById('edit_full_name').value = user.full_name;
+            document.getElementById('edit_username').value = user.username;
+            document.getElementById('edit_email').value = user.email;
+            document.getElementById('edit_phone').value = user.phone || '';
+            document.getElementById('edit_address').value = user.address || '';
+            document.getElementById('edit_role_id').value = user.role_id._id;
+            document.getElementById('edit_status').value = user.status;
+
+            const preview = document.getElementById('edit_profile_preview');
+            if (user.profile_image?.url) {
+                preview.src = user.profile_image.url;
+            } else {
+                preview.src = `/api/placeholder/150/150?text=${user.full_name.charAt(0)}`;
+            }
+
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        }
+
+        // Preview ảnh đại diện khi chọn ảnh
+        document.getElementById('edit_profile_image')?.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('edit_profile_preview');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Submit form chỉnh sửa người dùng
+        document.getElementById('editUserForm')?.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            const userId = document.getElementById('edit_user_id').value;
+            const imageFile = document.getElementById('edit_profile_image').files[0];
+
+            formData.append('full_name', document.getElementById('edit_full_name').value);
+            formData.append('username', document.getElementById('edit_username').value);
+            formData.append('email', document.getElementById('edit_email').value);
+            formData.append('phone', document.getElementById('edit_phone').value);
+            formData.append('address', document.getElementById('edit_address').value);
+            formData.append('role_id', document.getElementById('edit_role_id').value);
+            formData.append('status', document.getElementById('edit_status').value);
+
+            if (imageFile) {
+                formData.append('profile_image', imageFile);
+            }
+
+            const saveBtn = document.querySelector('button[type="submit"]');
+            const originalBtnText = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang lưu...';
+
+            fetch(`/v1/api/admin/user/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': localStorage.getItem('accessToken'),
+                    'x-client-id': localStorage.getItem('userId'),
+                    'x-api-key': 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683'
+                },
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalBtnText;
+
+                    if (data.success) {
+                        showToast('Thành công!', 'Thông tin người dùng đã được cập nhật', 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showToast('Lỗi!', data.message || 'Không thể cập nhật thông tin người dùng', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalBtnText;
+                    showToast('Lỗi!', 'Lỗi kết nối đến máy chủ', 'error');
+                });
+        });
+
+        // Function to show toast notifications
+        function showToast(title, message, type) {
+            const toastContainer = document.querySelector('.toast-container');
+            const toastId = 'toast-' + Date.now();
+
+            const toastHTML = `
+                <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header ${type === 'success' ? 'bg-success text-white' : 'bg-danger text-white'}">
+                        <strong class="me-auto">${title}</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+            toast.show();
+
+            // Remove toast from DOM after it's hidden
+            toastElement.addEventListener('hidden.bs.toast', function () {
+                this.remove();
+            });
+        }
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function () {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -10,39 +10,65 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #4e73df;
+            --primary-dark: #3a5cca;
             --secondary-color: #f8f9fc;
             --accent-color: #5a5c69;
             --success-color: #1cc88a;
             --danger-color: #e74a3b;
+            --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.12);
+            --border-radius: 0.5rem;
+            --transition-speed: 0.3s;
         }
 
         body {
             background-color: #f8f9fc;
             font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #444;
+            line-height: 1.6;
         }
 
         .card {
             border: none;
-            border-radius: 0.35rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
             margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .card:hover {
+            box-shadow: 0 0.3rem 2rem 0 rgba(58, 59, 69, 0.15);
         }
 
         .card-header {
-            background-color: #f8f9fc;
-            border-bottom: 1px solid #e3e6f0;
-            padding: 1rem 1.35rem;
-            font-weight: 700;
-            color: #4e73df;
+            background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
+            color: white;
+            font-weight: 600;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            border-bottom: none;
+        }
+
+        .card-header i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+            background-color: white;
         }
 
         .form-section {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #e3e6f0;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #eaecf4;
         }
 
         .form-section:last-child {
@@ -52,8 +78,16 @@
 
         .form-section-title {
             font-weight: 700;
-            margin-bottom: 1rem;
-            color: #5a5c69;
+            margin-bottom: 1.5rem;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .form-section-title i {
+            color: var(--primary-color);
+            margin-right: 0.75rem;
         }
 
         .btn-add-field {
@@ -61,108 +95,312 @@
             font-size: 0.85rem;
         }
 
+        .sticky-sidebar {
+            position: sticky;
+            top: 1.5rem;
+            z-index: 2;
+        }
+
         .remove-attribute,
         .remove-variation {
-            background-color: #e74a3b;
+            background-color: var(--danger-color);
             color: white;
             border: none;
+            border-radius: 50%;
+            width: 2.2rem;
+            height: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-speed);
         }
 
         .remove-attribute:hover,
         .remove-variation:hover {
             background-color: #c0392b;
+            transform: scale(1.05);
         }
 
         .main-content {
-            padding: 2rem;
+            padding: 2.5rem;
         }
 
         label {
             font-weight: 600;
-            color: #5a5c69;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
         }
 
-        .form-control:focus {
+        .form-control,
+        .form-select {
+            border-radius: 0.4rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e3e6f0;
+            font-size: 0.95rem;
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
             border-color: #bac8f3;
-            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
         }
 
         .attribute-row,
         .variation-row {
             background-color: #f8f9fc;
-            padding: 0.75rem;
-            margin-bottom: 0.75rem;
-            border-radius: 0.35rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-radius: var(--border-radius);
             border: 1px solid #e3e6f0;
+            transition: all var(--transition-speed);
+        }
+
+        .attribute-row:hover,
+        .variation-row:hover {
+            box-shadow: 0 0.15rem 1rem 0 rgba(58, 59, 69, 0.1);
+            border-color: #d1d3e2;
+        }
+
+        .btn {
+            border-radius: 0.4rem;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            transition: all var(--transition-speed);
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.85rem;
         }
 
         .btn-primary {
-            background-color: #4e73df;
-            border-color: #4e73df;
+            background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
+            border: none;
         }
 
         .btn-primary:hover {
-            background-color: #2e59d9;
-            border-color: #2653d4;
+            background: linear-gradient(to right, var(--primary-dark), #2d4dbd);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 115, 223, 0.25);
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, var(--success-color), #18a978);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(to right, #18a978, #138f67);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(28, 200, 138, 0.25);
+        }
+
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
         }
 
         .thumbnail-preview {
-            width: 150px;
-            /* Giữ kích thước cố định để hiển thị đều */
-            height: 150px;
-            /* Đảm bảo ảnh có tỷ lệ vuông */
+            width: 180px;
+            height: 180px;
             object-fit: cover;
-            /* Giữ ảnh đầy đủ khung, cắt bớt phần dư */
-            border: 2px solid #d1d3e2;
-            /* Viền nhẹ màu xám */
-            background-color: #f8f9fc;
-            /* Màu nền dịu nhẹ, giống giao diện admin */
+            border: 3px solid #e3e6f0;
+            background-color: white;
             display: none;
-            /* Ẩn mặc định, chỉ hiển thị khi có ảnh */
-            margin-top: 0.5rem;
-            border-radius: 8px;
-            /* Bo góc nhẹ */
-            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
-            /* Đổ bóng nhẹ tạo cảm giác nổi bật */
-            transition: all 0.3s ease-in-out;
-            /* Hiệu ứng mượt mà khi thay đổi */
+            margin: 0 auto 1.25rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all var(--transition-speed);
         }
 
         .thumbnail-preview.show {
             display: block;
-            animation: fadeIn 0.3s ease-in-out;
+            animation: fadeInScale 0.4s ease-out;
         }
 
-        .custom-file-input:focus~.custom-file-label {
-            border-color: #bac8f3;
-            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
-        }
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
 
-        /* Custom styling for select boxes */
-        .form-select:focus {
-            border-color: #bac8f3;
-            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         /* Badge styling */
         .badge {
             font-size: 0.75rem;
             font-weight: 600;
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
         }
 
         .badge-required {
-            background-color: #e74a3b;
+            background-color: var(--danger-color);
+            border-radius: 12px;
+            margin-left: 0.5rem;
         }
 
-        @keyframes fadeIn {
+        .badge.bg-light {
+            background-color: #f1f3f9 !important;
+            border: 1px solid #d1d3e2;
+            transition: all var(--transition-speed);
+        }
+
+        .badge.bg-light:hover {
+            background-color: #e9ecf7 !important;
+        }
+
+        .badge.bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        /* Custom switch styling */
+        .form-check-input {
+            cursor: pointer;
+            height: 1.15rem;
+            width: 2.25rem;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Improved header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e3e6f0;
+        }
+
+        .page-title {
+            font-weight: 700;
+            color: var(--accent-color);
+            margin: 0;
+        }
+
+        .back-button {
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 0.4rem;
+            transition: all var(--transition-speed);
+        }
+
+        .back-button:hover {
+            transform: translateX(-3px);
+        }
+
+        .input-group-text {
+            background-color: #f8f9fc;
+            border-color: #e3e6f0;
+            color: var(--accent-color);
+        }
+
+        /* Custom Modal Styling */
+        .modal-content {
+            border: none;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
+            color: white;
+            border-bottom: none;
+            padding: 1.2rem 1.5rem;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .btn-close {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+        }
+
+        /* Improved form layout */
+        .input-label {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Value checkbox container */
+        .value-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        /* Animate items */
+        @keyframes slideInUp {
             from {
+                transform: translateY(10px);
                 opacity: 0;
-                transform: scale(0.95);
             }
 
             to {
+                transform: translateY(0);
                 opacity: 1;
-                transform: scale(1);
+            }
+        }
+
+        .animate-in {
+            animation: slideInUp 0.3s ease-out forwards;
+        }
+
+        /* Custom spinner for thumbnail upload */
+        .thumbnail-container {
+            position: relative;
+            width: 180px;
+            margin: 0 auto;
+        }
+
+        /* Media queries for responsiveness */
+        @media (max-width: 768px) {
+            .sticky-sidebar {
+                position: static;
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
             }
         }
     </style>
@@ -172,40 +410,45 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Main Content -->
-            <div class="col-md-10 col-lg-10 mx-auto main-content">
-                <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">
-                        <%= action %> Sản Phẩm
+            <div class="col-md-10 col-lg-10 mx-auto main-content animate-in">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-edit me-2"></i>
+                        <%= action==='Edit' ? 'Sửa' : 'Thêm' %> Sản Phẩm
                     </h1>
-                    <a href="/v1/api/admin/products/list"
-                        class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
-                        <i class="fas fa-arrow-left fa-sm text-white-50 me-1"></i> Quay lại danh sách
+                    <a href="/v1/api/admin/products/list" class="btn btn-outline-secondary shadow-sm back-button">
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
                     </a>
                 </div>
 
-                <form action="/v1/api/shop/products/<%= action === 'Edit' ? product._id : '' %>"
+                <form
+                    action="<%= action === 'Edit' ? '/v1/api/shop/products/' + product._id : '/v1/api/shop/products' %>"
                     method="<%= action === 'Edit' ? 'PUT' : 'POST' %>" enctype="multipart/form-data" id="productForm">
                     <div class="row">
                         <div class="col-lg-8">
                             <!-- Thông tin cơ bản -->
-                            <div class="card">
+                            <div class="card animate-in" style="animation-delay: 0.1s;">
                                 <div class="card-header">
-                                    <i class="fas fa-info-circle me-2"></i> Thông tin cơ bản
+                                    <i class="fas fa-info-circle"></i> Thông tin cơ bản
                                 </div>
                                 <div class="card-body">
                                     <div class="form-section">
-                                        <div class="mb-3">
-                                            <label for="product_name" class="form-label">Tên sản phẩm <span
-                                                    class="badge bg-danger badge-required">Bắt buộc</span></label>
-                                            <input type="text" class="form-control" id="product_name"
+                                        <div class="mb-4">
+                                            <label for="product_name" class="form-label">
+                                                Tên sản phẩm <span class="badge bg-danger badge-required">Bắt
+                                                    buộc</span>
+                                            </label>
+                                            <input type="text" class="form-control shadow-sm" id="product_name"
                                                 name="product_name" value="<%= product ? product.product_name : '' %>"
                                                 placeholder="Nhập tên sản phẩm" required>
                                         </div>
 
-                                        <div class="mb-3">
-                                            <label for="category" class="form-label">Danh mục <span
-                                                    class="badge bg-danger badge-required">Bắt buộc</span></label>
-                                            <select class="form-select" id="category" name="category" required>
+                                        <div class="mb-4">
+                                            <label for="category" class="form-label">
+                                                Danh mục <span class="badge bg-danger badge-required">Bắt buộc</span>
+                                            </label>
+                                            <select class="form-select shadow-sm" id="category" name="category"
+                                                required>
                                                 <option value="" disabled selected>Chọn danh mục</option>
                                                 <% if (categories && categories.length> 0) { %>
                                                     <% categories.forEach(category=> { %>
@@ -223,13 +466,14 @@
 
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <div class="mb-3">
-                                                    <label for="product_price" class="form-label">Giá (VNĐ) <span
-                                                            class="badge bg-danger badge-required">Bắt
-                                                            buộc</span></label>
+                                                <div class="mb-4">
+                                                    <label for="product_price" class="form-label">
+                                                        Giá (VNĐ) <span class="badge bg-danger badge-required">Bắt
+                                                            buộc</span>
+                                                    </label>
                                                     <div class="input-group">
-                                                        <input type="number" class="form-control" id="product_price"
-                                                            name="product_price"
+                                                        <input type="number" class="form-control shadow-sm"
+                                                            id="product_price" name="product_price" step="1" min="0"
                                                             value="<%= product ? product.product_price : '' %>"
                                                             placeholder="Nhập giá sản phẩm" required>
                                                         <span class="input-group-text">₫</span>
@@ -237,21 +481,23 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <div class="mb-3">
-                                                    <label for="product_stock" class="form-label">Số lượng trong kho
-                                                        <span class="badge bg-danger badge-required">Bắt
-                                                            buộc</span></label>
-                                                    <input type="number" class="form-control" id="product_stock"
-                                                        name="product_stock"
+                                                <div class="mb-4">
+                                                    <label for="product_stock" class="form-label">
+                                                        Số lượng trong kho <span
+                                                            class="badge bg-danger badge-required">Bắt
+                                                            buộc</span>
+                                                    </label>
+                                                    <input type="number" class="form-control shadow-sm"
+                                                        id="product_stock" name="product_stock"
                                                         value="<%= product ? product.product_stock : '' %>"
                                                         placeholder="Nhập số lượng" required>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class="mb-3">
+                                        <div class="mb-4">
                                             <label for="product_description" class="form-label">Mô tả sản phẩm</label>
-                                            <textarea class="form-control" id="product_description"
+                                            <textarea class="form-control shadow-sm" id="product_description"
                                                 name="product_description" rows="4"
                                                 placeholder="Nhập mô tả chi tiết về sản phẩm"><%= product && product.product_description ? product.product_description : '' %></textarea>
                                         </div>
@@ -261,261 +507,128 @@
                                     <div class="form-section">
                                         <div
                                             class="form-section-title d-flex justify-content-between align-items-center">
-                                            <div><i class="fas fa-list-ul me-2"></i> Thuộc tính sản phẩm</div>
-                                            <button type="button" class="btn btn-outline-primary btn-sm"
-                                                id="add-attribute">
-                                                <i class="fas fa-plus me-1"></i> Thêm thuộc tính
-                                            </button>
+                                            <div><i class="fas fa-sliders-h"></i> Thuộc tính & Giá trị</div>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-outline-success btn-sm shadow-sm"
+                                                    data-bs-toggle="modal" data-bs-target="#createAttributeModal">
+                                                    <i class="fas fa-plus-circle me-1"></i> Tạo mới thuộc tính
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary btn-sm shadow-sm"
+                                                    id="add-attribute-select">
+                                                    <i class="fas fa-plus me-1"></i> Thêm thuộc tính
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div id="attributes-container">
-                                            <% if (product && product.product_attributes) { %>
-                                                <% Object.keys(product.product_attributes).forEach((key, index)=> { %>
-                                                    <div class="attribute-row">
-                                                        <div class="row">
-                                                            <div class="col-md-5">
-                                                                <div class="mb-2">
-                                                                    <label class="form-label">Tên thuộc tính</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="attribute_keys[]" value="<%= key %>"
-                                                                        placeholder="VD: Màu sắc, Kích thước...">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-5">
-                                                                <div class="mb-2">
-                                                                    <label class="form-label">Giá trị</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="attribute_values[]"
-                                                                        value="<%= product.product_attributes[key] %>"
-                                                                        placeholder="VD: Đỏ, XL...">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-2 d-flex align-items-end">
-                                                                <button type="button"
-                                                                    class="btn btn-sm remove-attribute">
-                                                                    <i class="fas fa-times"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <% }); %>
-                                                        <% } else { %>
-                                                            <div class="attribute-row">
-                                                                <div class="row">
-                                                                    <div class="col-md-5">
-                                                                        <div class="mb-2">
-                                                                            <label class="form-label">Tên thuộc
-                                                                                tính</label>
-                                                                            <input type="text" class="form-control"
-                                                                                name="attribute_keys[]"
-                                                                                placeholder="VD: Màu sắc, Kích thước...">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-5">
-                                                                        <div class="mb-2">
-                                                                            <label class="form-label">Giá trị</label>
-                                                                            <input type="text" class="form-control"
-                                                                                name="attribute_values[]"
-                                                                                placeholder="VD: Đỏ, XL...">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-2 d-flex align-items-end">
-                                                                        <button type="button"
-                                                                            class="btn btn-sm remove-attribute">
-                                                                            <i class="fas fa-times"></i>
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <% } %>
+
+                                        <div id="selected-attribute-container" class="mt-3">
+                                            <!-- Thuộc tính đã chọn sẽ render vào đây -->
+                                        </div>
+                                        <div id="attribute-select-container" class="mt-3">
+                                            <!-- Các select mới để thêm thuộc tính render vào đây -->
+                                        </div>
+
+
+                                        <div class="mt-4 text-end">
+                                            <button type="button" class="btn btn-success shadow" id="generate-variants">
+                                                <i class="fas fa-sync-alt me-1"></i> Sinh tổ hợp biến thể
+                                            </button>
                                         </div>
                                     </div>
 
-                                    <!-- Biến thể sản phẩm -->
-                                    <div class="form-section">
-                                        <div
-                                            class="form-section-title d-flex justify-content-between align-items-center">
-                                            <div><i class="fas fa-random me-2"></i> Biến thể sản phẩm</div>
-                                            <button type="button" class="btn btn-outline-primary btn-sm"
-                                                id="add-variation">
-                                                <i class="fas fa-plus me-1"></i> Thêm biến thể
-                                            </button>
+                                    <!-- Biến thể -->
+                                    <div class="form-section" id="variant-list-section" style="display: none;">
+                                        <div class="form-section-title">
+                                            <i class="fas fa-boxes"></i> Các biến thể sản phẩm
                                         </div>
-                                        <div id="variations-container">
-                                            <% if (product && product.variations && product.variations.length> 0) { %>
-                                                <% product.variations.forEach((variation, index)=> { %>
-                                                    <div class="variation-row">
-                                                        <div class="row">
-                                                            <div class="col-md-3">
-                                                                <div class="mb-2">
-                                                                    <label class="form-label">Tên biến thể</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="variant_names[]"
-                                                                        value="<%= variation.variant_name %>"
-                                                                        placeholder="VD: Màu, Size...">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <div class="mb-2">
-                                                                    <label class="form-label">Giá trị</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="variant_values[]"
-                                                                        value="<%= variation.variant_value %>"
-                                                                        placeholder="VD: Đỏ, M...">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <div class="mb-2">
-                                                                    <label class="form-label">Giá (VNĐ)</label>
-                                                                    <div class="input-group">
-                                                                        <input type="number" class="form-control"
-                                                                            name="variant_prices[]"
-                                                                            value="<%= variation.price %>"
-                                                                            placeholder="Giá biến thể">
-                                                                        <span class="input-group-text">₫</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-2">
-                                                                <div class="mb-2">
-                                                                    <label class="form-label">Kho</label>
-                                                                    <input type="number" class="form-control"
-                                                                        name="variant_stocks[]"
-                                                                        value="<%= variation.stock %>"
-                                                                        placeholder="Số lượng">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-1 d-flex align-items-end">
-                                                                <button type="button"
-                                                                    class="btn btn-sm remove-variation">
-                                                                    <i class="fas fa-times"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <% }); %>
-                                                        <% } else { %>
-                                                            <div class="variation-row">
-                                                                <div class="row">
-                                                                    <div class="col-md-3">
-                                                                        <div class="mb-2">
-                                                                            <label class="form-label">Tên biến
-                                                                                thể</label>
-                                                                            <input type="text" class="form-control"
-                                                                                name="variant_names[]"
-                                                                                placeholder="VD: Màu, Size...">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <div class="mb-2">
-                                                                            <label class="form-label">Giá trị</label>
-                                                                            <input type="text" class="form-control"
-                                                                                name="variant_values[]"
-                                                                                placeholder="VD: Đỏ, M...">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <div class="mb-2">
-                                                                            <label class="form-label">Giá (VNĐ)</label>
-                                                                            <div class="input-group">
-                                                                                <input type="number"
-                                                                                    class="form-control"
-                                                                                    name="variant_prices[]"
-                                                                                    placeholder="Giá biến thể">
-                                                                                <span class="input-group-text">₫</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-2">
-                                                                        <div class="mb-2">
-                                                                            <label class="form-label">Kho</label>
-                                                                            <input type="number" class="form-control"
-                                                                                name="variant_stocks[]"
-                                                                                placeholder="Số lượng">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-1 d-flex align-items-end">
-                                                                        <button type="button"
-                                                                            class="btn btn-sm remove-variation">
-                                                                            <i class="fas fa-times"></i>
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <% } %>
-                                        </div>
+                                        <div id="variant-list" class="mt-3"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-lg-4">
-                            <!-- Ảnh đại diện sản phẩm -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <i class="fas fa-image me-2"></i> Ảnh đại diện
-                                </div>
-                                <div class="card-body text-center">
-                                    <div class="mb-3">
-                                        <div class="d-flex flex-column align-items-center">
-                                            <img id="thumbnail-preview"
-                                                src="<%= product && product.product_thumbnail ? '/' + product.product_thumbnail : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzSncjhoWGdsxRm0LnCc5FD9kj86QoiTVAhw&s' %>"
-                                                class="img-fluid thumbnail-preview <%= product && product.product_thumbnail ? 'show' : '' %>"
-                                                alt="Ảnh đại diện">
+                            <div class="sticky-sidebar">
+                                <!-- Ảnh đại diện sản phẩm -->
+                                <div class="card animate-in" style="animation-delay: 0.2s;">
+                                    <div class="card-header">
+                                        <i class="fas fa-image"></i> Ảnh đại diện
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <div class="thumbnail-container">
+                                                    <img id="thumbnail-preview"
+                                                        src="<%= product && product.product_thumbnail ? '/' + product.product_thumbnail : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzSncjhoWGdsxRm0LnCc5FD9kj86QoiTVAhw&s' %>"
+                                                        class="img-fluid thumbnail-preview <%= product && product.product_thumbnail ? 'show' : '' %>"
+                                                        alt="Ảnh đại diện">
+                                                </div>
 
-
-                                            <div class="mt-3 text-center">
-                                                <label for="product_thumbnail" class="btn btn-outline-primary">
-                                                    <i class="fas fa-upload me-2"></i> Chọn ảnh
-                                                </label>
-                                                <input type="file" id="product_thumbnail" name="product_thumbnail"
-                                                    accept="image/*" class="d-none">
+                                                <div class="mt-3 text-center">
+                                                    <label for="product_thumbnail"
+                                                        class="btn btn-outline-primary shadow-sm">
+                                                        <i class="fas fa-upload me-2"></i> Chọn ảnh
+                                                    </label>
+                                                    <input type="file" id="product_thumbnail" name="product_thumbnail"
+                                                        accept="image/*" class="d-none">
+                                                </div>
+                                                <small class="form-text text-muted mt-2">Định dạng: JPG, PNG, GIF.
+                                                    Kích thước tối đa: 2MB</small>
+                                                <% if (product && product.product_thumbnail) { %>
+                                                    <button type="button" id="remove-thumbnail"
+                                                        class="btn btn-outline-danger btn-sm mt-3 shadow-sm">
+                                                        <i class="fas fa-trash me-1"></i> Xóa ảnh
+                                                    </button>
+                                                    <% } %>
                                             </div>
-                                            <small class="form-text text-muted mt-2">Định dạng: JPG, PNG, GIF.
-                                                Kích thước tối đa: 2MB</small>
-                                            <% if (product && product.product_thumbnail) { %>
-                                                <button type="button" id="remove-thumbnail"
-                                                    class="btn btn-outline-danger btn-sm mt-2">
-                                                    <i class="fas fa-trash me-1"></i> Xóa ảnh
-                                                </button>
-                                                <% } %>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Trạng thái và hành động -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <i class="fas fa-cog me-2"></i> Trạng thái & Hành động
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <label for="status" class="form-label">Trạng thái sản phẩm</label>
-                                        <select class="form-select" id="status" name="status">
-                                            <option value="active" <%=product && product.status==='active' ? 'selected'
-                                                : '' %>>Hiển thị</option>
-                                            <option value="inactive" <%=product && product.status==='inactive'
-                                                ? 'selected' : '' %>>Ẩn</option>
-                                            <option value="draft" <%=product && product.status==='draft' ? 'selected'
-                                                : '' %>>Bản nháp</option>
-                                        </select>
+                                <!-- Trạng thái và hành động -->
+                                <div class="card animate-in" style="animation-delay: 0.3s;">
+                                    <div class="card-header">
+                                        <i class="fas fa-cog"></i> Trạng thái & Hành động
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="featured" class="form-label">Sản phẩm nổi bật</label>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="featured"
-                                                name="featured" <%=product && product.featured ? 'checked' : '' %>>
-                                            <label class="form-check-label" for="featured">Đánh dấu là sản phẩm nổi
-                                                bật</label>
+                                    <div class="card-body">
+                                        <div class="mb-4">
+                                            <div class="mb-4">
+                                                <label class="form-label">Trạng thái sản phẩm</label>
+
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="isDraft"
+                                                        name="isDraft" <%=product && product.isDraft ? 'checked' : ''
+                                                        %>>
+                                                    <label class="form-check-label" for="isDraft">Bản nháp</label>
+                                                </div>
+
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="isPulished"
+                                                        name="isPulished" <%=product && product.isPulished ? 'checked'
+                                                        : '' %>>
+                                                    <label class="form-check-label" for="isPulished">Hiển thị công
+                                                        khai</label>
+                                                </div>
+                                            </div>
+
                                         </div>
-                                    </div>
-                                    <div class="d-grid gap-2">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-save me-1"></i> Lưu sản phẩm
-                                        </button>
-                                        <a href="/admin/products" class="btn btn-outline-secondary">
-                                            <i class="fas fa-times me-1"></i> Hủy
-                                        </a>
+                                        <div class="mb-4">
+                                            <label for="featured" class="form-label mb-2">Sản phẩm nổi bật</label>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input shadow-sm" type="checkbox" id="featured"
+                                                    name="featured" <%=product && product.featured ? 'checked' : '' %>>
+                                                <label class="form-check-label" for="featured">Đánh dấu là sản phẩm nổi
+                                                    bật</label>
+                                            </div>
+                                        </div>
+                                        <div class="action-buttons">
+                                            <button type="submit" class="btn btn-primary shadow">
+                                                <i class="fas fa-save me-1"></i> Lưu sản phẩm
+                                            </button>
+                                            <a href="/v1/api/admin/products/list"
+                                                class="btn btn-outline-secondary shadow-sm">
+                                                <i class="fas fa-times me-1"></i> Hủy
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -524,17 +637,63 @@
                 </form>
             </div>
         </div>
+
+        <!-- Modal tạo thuộc tính -->
+        <div class="modal fade" id="createAttributeModal" tabindex="-1" aria-labelledby="createAttributeModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="create-attribute-form" class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createAttributeModalLabel">
+                            <i class="fas fa-plus-circle me-2"></i> Tạo mới thuộc tính
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="new-attribute-name" class="form-label">Tên thuộc tính</label>
+                            <input type="text" class="form-control shadow-sm" id="new-attribute-name" required
+                                placeholder="Ví dụ: Màu sắc, Kích thước...">
+                        </div>
+                        <div class="mb-3">
+                            <label for="new-attribute-values" class="form-label">Giá trị (phân cách bởi dấu
+                                phẩy)</label>
+                            <input type="text" class="form-control shadow-sm" id="new-attribute-values"
+                                placeholder="VD: Đỏ, Xanh, Vàng" required>
+                            <small class="form-text text-muted mt-1">Mỗi giá trị cách nhau bởi dấu phẩy</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary shadow">
+                            <i class="fas fa-check me-1"></i> Tạo
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    </div>
+                </form>
+                <div id="product-data" data-product='<%- JSON.stringify(product || {}) %>'></div>
+            </div>
+        </div>
+        <!-- Toast container -->
+
     </div>
 
     <!-- Bootstrap and other scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        const product = JSON.parse(document.getElementById("product-data").dataset.product);
+        //  console.log("Product data:", product);
+
+        document.addEventListener('DOMContentLoaded', async function () {
             const form = document.getElementById('productForm');
             const isEdit = form.getAttribute('action').includes('/products/') && form.getAttribute('method') === 'PUT';
             const isCheck = form.getAttribute('action');
             console.log('isEdit:', isEdit);
+            let selectedAttributes = [];
+            let allAttributes = [];
+            await fetchAttributesFromDB();
 
+            document.getElementById('add-attribute-select').addEventListener('click', renderAttributeSelect);
 
 
             form.addEventListener('submit', function (event) {
@@ -555,13 +714,11 @@
                     console.log(pair[0] + ': ' + pair[1]);
                 }
 
-                // URL API endpoint: Đảm bảo rằng URL endpoint đúng cho việc create hoặc update
-                // let apiUrl = '/v1/api/shop/products'; // Đảm bảo đây là đúng endpoint của bạn
-                // if (isEdit) {
-                //     // Nếu là chỉnh sửa sản phẩm, thêm ID sản phẩm vào URL
-                //     const productId = form.getAttribute('data-product-id');  // Lấy ID sản phẩm từ data attribute
-                //     apiUrl = `/v1/api/shop/products/${productId}`;  // Cập nhật sản phẩm
-                // }
+                // Hiện thông báo loading
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-1"></i> Đang xử lý...';
+                submitBtn.disabled = true;
 
                 // Gửi yêu cầu POST hoặc PUT đến API tạo hoặc cập nhật sản phẩm
                 fetch(apiUrl, {
@@ -573,243 +730,566 @@
                         'x-api-key': apiKey
                     }
                 })
-                    .then(response => {
+                    .then(async response => {
+                        const data = await response.json();
                         if (!response.ok) {
-                            throw new Error('Network response was not ok: ' + response.statusText);
+                            // Ném lỗi kèm theo message cụ thể từ backend
+                            throw new Error(data.message || 'Network error');
                         }
-                        return response.json();
+                        return data;
                     })
                     .then(data => {
                         if (data.success === true) {
                             console.log("Success:", data);
-
-                            alert('Sản phẩm đã được ' + (isEdit ? 'cập nhật' : 'thêm') + ' thành công!');
-                            // window.location.href = '/v1/api/admin/list'; // Điều hướng đến danh sách sản phẩm
+                            showToast('Thành công!', 'Sản phẩm đã được ' + (isEdit ? 'cập nhật' : 'thêm') + ' thành công!', 'success');
+                            setTimeout(() => {
+                                window.location.href = '/v1/api/admin/products/list';
+                            }, 1500);
                         } else {
                             console.log("Error:", data.success);
-                            alert('Có lỗi xảy ra: ' + (data.message || 'Vui lòng thử lại!'));
+                            showToast('Lỗi!', data.message || 'Vui lòng thử lại!', 'error');
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Có lỗi xảy ra khi gửi dữ liệu: ' + error.message);
+                        showToast('Lỗi!', 'Đã xảy ra lỗi khi gửi dữ liệu: ' + error.message, 'error');
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
                     });
             });
-            // Hiển thị preview ảnh đại diện
+
+            // Xử lý xem trước ảnh đại diện
             const thumbnailInput = document.getElementById('product_thumbnail');
             const thumbnailPreview = document.getElementById('thumbnail-preview');
+            const removeThumbButton = document.getElementById('remove-thumbnail');
 
             thumbnailInput.addEventListener('change', function () {
-                if (this.files && this.files[0]) {
+                const file = this.files[0];
+                if (file) {
                     const reader = new FileReader();
-
                     reader.onload = function (e) {
                         thumbnailPreview.src = e.target.result;
-                        thumbnailPreview.classList.add('show'); // ✅ hiện lại ảnh
+                        thumbnailPreview.classList.add('show');
+
+                        // Thêm nút xóa nếu chưa có
+                        if (!removeThumbButton) {
+                            const removeBtn = document.createElement('button');
+                            removeBtn.id = 'remove-thumbnail';
+                            removeBtn.className = 'btn btn-outline-danger btn-sm mt-3 shadow-sm';
+                            removeBtn.innerHTML = '<i class="fas fa-trash me-1"></i> Xóa ảnh';
+                            thumbnailInput.parentElement.after(removeBtn);
+
+                            removeBtn.addEventListener('click', removeThumbHandler);
+                        }
                     };
-
-                    reader.readAsDataURL(this.files[0]);
-
-                    // Nếu bị ẩn bởi lần xoá trước thì remove class hidden
-                    thumbnailPreview.classList.add('show');
-
-                    // Nếu có input hidden báo xoá ảnh, thì xoá đi vì giờ user đã chọn lại ảnh
-                    const removeInput = document.querySelector('input[name="remove_thumbnail"]');
-                    if (removeInput) {
-                        removeInput.remove();
-                    }
-
-                    // Nếu nút "Xóa ảnh" chưa tồn tại, thì thêm lại
-                    if (!document.getElementById('remove-thumbnail')) {
-                        const removeButton = document.createElement('button');
-                        removeButton.id = 'remove-thumbnail';
-                        removeButton.className = 'btn btn-outline-danger btn-sm mt-2';
-                        removeButton.innerHTML = '<i class="fas fa-trash me-1"></i> Xóa ảnh';
-                        thumbnailInput.parentNode.parentNode.appendChild(removeButton);
-
-                        removeButton.addEventListener('click', function () {
-                            thumbnailPreview.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzSncjhoWGdsxRm0LnCc5FD9kj86QoiTVAhw&s';
-                            thumbnailPreview.classList.remove('show'); // ✅ đúng class
-                            thumbnailInput.value = '';
-                            this.remove();
-
-                            const oldRemove = document.querySelector('input[name="remove_thumbnail"]');
-                            if (!oldRemove) {
-                                const hiddenInput = document.createElement('input');
-                                hiddenInput.type = 'hidden';
-                                hiddenInput.name = 'remove_thumbnail';
-                                hiddenInput.value = 'true';
-                                document.getElementById('productForm').appendChild(hiddenInput);
-                            }
-                        });
-                    }
+                    reader.readAsDataURL(file);
                 }
             });
 
+            // Xử lý xóa ảnh đại diện
+            if (removeThumbButton) {
+                removeThumbButton.addEventListener('click', removeThumbHandler);
+            }
 
-            // Nếu đã có nút xóa ảnh
-            const removeButton = document.getElementById('remove-thumbnail');
-            if (removeButton) {
-                removeButton.addEventListener('click', function () {
-                    const thumbnailPreview = document.getElementById('thumbnail-preview');
-                    const thumbnailInput = document.getElementById('product_thumbnail');
+            function removeThumbHandler() {
+                thumbnailPreview.src = '';
+                thumbnailPreview.classList.remove('show');
+                thumbnailInput.value = '';
 
-                    // Sử dụng ảnh placeholder từ service bên ngoài thay vì đường dẫn local
-                    thumbnailPreview.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzSncjhoWGdsxRm0LnCc5FD9kj86QoiTVAhw&s';
-                    thumbnailPreview.classList.add('hidden')
-                    thumbnailInput.value = '';
-                    document.getElementById('productForm').insertAdjacentHTML('beforeend', '<input type="hidden" name="remove_thumbnail" value="true">');
+                // Thêm trường ẩn để đánh dấu xóa ảnh
+                if (isEdit) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'remove_thumbnail';
+                    hiddenInput.value = 'true';
+                    form.appendChild(hiddenInput);
+                }
+
+                this.remove();
+            }
+
+            // Tạo mới thuộc tính
+            document.getElementById('create-attribute-form').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const attributeName = document.getElementById('new-attribute-name').value;
+                const attributeValuesInput = document.getElementById('new-attribute-values').value;
+                const attributeValues = attributeValuesInput.split(',').map(value => value.trim()).filter(Boolean);
+
+                if (!attributeName || attributeValues.length === 0) {
+                    showToast('Lỗi!', 'Vui lòng nhập tên thuộc tính và ít nhất một giá trị!', 'error');
+                    return;
+                }
+
+                // API call để tạo thuộc tính mới
+                try {
+                    const apiUrl = '/v1/api/shop/attributes';
+                    const accessToken = localStorage.getItem('accessToken');
+                    const userId = localStorage.getItem('userId');
+                    const apiKey = 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683';
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'authorization': accessToken,
+                            'x-client-id': userId,
+                            'x-api-key': apiKey
+                        },
+                        body: JSON.stringify({
+                            name: attributeName,
+                            values: attributeValues
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showToast('Thành công!', 'Đã tạo thuộc tính mới!', 'success');
+
+                        // Cập nhật danh sách thuộc tính
+                        await fetchAttributesFromDB();
+
+                        // Đóng modal
+                        bootstrap.Modal.getInstance(document.getElementById('createAttributeModal')).hide();
+
+                        // Reset form
+                        document.getElementById('new-attribute-name').value = '';
+                        document.getElementById('new-attribute-values').value = '';
+                    } else {
+                        showToast('Lỗi!', data.message || 'Không thể tạo thuộc tính mới!', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error creating attribute:', error);
+                    showToast('Lỗi!', 'Đã xảy ra lỗi khi tạo thuộc tính!', 'error');
+                }
+            });
+
+            // Tạo toast thông báo
+            function showToast(title, message, type) {
+                const toastContainer = document.querySelector('.toast-container');
+
+                if (!toastContainer) {
+                    // Tạo container nếu chưa có
+                    const container = document.createElement('div');
+                    container.className = 'toast-container position-fixed top-0 start-0 p-3';
+
+                    container.style.zIndex = '5';
+                    document.body.appendChild(container);
+                }
+
+                const toastDiv = document.createElement('div');
+                toastDiv.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : 'success'} border-0`;
+                toastDiv.setAttribute('role', 'alert');
+                toastDiv.setAttribute('aria-live', 'assertive');
+                toastDiv.setAttribute('aria-atomic', 'true');
+
+                toastDiv.innerHTML = `
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <strong>${title}</strong> ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                `;
+
+                document.querySelector('.toast-container').appendChild(toastDiv);
+
+                const toast = new bootstrap.Toast(toastDiv, {
+                    autohide: true,
+                    delay: 3000
+                });
+
+                toast.show();
+            }
+
+            // Biến lưu trữ danh sách thuộc tính từ DB
+
+
+            // Biến lưu trữ thuộc tính đã chọn
+
+
+            // Nếu đang ở chế độ edit, lấy thuộc tính từ sản phẩm
+            if (product && product.variants && product.variants.length > 0) {
+                console.log("Raw product variants:", product.variants);
+
+                // Extract unique attributes from variants
+                const attributeMap = {};
+
+                product.variants.forEach(variant => {
+                    const combination = variant.combination;
+                    if (combination) {
+                        Object.entries(combination).forEach(([key, value]) => {
+                            if (!attributeMap[key]) {
+                                attributeMap[key] = new Set();
+                            }
+                            attributeMap[key].add(value);
+                        });
+                    }
+                });
+
+                selectedAttributes = Object.entries(attributeMap).map(([name, values]) => ({
+                    name,
+                    values: Array.from(values)
+                }));
+
+                console.log("Extracted selectedAttributes:", selectedAttributes);
+                renderSelectedAttributes();
+            }
+
+
+            // Fetch danh sách thuộc tính từ database
+            async function fetchAttributesFromDB() {
+                try {
+                    const apiUrl = '/v1/api/shop/attributes/all';
+                    const accessToken = localStorage.getItem('accessToken');
+                    const userId = localStorage.getItem('userId');
+                    const apiKey = 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683';
+
+                    const response = await fetch(apiUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'authorization': accessToken,
+                            'x-client-id': userId,
+                            'x-api-key': apiKey
+                        }
+                    });
+
+                    const data = await response.json();
+                    console.log("Fetched attributes data:", data);
+
+                    if (data.success) {
+                        allAttributes = data.attributes || [];
+                        console.log("Fetched attributes:", allAttributes);
+                    } else {
+                        console.error("Failed to fetch attributes:", data.message);
+                    }
+                } catch (error) {
+                    console.error('Error fetching attributes:', error);
+                }
+            }
+
+
+
+            // Render select để chọn thuộc tính
+            function renderAttributeSelect() {
+                if (allAttributes.length === 0) {
+                    showToast('Thông báo', 'Không có thuộc tính nào. Vui lòng tạo thuộc tính trước!', 'error');
+                    return;
+                }
+
+                const attributeSelectContainer = document.getElementById('attribute-select-container');
+
+                const availableAttributes = allAttributes.filter(attr =>
+                    !selectedAttributes.some(selected => selected.name === attr.name)
+                );
+
+                if (availableAttributes.length === 0) {
+                    showToast('Thông báo', 'Đã sử dụng tất cả thuộc tính!', 'error');
+                    return;
+                }
+
+                const newAttributeRow = document.createElement('div');
+                newAttributeRow.className = 'attribute-row mb-3 animate-in';
+
+                newAttributeRow.innerHTML = `
+        <div class="row align-items-center">
+            <div class="col-md-5 mb-2 mb-md-0">
+                <label class="input-label">Chọn thuộc tính</label>
+                <select class="form-select attribute-selector shadow-sm">
+                    <option value="" selected disabled>-- Chọn thuộc tính --</option>
+                    ${availableAttributes.map(attr => `
+                        <option value="${attr._id}">${attr.name}</option>
+                    `).join('')}
+                </select>
+            </div>
+            <div class="col-md-6 mb-2 mb-md-0">
+                <label class="input-label">Giá trị</label>
+                <div class="value-checkboxes d-flex flex-wrap gap-2">
+                    <div class="text-muted">Vui lòng chọn thuộc tính trước</div>
+                </div>
+            </div>
+            <div class="col-md-1 d-flex justify-content-center align-items-center mt-3 mt-md-0">
+                <button type="button" class="btn btn-outline-danger remove-attribute-row">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+
+                attributeSelectContainer.appendChild(newAttributeRow);
+
+                const attributeSelector = newAttributeRow.querySelector('.attribute-selector');
+                attributeSelector.addEventListener('change', function () {
+                    const attributeId = this.value;
+                    const selectedAttribute = allAttributes.find(attr => attr._id === attributeId);
+
+                    if (selectedAttribute) {
+                        const valuesContainer = newAttributeRow.querySelector('.value-checkboxes');
+                        valuesContainer.innerHTML = '';
+
+                        selectedAttribute.values.forEach(value => {
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'btn btn-outline-primary btn-sm rounded-pill toggle-value';
+                            btn.textContent = value;
+                            btn.dataset.value = value;
+                            btn.dataset.selected = 'false';
+
+                            btn.addEventListener('click', () => {
+                                const selected = btn.dataset.selected === 'true';
+                                btn.dataset.selected = (!selected).toString();
+
+                                btn.classList.toggle('btn-outline-primary', selected);
+                                btn.classList.toggle('btn-primary', !selected);
+                                btn.classList.toggle('text-white', !selected);
+                            });
+
+                            valuesContainer.appendChild(btn);
+                        });
+                    }
+                });
+
+                newAttributeRow.querySelector('.remove-attribute-row').addEventListener('click', function () {
+                    newAttributeRow.remove();
                 });
             }
 
-            // Add Attribute
-            document.getElementById('add-attribute').addEventListener('click', function () {
-                const container = document.getElementById('attributes-container');
-                const newRow = document.createElement('div');
-                newRow.className = 'attribute-row';
-                newRow.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="mb-2">
-                                <label class="form-label">Tên thuộc tính</label>
-                                <input type="text" class="form-control" name="attribute_keys[]" placeholder="VD: Màu sắc, Kích thước...">
+
+            // Render các thuộc tính đã chọn (khi edit sản phẩm)
+            function renderSelectedAttributes() {
+
+                const attributeSelectContainer = document.getElementById('attribute-select-container');
+                attributeSelectContainer.innerHTML = '';
+                console.log("Rendering selected attributes:", selectedAttributes);
+
+
+                selectedAttributes.forEach(attr => {
+                    const attributeRow = document.createElement('div');
+                    attributeRow.className = 'attribute-row mb-3 animate-in';
+
+                    attributeRow.innerHTML = `
+                        <div class="row align-items-center">
+                            <div class="col-md-5 mb-2 mb-md-0">
+                                <label class="input-label">Thuộc tính</label>
+                                <input type="text" class="form-control" value="${attr.name}" readonly>
+                                <input type="hidden" name="attribute_names[]" value="${attr.name}">
                             </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="mb-2">
-                                <label class="form-label">Giá trị</label>
-                                <input type="text" class="form-control" name="attribute_values[]" placeholder="VD: Đỏ, XL...">
-                            </div>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="button" class="btn btn-sm remove-attribute">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(newRow);
-
-                // Add event listener to the new remove button
-                const removeButtons = newRow.querySelectorAll('.remove-attribute');
-                removeButtons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        this.closest('.attribute-row').remove();
-                    });
-                });
-            });
-
-            // Initial remove attribute buttons
-            document.querySelectorAll('.remove-attribute').forEach(button => {
-                button.addEventListener('click', function () {
-                    this.closest('.attribute-row').remove();
-                });
-            });
-
-
-            document.getElementById('category').addEventListener('change', async function () {
-                const categoryId = this.value;
-
-                if (!categoryId) return;
-
-                try {
-                    const res = await fetch(`/v1/api/shop/categories/${categoryId}/attributes`);
-                    const data = await res.json();
-
-                    if (data && Array.isArray(data.attributes)) {
-                        const container = document.getElementById('attributes-container');
-                        container.innerHTML = ''; // Xóa các dòng hiện tại
-
-                        data.attributes.forEach(attr => {
-                            const row = document.createElement('div');
-                            row.className = 'attribute-row';
-                            row.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="mb-2">
-                                <label class="form-label">Tên thuộc tính</label>
-                                <input type="text" class="form-control" name="attribute_keys[]" value="${attr}" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="mb-2">
-                                <label class="form-label">Giá trị</label>
-                                <input type="text" class="form-control" name="attribute_values[]" placeholder="Nhập giá trị cho ${attr}">
-                            </div>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="button" class="btn btn-sm remove-attribute">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                            container.appendChild(row);
-                        });
-                    }
-                } catch (err) {
-                    console.error("Lỗi khi lấy thuộc tính:", err);
-                }
-            });
-
-            // Add Variation
-            document.getElementById('add-variation').addEventListener('click', function () {
-                const container = document.getElementById('variations-container');
-                const newRow = document.createElement('div');
-                newRow.className = 'variation-row';
-                newRow.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="mb-2">
-                                <label class="form-label">Tên biến thể</label>
-                                <input type="text" class="form-control" name="variant_names[]" placeholder="VD: Màu, Size...">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-2">
-                                <label class="form-label">Giá trị</label>
-                                <input type="text" class="form-control" name="variant_values[]" placeholder="VD: Đỏ, M...">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-2">
-                                <label class="form-label">Giá (VNĐ)</label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" name="variant_prices[]" placeholder="Giá biến thể">
-                                    <span class="input-group-text">₫</span>
+                            <div class="col-md-6 mb-2 mb-md-0">
+                                <label class="input-label">Giá trị đã chọn</label>
+                                <div class="value-checkboxes d-flex flex-wrap gap-2">
+                                    ${attr.values.map(value => `
+                                        <span class="badge bg-primary">${value}
+                                            <input type="hidden" name="attribute_values[${attr.name}][]" value="${value}">
+                                        </span>
+                                    `).join('')}
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="mb-2">
-                                <label class="form-label">Kho</label>
-                                <input type="number" class="form-control" name="variant_stocks[]" placeholder="Số lượng">
+                            <div class="col-md-1 d-flex justify-content-center align-items-center mt-3 mt-md-0">
+                                <button type="button" class="btn btn-outline-danger remove-selected-attribute" data-attribute="${attr.name}">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="col-md-1 d-flex align-items-end">
-                            <button type="button" class="btn btn-sm remove-variation">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(newRow);
+                    `;
 
-                // Add event listener to the new remove button
-                const removeButtons = newRow.querySelectorAll('.remove-variation');
-                removeButtons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        this.closest('.variation-row').remove();
+                    attributeSelectContainer.appendChild(attributeRow);
+
+                    // Xử lý xóa thuộc tính đã chọn
+                    attributeRow.querySelector('.remove-selected-attribute').addEventListener('click', function () {
+                        const attrName = this.getAttribute('data-attribute');
+                        selectedAttributes = selectedAttributes.filter(a => a.name !== attrName);
+                        attributeRow.remove();
                     });
                 });
+
+                // Hiển thị section biến thể nếu có thuộc tính đã chọn
+                if (selectedAttributes.length > 0) {
+                    generateVariants();
+                }
+            }
+
+            // Xử lý khi click "Sinh tổ hợp biến thể"
+            document.getElementById('generate-variants').addEventListener('click', function () {
+                // Thu thập các thuộc tính và giá trị đã chọn
+                const attributeRows = document.querySelectorAll('.attribute-row');
+                const attributes = [];
+
+                attributeRows.forEach(row => {
+                    const attributeSelect = row.querySelector('.attribute-selector');
+                    if (attributeSelect) {
+                        // Đây là thuộc tính mới đang chọn
+                        if (attributeSelect.value) {
+                            const attributeId = attributeSelect.value;
+                            const attributeName = attributeSelect.options[attributeSelect.selectedIndex].text;
+
+                            // Thu thập giá trị có trạng thái selected = true
+                            const selectedValues = Array.from(row.querySelectorAll('.toggle-value'))
+                                .filter(btn => btn.dataset.selected === 'true')
+                                .map(btn => btn.dataset.value);
+
+                            if (selectedValues.length > 0) {
+                                attributes.push({
+                                    _id: attributeId,
+                                    name: attributeName,
+                                    values: selectedValues
+                                });
+                            }
+                        }
+                    } else {
+                        // Đây là hàng thuộc tính đã chọn trước (khi edit)
+                        const attributeName = row.querySelector('input[name="attribute_names[]"]').value;
+                        const attributeValues = Array.from(row.querySelectorAll(`input[name="attribute_values[${attributeName}][]"]`))
+                            .map(input => input.value);
+
+                        if (attributeValues.length > 0) {
+                            attributes.push({
+                                name: attributeName,
+                                values: attributeValues
+                            });
+                        }
+                    }
+                });
+
+                if (attributes.length === 0) {
+                    showToast('Thông báo', 'Vui lòng chọn ít nhất một thuộc tính và giá trị!', 'error');
+                    return;
+                }
+
+                // Gán lại danh sách selectedAttributes
+                selectedAttributes = attributes;
+
+                // Cập nhật giao diện và sinh tổ hợp biến thể
+                renderSelectedAttributes();
+                generateVariants();
             });
 
-            // Initial remove variation buttons
-            document.querySelectorAll('.remove-variation').forEach(button => {
-                button.addEventListener('click', function () {
-                    this.closest('.variation-row').remove();
+
+            // Sinh các biến thể từ các thuộc tính đã chọn
+            function generateVariants() {
+                if (selectedAttributes.length === 0) return;
+
+                document.getElementById('variant-list-section').style.display = 'block';
+                const variantListContainer = document.getElementById('variant-list');
+
+                // Lưu các tổ hợp đã có để tránh trùng
+                const existingCombinations = new Set();
+                document.querySelectorAll('input[name="combinations[]"]').forEach(input => {
+                    existingCombinations.add(input.value);
                 });
-            });
+
+                // Tạo tổ hợp mới
+                const newVariants = generateCombinations(selectedAttributes);
+                console.log('Generated variants:', newVariants);
+
+                newVariants.forEach((variant, index) => {
+                    const combinationString = JSON.stringify(variant);
+                    if (existingCombinations.has(combinationString)) return; // đã có, bỏ qua
+
+                    // Tìm biến thể cũ nếu đang ở mode edit
+                    let existingVariant = null;
+                    if (product && product.variants) {
+                        existingVariant = product.variants.find(v =>
+                            Object.keys(variant).every(key =>
+                                v.combination && v.combination[key] === variant[key]
+                            )
+                        );
+                    }
+
+                    const variantRow = document.createElement('div');
+                    variantRow.className = 'variation-row animate-in';
+                    variantRow.style.animationDelay = `${0.05 * index}s`;
+
+                    const variantName = Object.values(variant).join(' / ');
+
+                    variantRow.innerHTML = `
+            <div class="row">
+                <div class="col-12 mb-3">
+                      <h6 class="mb-0 text-primary">Biến thể #${index + 1}: ${variantName}</h6>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Giá (VNĐ)</label>
+                    <input type="number" class="form-control shadow-sm variant-price"
+                        value="${existingVariant?.price || ''}" placeholder="Để trống nếu dùng giá mặc định">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Số lượng</label>
+                    <input type="number" class="form-control shadow-sm variant-stock"
+                        value="${existingVariant?.stock || ''}" placeholder="Để trống nếu dùng số lượng mặc định">
+                </div>
+            </div>
+        `;
+
+                    // Hidden inputs
+                    const combinationInput = document.createElement('input');
+                    combinationInput.type = 'hidden';
+                    combinationInput.name = 'combinations[]';
+                    combinationInput.value = combinationString;
+
+                    const priceInput = document.createElement('input');
+                    priceInput.type = 'hidden';
+                    priceInput.name = 'variant_prices[]';
+                    const stockInput = document.createElement('input');
+                    stockInput.type = 'hidden';
+                    stockInput.name = 'variant_stocks[]';
+
+                    // Đồng bộ giá và tồn kho
+                    const priceField = variantRow.querySelector('.variant-price');
+                    const stockField = variantRow.querySelector('.variant-stock');
+
+                    priceInput.value = priceField.value;
+                    stockInput.value = stockField.value;
+
+                    priceField.addEventListener('input', () => {
+                        priceInput.value = priceField.value;
+                    });
+                    stockField.addEventListener('input', () => {
+                        stockInput.value = stockField.value;
+                    });
+
+                    // Gắn vào DOM
+                    variantRow.appendChild(combinationInput);
+                    variantRow.appendChild(priceInput);
+                    variantRow.appendChild(stockInput);
+
+                    variantListContainer.appendChild(variantRow);
+                });
+            }
+
+
+            // Hàm tạo tất cả các tổ hợp có thể từ các thuộc tính
+            function generateCombinations(attributes) {
+                if (attributes.length === 0) return [];
+
+                // Bắt đầu với một tổ hợp trống
+                let result = [{}];
+
+                // Với mỗi thuộc tính, tạo tổ hợp mới cho mỗi giá trị
+                attributes.forEach(attribute => {
+                    const { name, values } = attribute;
+                    const newResult = [];
+
+                    // Tạo bản sao của kết quả hiện tại và thêm giá trị hiện tại
+                    result.forEach(item => {
+                        values.forEach(value => {
+                            newResult.push({
+                                ...item,
+                                [name]: value
+                            });
+                        });
+                    });
+
+                    // Cập nhật kết quả
+                    result = newResult;
+                });
+
+                return result;
+            }
         });
     </script>
 </body>

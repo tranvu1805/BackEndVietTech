@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản Trị Hệ Thống - Quản Lý Bài Viết</title>
+    <link rel="icon" href="/uploads/mini_logo.ico" type="image/png">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet 22" href="/css/style.css">
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <%- include('partials/header') %>
+
+                <!-- Main Content -->
+                <div class="col-md-10 col-lg-10 ms-auto main-content">
+                    <!-- Top Navbar -->
+                    <nav class="top-navbar">
+                        <h4 class="mb-0">Quản lý Bài viết</h4>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <button class="notification-btn" type="button">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="notification-badge">3</span>
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="user-dropdown border-0" type="button" id="userDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="user-avatar me-2">A</div>
+                                    <span class="d-none d-md-inline">Admin</span>
+                                    <i class="fas fa-chevron-down ms-2 small"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài
+                                            đặt</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="#" onclick="logout()"><i
+                                                class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <a href="/v1/api/admin/posts/create" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i> Thêm bài viết mới
+                        </a>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="row mb-4 align-items-end g-3">
+                        <!-- Tìm kiếm -->
+                        <div class="col-md-5">
+                            <label for="searchTitle" class="form-label">Tìm kiếm bài viết</label>
+                            <div class="input-group">
+                                <input type="text" id="searchTitle" class="form-control" placeholder="Tiêu đề bài viết"
+                                    value="<%= query?.search || '' %>">
+                                <button class="btn btn-outline-primary" id="searchButton"><i
+                                        class="fas fa-search"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Trạng thái -->
+                        <div class="col-md-3">
+                            <label for="filterStatus" class="form-label">Trạng thái</label>
+                            <select class="form-select" id="filterStatus">
+                                <option value="" <%=!query?.status ? 'selected' : '' %>>Tất cả</option>
+                                <option value="publish" <%=query?.status==='publish' ? 'selected' : '' %>>Đã đăng
+                                </option>
+                                <option value="draft" <%=query?.status==='draft' ? 'selected' : '' %>>Bản nháp</option>
+                                <option value="canceled" <%=query?.status==='canceled' ? 'selected' : '' %>>Đã hủy
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Sắp xếp -->
+                        <div class="col-md-2">
+                            <label for="sortOption" class="form-label">Sắp xếp</label>
+                            <select class="form-select" id="sortOption">
+                                <option value="">Mặc định</option>
+                                <option value="createdAt_desc" <%=query?.sort==='createdAt_desc' ? 'selected' : '' %>
+                                    >Mới nhất</option>
+                                <option value="createdAt_asc" <%=query?.sort==='createdAt_asc' ? 'selected' : '' %>>Cũ
+                                    nhất</option>
+                                <option value="title_asc" <%=query?.sort==='title_asc' ? 'selected' : '' %>>Tiêu đề A-Z
+                                </option>
+                                <option value="title_desc" <%=query?.sort==='title_desc' ? 'selected' : '' %>>Tiêu đề
+                                    Z-A</option>
+                            </select>
+                        </div>
+
+                        <!-- Nút hành động -->
+                        <div class="col-md-2 text-end">
+                            <label class="form-label d-block invisible">Hành động</label>
+                            <div class="btn-group w-100">
+                                <button class="btn btn-outline-primary" id="applyFilter">
+                                    <i class="fas fa-filter me-1"></i> Lọc
+                                </button>
+                                <button class="btn btn-outline-success" id="exportPostsButton">
+                                    <i class="fas fa-download me-1"></i> Xuất
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Posts Table -->
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-3">ID</th>
+                                        <th>Tiêu đề</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Tác giả</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thông tin chi tiết</th>
+                                        <th class="text-end pe-3">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% posts.forEach(post=> { %>
+                                        <tr>
+                                            <td class="ps-3">
+                                                <small class="text-muted" title="<%= post._id.toString() %>">
+                                                    <%= post._id.toString().slice(0, 8) %>...
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="post-icon me-2"
+                                                        style="width: 40px; height: 40px; background-color: #f1f1f1; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                                        <i class="fas fa-file-alt text-secondary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <%= post.title %>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <%= new Date(post.createdAt).toLocaleDateString('vi-VN', {day: '2-digit'
+                                                    , month: '2-digit' , year: 'numeric' , hour: '2-digit' ,
+                                                    minute: '2-digit' }) %>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="author-avatar me-2"
+                                                        style="width: 32px; height: 32px; background-color: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                        <i class="fas fa-user text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <%= authors[post.account_id] || 'Không rõ' %>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <% if (post.status==='publish' ) { %>
+                                                    <span class="badge bg-success">Đã đăng</span>
+                                                    <% } else if (post.status==='draft' ) { %>
+                                                        <span class="badge bg-warning text-dark">Bản nháp</span>
+                                                        <% } else if (post.status==='canceled' ) { %>
+                                                            <span class="badge bg-secondary">Đã hủy</span>
+                                                            <% } else { %>
+                                                                <span class="badge bg-light text-dark">Không rõ trạng
+                                                                    thái</span>
+                                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-secondary" type="button"
+                                                    data-bs-toggle="collapse" data-bs-target="#details<%= post._id %>"
+                                                    aria-expanded="false">
+                                                    <i class="fas fa-info-circle me-1"></i> Chi tiết
+                                                </button>
+                                            </td>
+                                            <td class="text-end pe-3">
+                                                <div class="action-buttons">
+                                                    <a href="/v1/api/admin/posts/edit/<%= post._id %>"
+                                                        class="btn btn-sm btn-warning me-1">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <div class="form-check form-switch d-inline-block">
+                                                        <label class="switch-toggle"
+                                                            title="<%= post.status === 'draft' ? 'Bản nháp - click để đăng' : 'Đã đăng - click để chuyển nháp' %>">
+                                                            <input type="checkbox" <%=post.status==='publish'
+                                                                ? 'checked' : '' %>
+                                                            onchange="toggleStatus('<%= post._id %>', '<%= post.status
+                                                                    %>')">
+                                                                    <span class="switch-slider"></span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Details Row -->
+                                        <tr class="collapse" id="details<%= post._id %>">
+                                            <td colspan="7" class="p-0">
+                                                <div class="post-details p-3">
+                                                    <div class="row g-4">
+                                                        <!-- Post Preview Column -->
+                                                        <div class="col-md-8">
+                                                            <div class="post-preview">
+                                                                <h6 class="mb-3"><i class="fas fa-eye me-2"></i>Xem
+                                                                    trước nội dung</h6>
+                                                                <div class="card border-0 shadow-sm">
+                                                                    <div class="card-body p-3">
+                                                                        <h5 class="card-title">
+                                                                            <%= post.title %>
+                                                                        </h5>
+                                                                        <div class="card-text post-content-preview">
+                                                                            <%- post.content.length> 300 ?
+                                                                                post.content.substring(0, 300) + '...' :
+                                                                                post.content %>
+                                                                        </div>
+
+                                                                        <div class="text-end mt-2">
+                                                                            <button class="btn btn-sm btn-primary"
+                                                                                onclick="previewPost('<%= post._id %>')">
+                                                                                <i
+                                                                                    class="fas fa-external-link-alt me-1"></i>
+                                                                                Xem đầy đủ
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Post Metadata Column -->
+                                                        <div class="col-md-4">
+                                                            <div class="post-metadata">
+                                                                <h6 class="mb-3"><i
+                                                                        class="fas fa-info-circle me-2"></i>Thông tin
+                                                                    bài viết</h6>
+                                                                <div class="card border-0 shadow-sm">
+                                                                    <div class="card-body p-3">
+                                                                        <ul class="list-group list-group-flush">
+                                                                            <li
+                                                                                class="list-group-item px-0 py-2 border-bottom">
+                                                                                <i
+                                                                                    class="fas fa-user-edit text-primary me-2"></i>
+                                                                                <strong>Tác giả:</strong>
+                                                                                <%= authors[post.account_id]
+                                                                                    || 'Không rõ' %>
+                                                                            </li>
+                                                                            <li
+                                                                                class="list-group-item px-0 py-2 border-bottom">
+                                                                                <i
+                                                                                    class="fas fa-calendar-alt text-primary me-2"></i>
+                                                                                <strong>Ngày tạo:</strong>
+                                                                                <%= new
+                                                                                    Date(post.createdAt).toLocaleDateString('vi-VN',
+                                                                                    {day: '2-digit' , month: '2-digit' ,
+                                                                                    year: 'numeric' , hour: '2-digit' ,
+                                                                                    minute: '2-digit' }) %>
+                                                                            </li>
+                                                                            <li
+                                                                                class="list-group-item px-0 py-2 border-bottom">
+                                                                                <i
+                                                                                    class="fas fa-edit text-primary me-2"></i>
+                                                                                <strong>Cập nhật:</strong>
+                                                                                <%= new
+                                                                                    Date(post.updatedAt).toLocaleDateString('vi-VN',
+                                                                                    {day: '2-digit' , month: '2-digit' ,
+                                                                                    year: 'numeric' , hour: '2-digit' ,
+                                                                                    minute: '2-digit' }) %>
+                                                                            </li>
+                                                                            <li class="list-group-item px-0 py-2">
+                                                                                <i
+                                                                                    class="fas fa-chart-bar text-primary me-2"></i>
+                                                                                <strong>Số từ:</strong>
+                                                                                <%= post.content.split(' ').length %> từ
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Success Modal -->
+                        <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-success">
+                                <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title" id="statusModalLabel"><i class="fas fa-check-circle me-2"></i>Thành công</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                                </div>
+                                <div class="modal-body" id="statusModalBody">
+                                Trạng thái bài viết đã được cập nhật.
+                                </div>
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="location.reload()">
+                                    Tải lại trang
+                                </button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        <!-- Confirm Modal -->
+                        <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-warning">
+                                <div class="modal-header bg-warning text-dark">
+                                <h5 class="modal-title" id="confirmModalLabel"><i class="fas fa-exclamation-circle me-2"></i>Xác nhận thay đổi</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                                </div>
+                                <div class="modal-body" id="confirmModalBody">
+                                Bạn có chắc chắn muốn thay đổi trạng thái bài viết này?
+                                </div>
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="button" class="btn btn-warning" id="confirmBtn">Xác nhận</button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+  
+                        <!-- Modal Preview -->
+                        <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+                              <div class="modal-content border-0 shadow-lg">
+                                <div class="modal-header bg-primary text-white py-3">
+                                  <h5 class="modal-title" id="previewModalLabel">
+                                    <i class="fas fa-eye me-2"></i>Xem trước bài viết
+                                  </h5>
+                                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                                </div>
+                                <div class="modal-body p-0">
+                                  <!-- Loading indicator -->
+                                  <div id="previewLoader" class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                      <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                    <p class="text-muted mt-3">Đang tải nội dung bài viết...</p>
+                                  </div>
+                                  
+                                  <!-- Actual content container -->
+                                  <div id="previewContent" class="p-4">
+                                    <!-- Nội dung bài viết sẽ được chèn vào đây -->
+                                  </div>
+                                </div>
+                                <div class="modal-footer bg-light py-3">
+                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-1"></i>Đóng
+                                  </button>
+                                  <button type="button" class="btn btn-primary" id="printPreviewBtn">
+                                    <i class="fas fa-print me-1"></i>In bài viết
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        
+                        
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav>
+                        <ul class="pagination justify-content-center mt-4">
+                            <% for (let i=1; i <=totalPages; i++) { %>
+                                <li class="page-item <%= i === currentPage ? ' active' : '' %>">
+                                                                                    <a class="page-link"
+                                                                                        href="/v1/api/admin/posts/list?<%= new URLSearchParams({ ...query, page: i }).toString() %>">
+                                                                                        <%= i %>
+                                                                                    </a>
+                                                                            </li>
+                                                                            <% } %>
+                                                                        </ul>
+                                                                        </nav>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Bootstrap and other scripts -->
+                                                            <script
+                                                                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                                                            <script>
+                                                                document.querySelectorAll('.nav-link').forEach(item => {
+                                                                    item.addEventListener('click', function () {
+                                                                        // Xóa lớp active khỏi tất cả các liên kết
+                                                                        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                                                                        // Thêm lớp active vào mục được chọn
+                                                                        this.classList.add('active');
+                                                                    });
+                                                                });
+
+                                                                document.getElementById('exportPostsButton').addEventListener('click', function () {
+                                                                    fetch('/v1/api/admin/posts/export', {
+                                                                        method: 'GET',
+                                                                        headers: {
+                                                                            'Content-Type': 'application/json'
+                                                                        }
+                                                                    })
+                                                                        .then(response => {
+                                                                            if (response.ok) {
+                                                                                return response.blob();
+                                                                            }
+                                                                            throw new Error('Error exporting posts')
+                                                                        })
+                                                                        .then(blob => {
+                                                                            const link = document.createElement('a');
+                                                                            link.href = URL.createObjectURL(blob);  // Tạo URL cho file Blob
+                                                                            link.download = 'all_posts.xlsx';  // Đặt tên file khi tải về
+                                                                            link.click();  // Tự động click vào link để tải file
+                                                                        })
+                                                                        .catch(error => {
+                                                                            console.error('Error:', error);
+                                                                            alert('Có lỗi khi xuất file.');
+                                                                        })
+                                                                });
+
+                                                                let pendingPostId = null;
+                                                                let pendingNewStatus = null;
+
+                                                                async function toggleStatus(postId, currentStatus) {
+                                                                    pendingPostId = postId;
+                                                                    pendingNewStatus = currentStatus === 'publish' ? 'draft' : 'publish';
+
+                                                                    const confirmText = currentStatus === 'publish'
+                                                                        ? "Bạn muốn chuyển bài viết này sang trạng thái BẢN NHÁP?"
+                                                                        : "Bạn muốn ĐĂNG bài viết này?";
+
+                                                                    document.getElementById("confirmModalBody").textContent = confirmText;
+
+                                                                    const confirmModal = new bootstrap.Modal(document.getElementById("confirmModal"));
+                                                                    confirmModal.show();
+                                                                }
+
+                                                                document.getElementById("confirmBtn").addEventListener("click", async () => {
+                                                                    const confirmModalInstance = bootstrap.Modal.getInstance(document.getElementById("confirmModal"));
+                                                                    confirmModalInstance.hide();
+
+                                                                    try {
+                                                                        const response = await fetch(`/v1/api/admin/posts/${pendingPostId}/toggle-status`, {
+                                                                            method: 'PUT',
+                                                                            headers: {
+                                                                                'Content-Type': 'application/json'
+                                                                            },
+                                                                            body: JSON.stringify({ status: pendingNewStatus })
+                                                                        });
+
+                                                                        const data = await response.json();
+
+                                                                        if (data.success) {
+                                                                            document.getElementById("statusModalBody").textContent = data.message;
+                                                                            const modal = new bootstrap.Modal(document.getElementById("statusModal"));
+                                                                            modal.show();
+                                                                        } else {
+                                                                            alert("Lỗi: " + data.message);
+                                                                        }
+                                                                    } catch (error) {
+                                                                        console.error("Lỗi khi thay đổi trạng thái:", error);
+                                                                        alert("Đã xảy ra lỗi.");
+                                                                    }
+                                                                });
+
+                                                                document.getElementById('applyFilter').addEventListener('click', function () {
+                                                                    const title = document.getElementById('searchTitle').value;
+                                                                    const status = document.getElementById('filterStatus').value;
+                                                                    const sort = document.getElementById('sortOption').value;
+
+                                                                    let query = '?';
+
+                                                                    if (title) query += `search=${encodeURIComponent(title)}&`;
+                                                                    if (status) query += `status=${status}&`;
+                                                                    if (sort) query += `sort=${sort}&`;
+
+                                                                    window.location.href = `/v1/api/admin/posts/list${query}`;
+                                                                });
+
+                                                                document.getElementById('searchButton').addEventListener('click', function () {
+                                                                    document.getElementById('applyFilter').click();
+                                                                });
+
+                                                                function logout() {
+                                                                    if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                                                                        fetch('/v1/api/auth/logout', {
+                                                                            method: 'POST',
+                                                                            credentials: 'include'
+                                                                        })
+                                                                            .then(response => {
+                                                                                if (response.ok) {
+                                                                                    window.location.href = '/login';
+                                                                                } else {
+                                                                                    alert('Có lỗi xảy ra khi đăng xuất');
+                                                                                }
+                                                                            })
+                                                                            .catch(error => {
+                                                                                console.error('Lỗi:', error);
+                                                                                alert('Có lỗi xảy ra khi đăng xuất');
+                                                                            });
+                                                                    }
+                                                                }
+
+                                                                function previewPost(postId) {
+                                                                    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+                                                                    const previewContent = document.getElementById('previewContent');
+                                                                    const previewLoader = document.getElementById('previewLoader');
+
+                                                                    // Show loader, hide content
+                                                                    previewLoader.classList.remove('d-none');
+                                                                    previewContent.classList.add('d-none');
+                                                                    previewContent.innerHTML = '';
+
+                                                                    modal.show();
+
+                                                                    fetch(`/v1/api/admin/posts/preview/${postId}`)
+                                                                        .then(res => {
+                                                                            if (!res.ok) throw new Error("Không tìm thấy bài viết");
+                                                                            return res.text();
+                                                                        })
+                                                                        .then(html => {
+                                                                            // Hide loader, show content with animation
+                                                                            previewLoader.classList.add('d-none');
+                                                                            previewContent.innerHTML = `
+        <div class="post-preview-container">
+          <div class="post-title-container mb-4 pb-3 border-bottom">
+            <h3 class="preview-title"></h3>
+            <div class="post-meta text-muted d-flex align-items-center mt-2">
+              <span class="me-3"><i class="far fa-calendar-alt me-1"></i><span class="preview-date"></span></span>
+              <span><i class="far fa-user me-1"></i><span class="preview-author"></span></span>
+            </div>
+          </div>
+          <div class="post-content">${html}</div>
+        </div>
+      `;
+                                                                            previewContent.classList.remove('d-none');
+
+                                                                            // Extract title from content if available
+                                                                            const titleMatch = html.match(/<h1[^>]*>(.*?)<\/h1>/i) || html.match(/<h2[^>]*>(.*?)<\/h2>/i);
+                                                                            if (titleMatch) {
+                                                                                document.querySelector('.preview-title').textContent = titleMatch[1];
+                                                                            } else {
+                                                                                document.querySelector('.preview-title').textContent = "Bài viết không có tiêu đề";
+                                                                            }
+
+                                                                            // Update preview metadata with placeholder data
+                                                                            document.querySelector('.preview-date').textContent = new Date().toLocaleDateString('vi-VN');
+                                                                            document.querySelector('.preview-author').textContent = "Tác giả";
+                                                                        })
+                                                                        .catch(err => {
+                                                                            previewLoader.classList.add('d-none');
+                                                                            previewContent.classList.remove('d-none');
+                                                                            previewContent.innerHTML = `
+                                                                            <div class="alert alert-danger">
+                                                                            <i class="fas fa-exclamation-circle me-2"></i>
+                                                                            Không thể tải nội dung bài viết. Vui lòng thử lại sau.
+                                                                            </div>
+                                                                        `;
+                                                                            console.error(err);
+                                                                        });
+                                                                }
+
+                                                                // Handle print button
+                                                                document.getElementById('printPreviewBtn').addEventListener('click', function () {
+                                                                    const printContent = document.getElementById('previewContent').innerHTML;
+                                                                    const printWindow = window.open('', '_blank');
+
+                                                                    printWindow.document.write(`
+                                                                    <!DOCTYPE html>
+                                                                    <html>
+                                                                    <head>
+                                                                    <title>In bài viết</title>
+                                                                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+                                                                    <style>
+                                                                        body { padding: 20px; }
+                                                                        @media print {
+                                                                        .no-print { display: none; }
+                                                                        }
+                                                                    </style>
+                                                                    </head>
+                                                                    <body>
+                                                                    <div class="container">
+                                                                        <div class="text-end mb-4 no-print">
+                                                                        <button onclick="window.print()" class="btn btn-primary">
+                                                                            <i class="fas fa-print me-1"></i>In ngay
+                                                                        </button>
+                                                                        </div>
+                                                                        ${printContent}
+                                                                    </div>
+                                                                    </body>
+                                                                    </html>
+                                                                `);
+
+                                                                    printWindow.document.close();
+                                                                });
+                                                            </script>
+</body>
+
+</html>

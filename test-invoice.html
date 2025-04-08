@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hóa đơn bán hàng</title>
+    <link rel="icon" href="/uploads/mini_logo.ico" type="image/png">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            color: #333;
+            background-color: #fff;
+        }
+
+        .invoice-container {
+            border: 1px solid #ddd;
+            padding: 25px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #0056b3;
+        }
+
+        .company-info {
+            text-align: left;
+        }
+
+        .invoice-title {
+            text-align: right;
+        }
+
+        .invoice-title h1 {
+            color: #0056b3;
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .customer-info,
+        .payment-info {
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #333;
+            font-weight: bold;
+            text-align: center;
+            padding: 12px 8px;
+        }
+
+        td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-name {
+            text-align: left;
+        }
+
+        .total-row {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+
+        .total-row td {
+            padding: 12px 8px;
+        }
+
+        .signature {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+        }
+
+        .signature-block {
+            text-align: center;
+            width: 40%;
+        }
+
+        .signature-line {
+            margin: 50px 0 10px 0;
+            border-top: 1px solid #333;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .variant-details {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0 0 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .invoice-number {
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <div class="company-info">
+               
+                <h2>
+                    CÔNG TY TNHH VietTech
+                </h2>
+                <p>MST: xxxxxxxxxx<br>
+                    Địa chỉ: xxxxxxxxxxxxxxxxx<br>
+                    Điện thoại: xxxx xxx 613<br>
+                    Email: xxxxxx@xxxxx.xx</p>
+            </div>
+            <div class="invoice-title">
+                <h1>HÓA ĐƠN BÁN HÀNG</h1>
+                <p>Số: <span class="invoice-number">HD2025
+                            03294</span></p>
+                <p>Ngày: 26/3/2025
+                </p>
+            </div>
+        </div>
+
+        <div class="invoice-details">
+            <div class="customer-info">
+                <h3>THÔNG TIN KHÁCH HÀNG</h3>
+                <p><strong>Khách hàng:</strong>
+                    LTD
+                </p>
+                <p><strong>Địa chỉ:</strong>
+                    Bac Tu Liem, Ha Noi
+                </p>
+                <p><strong>Điện thoại:</strong>
+                    0987654329
+                </p>
+                <p><strong>Email:</strong>
+                    ...
+                </p>
+            </div>
+            <div class="payment-info">
+                <h3>THÔNG TIN THANH TOÁN</h3>
+                <p><strong>Hình thức thanh toán:</strong>
+                    
+                        Chuyển khoản
+                </p>
+                
+                    <p>
+                        <strong>Thông tin tài khoản:</strong><br>
+                        Ngân hàng: MB Bank<br>
+                        Số tài khoản: 190404112004<br>
+                        Chủ tài khoản: CÔNG TY TNHH VietTech
+                    </p>
+                    
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 5%;">STT</th>
+                    <th style="width: 40%;">Tên hàng hóa</th>
+                    <th style="width: 10%;">Đơn vị</th>
+                    <th style="width: 10%;">Số lượng</th>
+                    <th style="width: 15%;">Đơn giá (₫)</th>
+                    <th style="width: 20%;">Thành tiền (₫)</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr>
+                        <td>
+                            1
+                        </td>
+                        <td class="product-name">
+                            <strong>
+                                iPhone 16 Pro Max
+                            </strong>
+                            
+                        </td>
+                        <td>cái</td>
+                        <td>
+                            11
+                        </td>
+                        <td class="text-right">
+                            1,099.99
+                        </td>
+                        <td class="text-right">
+                            12,099.89
+                        </td>
+                    </tr>
+                    
+                        <tr class="total-row">
+                            <td colspan="4" class="text-left">Tổng cộng</td>
+                            <td class="text-right" colspan="2">
+                                12,134.89 ₫
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" class="text-left" style="border-bottom: none; font-style: italic;">
+                                Bằng chữ: Mười hai triệu một trăm ba mươi bốn nghìn tám mươi chín
+                            </td>
+                        </tr>
+
+            </tbody>
+        </table>
+
+        <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+            <!-- Document Structure -->
+            <g id="document">
+                <!-- Left Side - Buyer Section -->
+                <g id="buyer-section" transform="translate(80, 70)">
+                    <text font-family="Arial, sans-serif" font-size="16" font-weight="bold">Người mua hàng</text>
+                    <text font-family="Arial, sans-serif" font-size="14" y="30">(Ký, ghi rõ họ tên)</text>
+
+                    <!-- Empty signature space -->
+                    <rect x="0" y="50" width="150" height="90" fill="none" stroke="#dddddd" stroke-dasharray="5,5"
+                        stroke-width="1" />
+                </g>
+
+                <!-- Right Side - Seller Section -->
+                <g id="seller-section" transform="translate(350, 70)">
+                    <text font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle"
+                        x="80">Người bán hàng</text>
+
+                    <!-- Improved Signature -->
+                    <g transform="translate(-20, 0) scale(0.8)">
+                        <!-- Elegant flowing signature path for "Dương" -->
+                        <path d="M30 80 
+                                 C30 60, 40 50, 55 50
+                                 C70 50, 80 60, 80 80
+                                 C80 95, 70 100, 60 100
+                                 C50 100, 45 95, 40 90
+                                 C35 85, 32 80, 35 75
+                                 C38 70, 45 70, 50 75
+                                 C60 85, 65 95, 75 90
+                                 C85 85, 90 75, 95 70
+                                 C100 65, 110 65, 115 70
+                                 C120 75, 120 85, 115 90
+                                 C110 95, 105 90, 105 85
+                                 C105 80, 108 75, 115 75
+                                 C122 75, 128 80, 132 85
+                                 C136 90, 140 95, 145 90
+                                 C150 85, 155 75, 160 70
+                                 C165 65, 175 65, 180 70
+                                 C185 75, 185 85, 180 90
+                                 C175 95, 170 90, 170 85
+                                 C170 80, 173 75, 180 75
+                                 C190 75, 200 85, 220 75
+                                 C240 65, 250 55, 260 70" stroke="#000066" stroke-width="1.5" fill="none"
+                            stroke-linejoin="round" stroke-linecap="round" />
+
+                        <!-- Vietnamese accent on "ư" -->
+
+                    </g>
+
+
+                    <!-- Improved Stamp -->
+                    <g transform="translate(40, 100)">
+                        <!-- Outer circle -->
+                        <circle cx="40" cy="40" r="44" fill="#ffeeee" stroke="#cc0000" stroke-width="2" />
+
+                        <!-- Inner circle -->
+                        <circle cx="40" cy="40" r="35" fill="none" stroke="#cc0000" stroke-width="1" />
+
+                        <!-- Top text curved along circle -->
+                        <path id="topArc" d="M5,40 A35,35 0 0,1 75,40" fill="none" />
+                        <text font-family="Arial, sans-serif" font-size="10" fill="#cc0000" font-weight="bold">
+                            <textPath href="#topArc" startOffset="50%" text-anchor="middle">CÔNG TY TNHH</textPath>
+                        </text>
+
+                        <!-- Bottom text curved along circle -->
+                        <path id="bottomArc" d="M75,40 A35,35 0 0,1 5,40" fill="none" />
+                        <text font-family="Arial, sans-serif" font-size="10" fill="#cc0000" font-weight="bold">
+                            <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">ĐÃ ĐỐI CHIẾU</textPath>
+                        </text>
+
+                        <!-- Center text -->
+                        <text x="40" y="35" font-family="Arial, sans-serif" font-size="14" fill="#cc0000"
+                            font-weight="bold" text-anchor="middle">VietTech</text>
+                        <text x="40" y="50" font-family="Arial, sans-serif" font-size="10" fill="#cc0000"
+                            text-anchor="middle">MST: 0123456789</text>
+
+                        <!-- Decorative elements -->
+                        <path d="M30,15 L50,15 M25,65 L55,65" stroke="#cc0000" stroke-width="1" />
+                        <path d="M15,30 L15,50 M65,30 L65,50" stroke="#cc0000" stroke-width="1" />
+                    </g>
+
+                    <text x="80" y="30" font-family="'Brush Script MT', cursive" font-size="28" text-anchor="middle"
+                        fill="#000066">VietTech</text>
+
+                    <!-- Confirmation text -->
+                    <text x="80" y="220" font-family="Arial, sans-serif" font-size="14" text-anchor="middle">(Đã ký và
+                        đóng dấu)</text>
+                </g>
+            </g>
+        </svg> -->
+
+
+        <div class="footer">
+            <p>Xin cảm ơn Quý khách đã mua hàng tại CÔNG TY TNHH VietTech!</p>
+            <p>Hóa đơn điện tử này có giá trị pháp lý và được lưu trữ tại: www.xxxxxxxxx.vn</p>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản Trị Hệ Thống - Đánh Giá Sản Phẩm</title>
+    <link rel="icon" href="/uploads/mini_logo.ico" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .card {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+            margin-bottom: 30px;
+        }
+
+        /* .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    } */
+        .card-header {
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+
+        .table td {
+            vertical-align: middle;
+            font-size: 0.95rem;
+        }
+
+        .img-thumbnail {
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            transition: transform 0.2s ease;
+        }
+
+        .img-thumbnail:hover {
+            transform: scale(1.1);
+        }
+
+        .badge {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 20px;
+        }
+
+        .search-bar {
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            margin: 0 2px;
+        }
+
+        .tab-container {
+            margin-bottom: 20px;
+        }
+
+        .nav-tabs .nav-link {
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #f8f9fa;
+            border-bottom-color: transparent;
+        }
+
+        .tab-content {
+            background-color: #fff;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eaeaea;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .card-filter {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <%- include('partials/header') %>
+
+                <div class="col-md-10 col-lg-10 ms-auto main-content">
+                    <nav class="top-navbar d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 text-dark">Quản lý Đánh giá và Báo cáo sản phẩm</h4>
+                        <div class="search-bar">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" placeholder="Tìm kiếm..." id="searchInput">
+                            </div>
+                        </div>
+                    </nav>
+
+                    <!-- Phân loại tab điều hướng -->
+
+
+                    <!-- Nội dung tab -->
+                    <div class="tab-content" id="managementTabsContent">
+                        <!-- Tab đánh giá sản phẩm -->
+                        <div class="tab-pane fade show active" id="reviews" role="tabpanel"
+                            aria-labelledby="reviews-tab">
+                            <div class="p-4">
+                                <!-- Bộ lọc -->
+                                <div class="card-filter d-flex flex-wrap justify-content-between align-items-center">
+                                    <div class="d-flex gap-3">
+                                        <select class="form-select" style="width: auto;">
+                                            <option selected>Xếp theo</option>
+                                            <option>Mới nhất</option>
+                                            <option>Điểm cao nhất</option>
+                                            <option>Điểm thấp nhất</option>
+                                        </select>
+                                        <select class="form-select" style="width: auto;">
+                                            <option selected>Số sao</option>
+                                            <option>5 sao</option>
+                                            <option>4 sao</option>
+                                            <option>3 sao</option>
+                                            <option>2 sao</option>
+                                            <option>1 sao</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-outline-secondary">
+                                        <i class="fas fa-download me-1"></i> Xuất dữ liệu
+                                    </button>
+                                </div>
+
+                                <!-- Bảng đánh giá -->
+                                <div class="card shadow-sm">
+                                    <div
+                                        class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+                                        <span><i class="fas fa-star me-2"></i> Danh sách đánh giá sản phẩm</span>
+                                        <div>
+                                            <button class="btn btn-sm btn-light me-2"><i
+                                                    class="fas fa-refresh me-1"></i> Làm mới</button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered align-middle mb-0"
+                                                id="reviewsTable">
+
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th style="width: 50px;">#</th>
+                                                        <th style="width: 15%;">Người đánh giá</th>
+                                                        <th style="width: 15%;">Sản phẩm</th>
+                                                        <th>Nội dung</th>
+                                                        <th style="width: 15%;">Hình ảnh</th>
+                                                        <th style="width: 80px;">Điểm</th>
+                                                        <th style="width: 15%;">Ngày</th>
+                                                        <th style="width: 120px;">Hành động</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% reviews.forEach((r, idx)=> { %>
+                                                        <tr>
+                                                            <td>
+                                                                <%= idx + 1 %>
+                                                            </td>
+                                                            <td>
+                                                                <%= r.account_id?.username %>
+                                                            </td>
+                                                            <td>
+                                                                <%= r.product_id?.product_name %>
+                                                            </td>
+                                                            <td>
+                                                                <%= r.contents_review %>
+                                                            </td>
+                                                            <td>
+                                                                <% if (r.image_ids?.length) { %>
+                                                                    <div class="d-flex flex-wrap">
+                                                                        <% r.image_ids.forEach(img=> { %>
+                                                                            <img src="<%= img.url %>" alt="review image"
+                                                                                class="img-thumbnail me-1 mb-1"
+                                                                                style="max-width: 60px; max-height: 60px;"
+                                                                                data-bs-toggle="modal"
+                                                                                data-bs-target="#imageModal"
+                                                                                onclick="showImageInModal('<%= img.url %>')" />
+                                                                            <% }) %>
+                                                                    </div>
+                                                                    <% } else { %>
+                                                                        <span class="text-muted">Không có</span>
+                                                                        <% } %>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-success">
+                                                                    <%= r.rating %>/5
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <%= new Date(r.createdAt).toLocaleString('vi-VN') %>
+                                                            </td>
+                                                            <td>
+                                                                <button
+                                                                    class="btn btn-sm btn-outline-primary action-btn"
+                                                                    title="Xem chi tiết"><i
+                                                                        class="fas fa-eye"></i></button>
+                                                                <button
+                                                                    class="btn btn-sm btn-outline-warning action-btn"
+                                                                    title="Ẩn đánh giá"><i
+                                                                        class="fas fa-ban"></i></button>
+                                                                <!-- <button class="btn btn-sm btn-outline-danger action-btn" title="Xóa đánh giá"><i class="fas fa-trash"></i></button> -->
+                                                            </td>
+                                                        </tr>
+                                                        <% }) %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-between align-items-center">
+                                        <div>
+                                            Hiển thị <strong>
+                                                <%= (currentReviewPage - 1) * 10 + 1 %> - <%= (currentReviewPage - 1) *
+                                                        10 + reviews.length %>
+                                            </strong>
+                                            trong <strong>
+                                                <%= totalReviews %>
+                                            </strong> đánh giá
+                                        </div>
+
+                                        <nav>
+                                            <ul class="pagination mb-0">
+                                                <% for (let i=1; i <=totalReviewPages; i++) { %>
+                                                    <li
+                                                        class="page-item <%= i === currentReviewPage ? 'active' : '' %>">
+                                                        <a class="page-link"
+                                                            href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, page: i, reportPage: currentReportPage }).toString() %>">
+                                                            <%= i %>
+                                                        </a>
+                                                    </li>
+                                                    <% } %>
+                                            </ul>
+                                        </nav>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="" id="reports" role="tabpanel" aria-labelledby="reports-tab">
+                            <div class="p-4">
+                                <!-- Bộ lọc -->
+                                <div class="card-filter d-flex flex-wrap justify-content-between align-items-center">
+                                    <div class="d-flex gap-3">
+                                        <select class="form-select" style="width: auto;">
+                                            <option selected>Trạng thái</option>
+                                            <option>Đã xử lý</option>
+                                            <option>Đang chờ</option>
+                                        </select>
+                                        <select class="form-select" style="width: auto;">
+                                            <option selected>Xếp theo</option>
+                                            <option>Mới nhất</option>
+                                            <option>Cũ nhất</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-outline-secondary">
+                                        <i class="fas fa-download me-1"></i> Xuất dữ liệu
+                                    </button>
+                                </div>
+
+                                <!-- Bảng báo cáo -->
+                                <div class="card shadow-sm">
+                                    <div
+                                        class="card-header bg-danger text-white d-flex align-items-center justify-content-between">
+                                        <span><i class="fas fa-flag me-2"></i> Danh sách báo cáo đánh giá</span>
+                                        <div>
+                                            <button class="btn btn-sm btn-light me-2"><i
+                                                    class="fas fa-refresh me-1"></i> Làm mới</button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered align-middle mb-0"
+                                                id="reportsTable">
+
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th style="width: 50px;">#</th>
+                                                        <th style="width: 15%;">Người báo cáo</th>
+                                                        <th style="width: 15%;">Đánh giá được báo cáo</th>
+                                                        <th>Lý do</th>
+                                                        <th style="width: 15%;">Trạng thái</th>
+                                                        <th style="width: 15%;">Ngày báo cáo</th>
+                                                        <th style="width: 120px;">Hành động</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% reports.forEach((rep, idx)=> { %>
+                                                        <tr>
+                                                            <td>
+                                                                <%= idx + 1 %>
+                                                            </td>
+                                                            <td>
+                                                                <%= rep.account_id?.username %>
+                                                            </td>
+                                                            <td><a href="#" class="text-primary">Xem đánh giá</a></td>
+                                                            <td>
+                                                                <%= rep.reason %>
+                                                            </td>
+                                                            <td>
+                                                                <% if (rep.status==='active' ) { %>
+                                                                    <span class="badge bg-success">Đã xử lý</span>
+                                                                    <% } else { %>
+                                                                        <span class="badge bg-warning text-dark">Đang
+                                                                            chờ</span>
+                                                                        <% } %>
+                                                            </td>
+                                                            <td>
+                                                                <%= new Date(rep.createdAt).toLocaleString('vi-VN') %>
+                                                            </td>
+                                                            <td>
+                                                                <button
+                                                                    class="btn btn-sm btn-outline-primary action-btn"
+                                                                    title="Xem chi tiết"><i
+                                                                        class="fas fa-eye"></i></button>
+                                                                <button
+                                                                    class="btn btn-sm btn-outline-success action-btn"
+                                                                    title="Chấp nhận báo cáo"><i
+                                                                        class="fas fa-check"></i></button>
+                                                                <button class="btn btn-sm btn-outline-danger action-btn"
+                                                                    title="Từ chối báo cáo"><i
+                                                                        class="fas fa-times"></i></button>
+                                                            </td>
+                                                        </tr>
+                                                        <% }) %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-between align-items-center">
+                                        <div>
+                                            Hiển thị <strong>
+                                                <%= (currentReportPage - 1) * 10 + 1 %> - <%= (currentReportPage - 1) *
+                                                        10 + reports.length %>
+                                            </strong>
+                                            trong <strong>
+                                                <%= totalReports %>
+                                            </strong> báo cáo
+                                        </div>
+
+                                        <nav>
+                                            <ul class="pagination mb-0">
+                                                <% for (let i=1; i <=totalReportPages; i++) { %>
+                                                    <li
+                                                        class="page-item <%= i === currentReportPage ? 'active' : '' %>">
+                                                        <a class="page-link"
+                                                            href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, reportPage: i, page: currentReviewPage }).toString() %>">
+                                                            <%= i %>
+                                                        </a>
+                                                    </li>
+                                                    <% } %>
+                                            </ul>
+                                        </nav>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+        <!-- Modal hiển thị ảnh đánh giá -->
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="imageModalLabel">Ảnh đánh giá</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img id="modalReviewImage" src="" alt="Ảnh đánh giá" class="img-fluid rounded"
+                            style="max-height: 80vh;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Tìm kiếm đơn giản
+        document.getElementById('searchInput').addEventListener('input', function (e) {
+            const searchText = e.target.value.toLowerCase();
+
+            // Tìm kiếm tất cả các bảng trong trang
+            const allTables = document.querySelectorAll('.table tbody');
+
+            allTables.forEach(tbody => {
+                tbody.querySelectorAll('tr').forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchText) ? '' : 'none';
+                });
+            });
+        });
+
+        function showImageInModal(url) {
+            document.getElementById('modalReviewImage').src = url;
+        }
+    </script>
+</body>
+
+</html>

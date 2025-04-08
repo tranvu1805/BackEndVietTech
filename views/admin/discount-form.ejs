@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản Trị Hệ Thống - <%= isEdit ? 'Chỉnh sửa' : 'Thêm Mới' %> Khuyến Mãi</title>
+    <link rel="icon" href="/uploads/mini_logo.ico" type="image/png">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- DatePicker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <%- include('partials/header') %>
+
+                <!-- Main Content -->
+                <div class="col-md-10 col-lg-10 ms-auto main-content">
+                    <!-- Top Navbar -->
+                    <nav class="top-navbar">
+                        <h4 class="mb-0">
+                            <%= isEdit ? 'Chỉnh sửa' : 'Thêm Mới' %> Khuyến Mãi
+                        </h4>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <button class="notification-btn" type="button">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="notification-badge">3</span>
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="user-dropdown border-0" type="button" id="userDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="user-avatar me-2">A</div>
+                                    <span class="d-none d-md-inline">Admin</span>
+                                    <i class="fas fa-chevron-down ms-2 small"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Cài
+                                            đặt</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="#" onclick="logout()"><i
+                                                class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <!-- Page Header -->
+                    <div class="page-header d-flex justify-content-between align-items-center">
+                        <h5 class="page-title">
+                            <i class="fas fa-tag me-2 text-primary"></i>
+                            <%= isEdit ? 'Chỉnh sửa khuyến mãi' : 'Thêm khuyến mãi mới' %>
+                        </h5>
+                        <a href="/v1/api/admin/discounts/list" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+                        </a>
+                    </div>
+
+                    <!-- Add Discount Form -->
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <form id="addDiscountForm"
+                                action="<%= isEdit ? '/v1/api/disscount/' + discount._id : '/v1/api/disscount/' %>"
+                                method="<%= isEdit ? 'PUT' : 'POST' %>" enctype="multipart/form-data">
+
+                                <div class="row g-4">
+                                    <!-- Thông tin cơ bản -->
+                                    <div class="col-lg-8">
+                                        <div class="card border">
+                                            <div class="card-header bg-light">
+                                                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin cơ bản
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <!-- Tên khuyến mãi -->
+                                                    <div class="col-md-6">
+                                                        <label for="name" class="form-label">Tên khuyến mãi <span
+                                                                class="text-danger">*</span></label>
+                                                        <input type="text" id="name" name="name" class="form-control"
+                                                            value="<%= discount?.name || '' %>" required
+                                                            placeholder="VD: Khuyến mãi mùa hè">
+
+                                                    </div>
+
+                                                    <!-- Mã code -->
+                                                    <div class="col-md-6">
+                                                        <label for="code" class="form-label">Mã giảm giá</label>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control" id="code"
+                                                                name="code" value="<%= discount?.code || '' %>"
+                                                                placeholder="VD: SUMMER2025">
+
+                                                            <button class="btn btn-outline-secondary" type="button"
+                                                                id="generateCode">
+                                                                <i class="fas fa-magic me-1"></i> Tạo mã
+                                                            </button>
+                                                        </div>
+                                                        <div class="form-text">Để trống nếu tự động áp dụng khuyến mãi
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Mô tả -->
+                                                    <div class="col-12">
+                                                        <label for="description" class="form-label">Mô tả</label>
+                                                        <textarea class="form-control" id="description"
+                                                            name="description"
+                                                            rows="3"><%= discount?.description || '' %></textarea>
+
+
+                                                    </div>
+
+                                                    <!-- Loại khuyến mãi -->
+                                                    <div class="col-md-6">
+                                                        <label for="discountType" class="form-label">Loại khuyến mãi
+                                                            <span class="text-danger">*</span></label>
+                                                        <select class="form-select" id="discountType"
+                                                            name="discountType" required>
+                                                            <option value="" disabled <%=!discount?.discountType
+                                                                ? 'selected' : '' %>>Chọn loại khuyến mãi</option>
+                                                            <option value="percentage"
+                                                                <%=discount?.discountType==='percentage' ? 'selected'
+                                                                : '' %>>Phần trăm</option>
+                                                            <option value="fixed" <%=discount?.discountType==='fixed'
+                                                                ? 'selected' : '' %>>Số tiền cố định (₫)</option>
+                                                            <option value="shipping"
+                                                                <%=discount?.discountType==='shipping' ? 'selected' : ''
+                                                                %>>Miễn phí vận chuyển</option>
+                                                        </select>
+
+                                                    </div>
+
+                                                    <!-- Giá trị khuyến mãi -->
+                                                    <div class="col-md-6">
+                                                        <label for="discountValue" class="form-label">Giá trị <span
+                                                                class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <input type="number" class="form-control" id="discountValue"
+                                                                name="discountValue" min="0"
+                                                                value="<%= discount?.discountValue || '' %>">
+
+                                                            <span class="input-group-text" id="valueSymbol">%</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Thời gian hiệu lực -->
+                                                    <div class="col-md-6">
+                                                        <label for="startDate" class="form-label">Ngày bắt đầu <span
+                                                                class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text"><i
+                                                                    class="far fa-calendar-alt"></i></span>
+                                                            <input type="datetime-local"
+                                                                class="form-control date-picker" id="startDate"
+                                                                name="startDate"
+                                                                value="<%= discount?.startDate ? new Date(discount.startDate).toISOString().slice(0,16) : '' %>">
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Ngày kết thúc -->
+                                                    <div class="col-md-6">
+                                                        <label for="endDate" class="form-label">Ngày kết thúc <span
+                                                                class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text"><i
+                                                                    class="far fa-calendar-alt"></i></span>
+                                                            <input type="datetime-local"
+                                                                class="form-control date-picker" id="endDate"
+                                                                name="endDate"
+                                                                value="<%= discount?.endDate ? new Date(discount.endDate).toISOString().slice(0,16) : '' %>">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Điều kiện áp dụng -->
+                                        <div class="card border mt-4">
+                                            <div class="card-header bg-light">
+                                                <h6 class="mb-0"><i class="fas fa-check-circle me-2"></i>Điều kiện áp
+                                                    dụng</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <!-- Giá trị đơn hàng tối thiểu -->
+                                                    <div class="col-md-6">
+                                                        <label for="minOrderValue" class="form-label">Giá trị đơn hàng
+                                                            tối thiểu</label>
+                                                        <div class="input-group">
+                                                            <input type="number" class="form-control" id="minOrderValue"
+                                                                name="minOrderValue" min="0"
+                                                                value="<%= discount?.minOrderValue || '' %>">
+
+                                                            <span class="input-group-text">₫</span>
+                                                        </div>
+                                                        <div class="form-text">Để trống nếu không giới hạn</div>
+                                                    </div>
+
+                                                    <!-- Giá trị giảm tối đa -->
+                                                    <div class="col-md-6" id="maxDiscountAmountContainer">
+                                                        <label for="maxDiscountAmount" class="form-label">Giá trị giảm
+                                                            tối đa</label>
+                                                        <div class="input-group">
+                                                            <input type="number" class="form-control"
+                                                                id="maxDiscountAmount" name="maxDiscountAmount" min="0"
+                                                                value="<%= discount?.maxDiscountAmount || '' %>">
+
+                                                            <span class="input-group-text">₫</span>
+                                                        </div>
+                                                        <div class="form-text">Chỉ áp dụng cho loại giảm giá phần trăm
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Giới hạn sử dụng -->
+                                                    <div class="col-md-6">
+                                                        <label for="usageLimit" class="form-label">Giới hạn số lần sử
+                                                            dụng</label>
+                                                        <input type="number" class="form-control" id="usageLimit"
+                                                            name="usageLimit" min="1"
+                                                            value="<%= discount?.usageLimit || '' %>">
+
+                                                        <div class="form-text">Để trống nếu không giới hạn</div>
+                                                    </div>
+
+                                                    <!-- Áp dụng cho khách hàng -->
+                                                    <div class="col-md-6">
+                                                        <label for="customerType" class="form-label">Áp dụng cho khách
+                                                            hàng</label>
+                                                        <select class="form-select" id="customerType"
+                                                            name="customerType">
+                                                            <option value="all" <%=discount?.customerType==='all'
+                                                                ? 'selected' : '' %>>Tất cả khách hàng</option>
+                                                            <option value="new" <%=discount?.customerType==='new'
+                                                                ? 'selected' : '' %>>Khách hàng mới</option>
+                                                            <option value="existing"
+                                                                <%=discount?.customerType==='existing' ? 'selected' : ''
+                                                                %>>Khách hàng hiện có</option>
+                                                            <option value="vip" <%=discount?.customerType==='vip'
+                                                                ? 'selected' : '' %>>Khách hàng VIP</option>
+                                                        </select>
+
+                                                    </div>
+
+                                                    <!-- Phạm vi áp dụng -->
+                                                    <div class="col-12">
+                                                        <label class="form-label">Phạm vi áp dụng</label>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="applyTo"
+                                                                id="applyToAll" value="all" <%=discount?.applyTo==='all'
+                                                                || !discount?.applyTo ? 'checked' : '' %>>
+                                                            <label class="form-check-label" for="applyToAll">
+                                                                Áp dụng cho tất cả sản phẩm
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+
+                                                            <input class="form-check-input" type="radio" name="applyTo"
+                                                                id="applyToSpecificProducts" value="specific_products"
+                                                                <%=discount?.applyTo==='specific_products' ? 'checked'
+                                                                : '' %>>
+                                                            <label class="form-check-label"
+                                                                for="applyToSpecificProducts">
+                                                                Áp dụng cho sản phẩm cụ thể
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="applyTo"
+                                                                id="applyToSpecificCategories"
+                                                                value="specific_categories"
+                                                                <%=discount?.applyTo==='specific_categories' ? 'checked'
+                                                                : '' %>>
+                                                            <label class="form-check-label"
+                                                                for="applyToSpecificCategories">
+                                                                Áp dụng cho danh mục cụ thể
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Chọn sản phẩm -->
+                                                    <div class="col-12 d-none" id="productSelectionContainer">
+                                                        <label class="form-label">Chọn sản phẩm áp dụng</label>
+                                                        <div class="input-group mb-2">
+                                                            <input type="text" class="form-control" id="productSearch"
+                                                                placeholder="Tìm kiếm sản phẩm...">
+
+                                                            <button class="btn btn-outline-primary" type="button">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div class="border p-3 rounded"
+                                                            style="max-height: 200px; overflow-y: auto;">
+                                                            <div id="productList">
+                                                                <!-- Danh sách sản phẩm sẽ được tải động -->
+                                                                <div
+                                                                    class="product-item d-flex align-items-center mb-2">
+                                                                    <div class="form-check">
+                                                                        <input class="form-check-input product-checkbox"
+                                                                            type="checkbox" value="prod1"
+                                                                            name="appliedProducts">
+                                                                        <label class="form-check-label">
+                                                                            Sản phẩm mẫu 1 - 200,000 ₫
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                                <div
+                                                                    class="product-item d-flex align-items-center mb-2">
+                                                                    <div class="form-check">
+                                                                        <input class="form-check-input product-checkbox"
+                                                                            type="checkbox" value="prod2"
+                                                                            name="appliedProducts">
+                                                                        <label class="form-check-label">
+                                                                            Sản phẩm mẫu 2 - 350,000 ₫
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Chọn danh mục -->
+                                                    <div class="col-12 d-none" id="categorySelectionContainer">
+                                                        <label class="form-label">Chọn danh mục áp dụng</label>
+                                                        <div class="border p-3 rounded"
+                                                            style="max-height: 200px; overflow-y: auto;">
+                                                            <div id="categoryList">
+                                                                <!-- Danh sách danh mục sẽ được tải động -->
+                                                                <div
+                                                                    class="category-item d-flex align-items-center mb-2">
+                                                                    <div class="form-check">
+                                                                        <input
+                                                                            class="form-check-input category-checkbox"
+                                                                            type="checkbox" value="cat1"
+                                                                            name="appliedCategories">
+                                                                        <label class="form-check-label">
+                                                                            Danh mục mẫu 1 (20 sản phẩm)
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                                <div
+                                                                    class="category-item d-flex align-items-center mb-2">
+                                                                    <div class="form-check">
+                                                                        <input
+                                                                            class="form-check-input category-checkbox"
+                                                                            type="checkbox" value="cat2"
+                                                                            name="appliedCategories">
+                                                                        <label class="form-check-label">
+                                                                            Danh mục mẫu 2 (15 sản phẩm)
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bên phải - Preview và trạng thái -->
+                                    <div class="col-lg-4">
+                                        <!-- Trạng thái và hành động -->
+                                        <div class="card border">
+                                            <div class="card-header bg-light">
+                                                <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Cài đặt khuyến mãi</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <!-- Trạng thái -->
+                                                <div class="mb-3">
+                                                    <label class="form-label">Trạng thái</label>
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" name="isDraft" id="isDraft"
+                                                            class="form-check-input" <%=discount?.isDraft !==false
+                                                            ? 'checked' : '' %>>
+
+
+                                                        <label class="form-check-label" for="isDraft">
+                                                            <span class="text-success" id="statusLabel">Bản nháp</span>
+                                                        </label>
+                                                    </div>
+                                                    <small class="form-text text-muted">
+                                                        Chọn "Bản nháp" nếu bạn chưa muốn khuyến mãi được kích hoạt
+                                                        ngay.
+                                                    </small>
+                                                </div>
+
+                                                <!-- Nút lưu hành động -->
+                                                <div class="d-grid gap-2">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-save me-1"></i> Lưu khuyến mãi
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                        onclick="resetForm()">
+                                                        <i class="fas fa-undo me-1"></i> Đặt lại
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Xem trước -->
+                                        <div class="card border mt-4">
+                                            <div class="card-header bg-light">
+                                                <h6 class="mb-0"><i class="fas fa-eye me-2"></i>Xem trước</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="preview-container p-3 border rounded bg-light mb-3">
+                                                    <div class="discount-preview">
+                                                        <h5 id="previewName">Tên khuyến mãi</h5>
+                                                        <div class="discount-value mt-2 mb-2">
+                                                            <span class="badge bg-success fs-6"
+                                                                id="previewDiscount">Khuyến mãi</span>
+                                                        </div>
+                                                        <p class="text-muted small mb-1" id="previewDescription">Mô tả
+                                                            khuyến mãi sẽ hiển thị ở đây.</p>
+                                                        <div
+                                                            class="d-flex justify-content-between small text-muted mt-2">
+                                                            <div id="previewDates">Thời gian áp dụng</div>
+                                                        </div>
+                                                        <div class="mt-2 pt-2 border-top">
+                                                            <div class="small text-muted" id="previewCode">Mã code:
+                                                                SUMMER2025</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="small text-muted">
+                                                    <i class="fas fa-info-circle me-1"></i> Đây là bản xem trước. Khuyến
+                                                    mãi thực tế có thể khác tùy thuộc vào thiết kế giao diện.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap and other scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // DatePicker Init
+        document.addEventListener('DOMContentLoaded', function () {
+            // Khởi tạo datepicker
+            flatpickr(".date-picker", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: true
+            });
+
+            document.getElementById('addDiscountForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const form = e.target;
+                const formData = new FormData(form);
+
+                const apiUrl = form.getAttribute('action');
+                const isEdit = apiUrl.includes('/disscount/') && form.getAttribute('method') !== 'POST';
+
+                const accessToken = localStorage.getItem('accessToken');
+                const userId = localStorage.getItem('userId');
+                const apiKey = 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a1b...'; // thay bằng key thật
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-1"></i> Đang lưu...';
+                submitBtn.disabled = true;
+
+
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: isEdit ? 'PUT' : 'POST',
+                        body: JSON.stringify(Object.fromEntries(formData)),
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'authorization': accessToken,
+                            'x-client-id': userId,
+                            'x-api-key': apiKey
+                        }
+                    });
+
+                    const data = await response.json();
+                    console.log('Response:', data);
+                    console.log("Status:", response);
+
+                    if (response.ok && data.statusCode === 200) {
+                        showModal(`Khuyến mãi đã được ${isEdit ? 'cập nhật' : 'thêm'} thành công!`, true);
+
+                        setTimeout(() => {
+                            window.location.href = '/v1/api/admin/discounts/list';
+                        }, 1500);
+                    } else {
+                        showModal(data.message || 'Không thể lưu khuyến mãi!', false);
+                    }
+
+                } catch (err) {
+                    console.error('❌ Submit error:', err);
+                    showToast('Lỗi!', 'Đã xảy ra lỗi kết nối. Vui lòng thử lại!', 'error');
+                }
+
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+
+
+            function showToast(title, message, type = 'success') {
+                const container = document.querySelector('.toast-container') || (() => {
+                    const c = document.createElement('div');
+                    c.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                    c.style.zIndex = 9999;
+                    document.body.appendChild(c);
+                    return c;
+                })();
+
+                const toast = document.createElement('div');
+                toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : 'success'} border-0`;
+                toast.setAttribute('role', 'alert');
+                toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        <strong>${title}</strong> ${message}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Đóng"></button>
+    </div>
+  `;
+                container.appendChild(toast);
+                new bootstrap.Toast(toast, { delay: 3000 }).show();
+            }
+
+
+            // Hiển thị/ẩn container lựa chọn sản phẩm/danh mục
+            document.querySelectorAll('input[name="applyTo"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    const productContainer = document.getElementById('productSelectionContainer');
+                    const categoryContainer = document.getElementById('categorySelectionContainer');
+
+                    if (this.value === 'specific_products') {
+                        productContainer.classList.remove('d-none');
+                        categoryContainer.classList.add('d-none');
+                        loadProducts();
+                    } else if (this.value === 'specific_categories') {
+                        categoryContainer.classList.remove('d-none');
+                        productContainer.classList.add('d-none');
+                        loadCategories();
+                    } else {
+                        productContainer.classList.add('d-none');
+                        categoryContainer.classList.add('d-none');
+                    }
+                });
+            });
+
+
+            // Thay đổi hiển thị đơn vị giá trị khuyến mãi
+            document.getElementById('discountType').addEventListener('change', function () {
+                const valueSymbol = document.getElementById('valueSymbol');
+                const maxDiscountContainer = document.getElementById('maxDiscountAmountContainer');
+
+                if (this.value === 'percentage') {
+                    valueSymbol.textContent = '%';
+                    maxDiscountContainer.classList.remove('d-none');
+                } else if (this.value === 'fixed') {
+                    valueSymbol.textContent = '₫';
+                    maxDiscountContainer.classList.add('d-none');
+                } else if (this.value === 'shipping') {
+                    valueSymbol.textContent = '';
+                    maxDiscountContainer.classList.add('d-none');
+                    document.getElementById('discountValue').value = '0';
+                    document.getElementById('discountValue').disabled = true;
+                } else {
+                    document.getElementById('discountValue').disabled = false;
+                }
+
+                updatePreview();
+            });
+
+            // Cập nhật trạng thái khi thay đổi switchbox
+            document.getElementById('isDraft').addEventListener('change', function () {
+                const statusLabel = document.getElementById('statusLabel');
+                if (this.checked) {
+                    statusLabel.textContent = 'Bản nháp';
+                    statusLabel.className = 'text-warning';
+                } else {
+                    statusLabel.textContent = 'Kích hoạt';
+                    statusLabel.className = 'text-success';
+                }
+            });
+
+            // Tạo mã giảm giá
+            document.getElementById('generateCode').addEventListener('click', function () {
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let code = '';
+
+                // Tạo mã 8 ký tự
+                for (let i = 0; i < 8; i++) {
+                    code += characters.charAt(Math.floor(Math.random() * characters.length));
+                }
+
+                document.getElementById('code').value = code;
+                updatePreview();
+            });
+
+            // Cập nhật preview khi thay đổi input
+            const updateFields = ['name', 'description', 'code', 'discountValue', 'discountType', 'startDate', 'endDate'];
+            updateFields.forEach(field => {
+                document.getElementById(field).addEventListener('input', updatePreview);
+            });
+
+            // Khởi tạo preview
+            updatePreview();
+        });
+
+        // Cập nhật xem trước
+        function updatePreview() {
+            const name = document.getElementById('name').value || 'Tên khuyến mãi';
+            const description = document.getElementById('description').value || 'Mô tả khuyến mãi sẽ hiển thị ở đây.';
+            const code = document.getElementById('code').value;
+            const discountType = document.getElementById('discountType').value;
+            const discountValue = document.getElementById('discountValue').value || 0;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            // Cập nhật tên
+            document.getElementById('previewName').textContent = name;
+
+            // Cập nhật mô tả
+            document.getElementById('previewDescription').textContent = description;
+
+            // Cập nhật mã
+            if (code) {
+                document.getElementById('previewCode').textContent = `Mã giảm giá: ${code}`;
+                document.getElementById('previewCode').classList.remove('d-none');
+            } else {
+                document.getElementById('previewCode').textContent = 'Tự động áp dụng';
+                document.getElementById('previewCode').classList.remove('d-none');
+            }
+
+            // Cập nhật giá trị khuyến mãi
+            let discountText = '';
+            if (discountType === 'percentage') {
+                discountText = `Giảm ${discountValue}%`;
+            } else if (discountType === 'fixed') {
+                discountText = `Giảm ${Number(discountValue).toLocaleString()} ₫`;
+            } else if (discountType === 'shipping') {
+                discountText = 'Miễn phí vận chuyển';
+            } else {
+                discountText = 'Khuyến mãi';
+            }
+            document.getElementById('previewDiscount').textContent = discountText;
+
+            // Cập nhật ngày
+            let dateText = '';
+            if (startDate && endDate) {
+                const formatDate = (dateStr) => {
+                    const date = new Date(dateStr);
+                    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                };
+                dateText = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+            } else {
+                dateText = 'Thời gian áp dụng';
+            }
+            document.getElementById('previewDates').textContent = dateText;
+        }
+
+        // Reset form
+        function resetForm() {
+            if (confirm('Bạn có chắc muốn đặt lại form?')) {
+                document.getElementById('addDiscountForm').reset();
+                updatePreview();
+            }
+        }
+
+        document.getElementById("productSearch").addEventListener("input", function () {
+            const term = this.value.trim();
+            loadProducts(term);
+        });
+
+
+        // Tải sản phẩm
+        async function loadProducts(searchTerm = "") {
+            try {
+                const url = `/v1/api/shop/products/?limit=1000&search=${encodeURIComponent(searchTerm)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                const productList = document.getElementById('productList');
+                productList.innerHTML = '';
+
+                if (!data.products || data.products.length === 0) {
+                    productList.innerHTML = `<p class="text-muted">Không có sản phẩm phù hợp.</p>`;
+                    return;
+                }
+
+                data.products.forEach(product => {
+                    const item = document.createElement('div');
+                    item.className = 'product-item d-flex align-items-center mb-2';
+                    item.innerHTML = `
+                <div class="form-check">
+                    <input class="form-check-input product-checkbox" type="checkbox"
+                        value="${product._id}" name="appliedProducts">
+                    <label class="form-check-label">
+                        ${product.product_name} - ${product.product_price.toLocaleString()} ₫
+                    </label>
+                </div>
+            `;
+                    productList.appendChild(item);
+                });
+
+            } catch (err) {
+                console.error("❌ Lỗi khi tải sản phẩm:", err);
+            }
+        }
+
+
+        // Tải danh mục
+        async function loadCategories() {
+            try {
+                const response = await fetch('/v1/api/shop/categories?limit=1000');
+                const data = await response.json();
+
+                const categoryList = document.getElementById('categoryList');
+                categoryList.innerHTML = ''; // Clear old
+
+                if (!data.categories || data.categories.length === 0) {
+                    categoryList.innerHTML = `<p class="text-muted">Không có danh mục nào.</p>`;
+                    return;
+                }
+
+                data.categories.forEach(category => {
+                    const item = document.createElement('div');
+                    item.className = 'category-item d-flex align-items-center mb-2';
+                    item.innerHTML = `
+                <div class="form-check">
+                    <input class="form-check-input category-checkbox" type="checkbox" 
+                        value="${category._id}" name="appliedCategories">
+                    <label class="form-check-label">
+                        ${category.name} (${category.productCount || 0} sản phẩm)
+                    </label>
+                </div>
+            `;
+                    categoryList.appendChild(item);
+                });
+
+            } catch (err) {
+                console.error("❌ Lỗi khi tải danh mục:", err);
+            }
+        }
+
+
+        function showModal(message, isSuccess = true) {
+            const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
+            const modalTitle = document.getElementById('notificationModalLabel');
+            const modalBody = document.getElementById('notificationMessage');
+
+            modalTitle.textContent = isSuccess ? 'Thành công' : 'Thất bại';
+            modalBody.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas ${isSuccess ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'} fa-2x me-3"></i>
+            <span>${message}</span>
+        </div>
+    `;
+
+            modal.show();
+        }
+
+
+    </script>
+
+    <!-- Modal Thông báo -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationModalLabel">Thông báo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body" id="notificationMessage">
+                    <!-- Nội dung sẽ được cập nhật bằng JS -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đã hiểu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

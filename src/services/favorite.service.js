@@ -5,6 +5,7 @@ class FavoriteService {
     return await Favorite.create({ user: userId, product: productId });
   }
 
+  //test1
   static async removeFromFavorites(userId, productId) {
     return await Favorite.findOneAndDelete({ user: userId, product: productId });
   }

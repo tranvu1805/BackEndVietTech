@@ -1,4 +1,4 @@
-<div class="col-md-2 col-lg-2 px-0 sidebar d-none d-md-block">
+<div class="col-md-2 col-lg-2 px-0 sidebar d-none d-md-block fixed-sidebar">
   <div class="text-center mini-container py-3">
     <img src="/uploads/logo_viettech.png" alt="VIETTECH" class="navbar-brand mb-0"
       style="max-width: 80%; height: auto;">
@@ -15,29 +15,63 @@
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="/v1/api/admin/bills" id="orders">
-        <i class="fas fa-shopping-cart"></i> Đơn hàng
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="/admin/customers" id="customers">
-        <i class="fas fa-users"></i> Khách hàng
-      </a>
-    </li>
-    <li class="nav-item">
       <a class="nav-link" href="/v1/api/admin/categories/" id="categories">
         <i class="fas fa-tags"></i> Danh mục
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="/admin/reports" id="reports">
-        <i class="fas fa-chart-bar"></i> Báo cáo
+      <a class="nav-link" href="/v1/api/admin/bills" id="orders">
+        <i class="fas fa-shopping-cart"></i> Đơn hàng
       </a>
     </li>
     <li class="nav-item">
+      <a class="nav-link" href="/v1/api/admin/discounts/list" id="discounts">
+        <i class="fas fa-percent"></i> Mã giảm giá
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="/v1/api/admin/user/list" id="customers">
+        <i class="fas fa-users"></i> Khách hàng
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="/v1/api/admin/posts/list" id="posts">
+        <i class="fas fa-pencil-alt"></i> Bài viết
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/v1/api/admin/reviews/list" id="reviews">
+        <i class="fas fa-star"></i> Đánh giá
+      </a>
+    </li>
+
+
+    <li class="nav-item">
+      <a class="nav-link" href="/v1/api/admin/reports/" id="reports-tab">
+        <i class="fas fa-chart-bar"></i> Báo cáo
+      </a>
+    </li>
+    <!-- <li class="nav-item">
       <a class="nav-link" href="/admin/settings" id="settings">
         <i class="fas fa-cog"></i> Cài đặt
       </a>
-    </li>
+    </li> -->
   </ul>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const currentPath = window.location.pathname;
+
+    // Lặp qua tất cả thẻ <a> trong sidebar
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+      if (currentPath.startsWith(link.getAttribute('href'))) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  });
+</script>

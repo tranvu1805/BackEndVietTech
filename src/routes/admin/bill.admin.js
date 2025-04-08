@@ -1,14 +1,16 @@
 const express = require("express");
 const {
-  getAllBills_Admin,
-  exportBillsToExcel,
+    getAllBills_Admin,
+    exportBillsToExcel,
 } = require("../../controllers/bill.controller");
+const BillController = require("../../controllers/bill.controller");
+const asyncHandler = require("../../helpers/asyncHandler");
 const router = express.Router();
 
 
 router.get("/", async (req, res) => {
     try {
-        const { search, status, payment_method, start_date, end_date, page = 1, limit = 10 } = req.query;
+        const { search, status, payment_method, start_date, end_date, page = 1, limit = 8 } = req.query;
 
         const result = await getAllBills_Admin({ search, status, payment_method, start_date, end_date, page, limit });
 
@@ -52,5 +54,9 @@ router.get('/export', async (req, res, next) => {
     }
 
 });
+
+router.get("/:billId", asyncHandler(BillController.renderInvoicePage));
+router.get('/:id/invoice/download', BillController.downloadInvoice);
+
 
 module.exports = router;

@@ -11,18 +11,17 @@
     <style>
         :root {
             --primary-color: #1a237e;
-            /* Xanh đậm - màu chính của Viettech */
             --secondary-color: #ff6d00;
-            /* Cam - màu phụ của Viettech */
-            --background-color: #f5f5f5;
+            --background-color: #f8f9fa;
             --text-color: #424242;
             --light-color: #ffffff;
             --border-color: #e0e0e0;
             --danger-color: #d32f2f;
+            --success-color: #2e7d32;
         }
 
         body {
-            background-color: var(--background-color);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             height: 100vh;
             display: flex;
@@ -38,121 +37,182 @@
 
         .viettech-logo {
             text-align: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.8s ease-out;
         }
 
         .viettech-logo h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 700;
             margin-bottom: 0;
             color: var(--primary-color);
+            letter-spacing: -0.5px;
         }
 
         .viettech-logo span {
             color: var(--secondary-color);
+            position: relative;
+        }
+
+        .viettech-logo span::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--secondary-color);
+            border-radius: 2px;
         }
 
         .logo-tagline {
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: var(--text-color);
             opacity: 0.8;
+            margin-top: 0.5rem;
         }
 
         .admin-card {
             background-color: var(--light-color);
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+            transform: translateY(0);
+        }
+
+        .admin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
 
         .card-header {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, #303f9f 100%);
             color: white;
-            padding: 1.5rem;
+            padding: 2rem;
             position: relative;
         }
 
         .card-header h2 {
-            font-size: 1.5rem;
+            font-size: 1.7rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
 
         .card-header p {
             margin-bottom: 0;
-            opacity: 0.8;
-            font-size: 0.95rem;
+            opacity: 0.9;
+            font-size: 1rem;
         }
 
         .admin-icon {
             position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(255, 255, 255, 0.2);
+            top: 1.8rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            background-color: rgba(255, 255, 255, 0.15);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .admin-icon:hover {
+            transform: rotate(15deg);
         }
 
         .admin-icon i {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             color: white;
         }
 
         .card-body {
-            padding: 2rem;
+            padding: 2.5rem;
         }
 
         .form-label {
             font-weight: 500;
             color: var(--text-color);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
         }
 
         .form-control {
-            padding: 0.8rem 1rem;
+            padding: 0.9rem 1rem;
             border: 1px solid var(--border-color);
-            border-radius: 4px;
+            border-radius: 8px;
             transition: all 0.3s;
+            font-size: 1rem;
         }
 
         .form-control:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(26, 35, 126, 0.15);
+            box-shadow: 0 0 0 0.25rem rgba(26, 35, 126, 0.15);
+        }
+
+        .input-group {
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .input-group-text {
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
             border: 1px solid var(--border-color);
             color: var(--text-color);
+            padding-left: 1rem;
+            padding-right: 1rem;
         }
 
         .btn-viettech {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, #303f9f 100%);
             color: white;
             border: none;
-            padding: 0.8rem 1.5rem;
+            padding: 0.9rem 1.5rem;
             font-weight: 500;
             letter-spacing: 0.5px;
             transition: all 0.3s;
             width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(26, 35, 126, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-viettech::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s;
         }
 
         .btn-viettech:hover {
-            background-color: #0d1b69;
+            background: linear-gradient(135deg, #0d1b69 0%, #232f78 100%);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(26, 35, 126, 0.3);
+            box-shadow: 0 6px 15px rgba(26, 35, 126, 0.35);
+        }
+
+        .btn-viettech:hover::before {
+            left: 100%;
         }
 
         .tech-footer {
-            margin-top: 2rem;
+            margin-top: 2.5rem;
             text-align: center;
             color: var(--text-color);
-            opacity: 0.7;
-            font-size: 0.85rem;
+            opacity: 0.8;
+            font-size: 0.9rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .tech-footer p:last-child {
+            margin-bottom: 0;
         }
 
         .tech-icon {
@@ -162,42 +222,54 @@
         .dashboard-features {
             display: flex;
             flex-wrap: wrap;
-            margin-top: 1.5rem;
-            gap: 1rem;
+            margin-top: 2rem;
+            gap: 0.8rem;
+            justify-content: center;
         }
 
         .feature-badge {
-            padding: 0.5rem 1rem;
-            background-color: rgba(26, 35, 126, 0.1);
+            padding: 0.6rem 1.2rem;
+            background-color: rgba(26, 35, 126, 0.08);
             color: var(--primary-color);
-            border-radius: 20px;
-            font-size: 0.85rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-badge:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
 
         .orange-badge {
-            background-color: rgba(255, 109, 0, 0.1);
+            background-color: rgba(255, 109, 0, 0.08);
             color: var(--secondary-color);
         }
 
         .alert {
-            border-radius: 4px;
-            padding: 1rem;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
             margin-top: 1.5rem;
             border: none;
+            display: flex;
+            align-items: center;
         }
 
         .alert-danger {
-            background-color: rgba(211, 47, 47, 0.1);
+            background-color: rgba(211, 47, 47, 0.08);
             color: var(--danger-color);
+            border-left: 4px solid var(--danger-color);
         }
 
         .forgot-link {
             color: var(--primary-color);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             transition: all 0.3s;
+            font-weight: 500;
         }
 
         .forgot-link:hover {
@@ -205,22 +277,65 @@
             text-decoration: underline;
         }
 
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             .card-body {
-                padding: 1.5rem;
+                padding: 1.8rem;
             }
 
             .viettech-logo h1 {
-                font-size: 2rem;
+                font-size: 2.3rem;
             }
 
             .admin-icon {
-                width: 40px;
-                height: 40px;
+                width: 48px;
+                height: 48px;
+                top: 1.5rem;
+                right: 1.5rem;
             }
 
             .admin-icon i {
-                font-size: 1.2rem;
+                font-size: 1.4rem;
+            }
+
+            .card-header {
+                padding: 1.8rem;
+            }
+
+            .card-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .dashboard-features {
+                justify-content: flex-start;
             }
         }
     </style>
@@ -246,7 +361,7 @@
 
                     <div class="card-body">
                         <form id="loginForm">
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="username" class="form-label">Tên đăng nhập</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
@@ -255,7 +370,7 @@
                                 </div>
                             </div>
 
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="password" class="form-label">Mật khẩu</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
@@ -278,8 +393,8 @@
                                 <a href="#" class="forgot-link">Quên mật khẩu?</a>
                             </div>
 
-                            <button type="submit" class="btn btn-viettech">
-                                Đăng nhập
+                            <button type="submit" class=" btn-viettech">
+                                <i class="fas fa-sign-in-alt me-2"></i> Đăng nhập
                             </button>
 
                             <div id="errorMessage" class="alert alert-danger" style="display: none;">
@@ -307,7 +422,7 @@
 
                 <div class="tech-footer">
                     <p>© 2025 Viettech Electronics. Tất cả quyền được bảo lưu.</p>
-                    <p>Liên hệ hỗ trợ kỹ thuật: <span style="color: var(--primary-color);">admin@viettech.vn</span></p>
+                    <p>Liên hệ hỗ trợ kỹ thuật: <span style="color: var(--primary-color); font-weight: 500;">admin@viettech.vn</span></p>
                 </div>
             </div>
         </div>
@@ -392,7 +507,6 @@
                     console.error('Error:', error);
                 });
         });
-
     </script>
 </body>
 

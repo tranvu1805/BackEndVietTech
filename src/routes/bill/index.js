@@ -20,6 +20,8 @@ router.get("/", asyncHandler(BillController.getAllBills));
 
 router.get('/status/:status', BillController.getBillsByStatus);
 
+router.get("/user/:userId", asyncHandler(BillController.getBillsByUserId));
+
 
 
 
