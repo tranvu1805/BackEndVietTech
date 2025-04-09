@@ -6,6 +6,8 @@ const { asyncHandler } = require("../../auth/checkAuth");
 const { authentication } = require("../../auth/authUtils");
 const router = express.Router();
 
+router.get("/vnpay-return", asyncHandler(BillController.handleVnpayReturn));
+
 router.use(authentication)
 // Tính tổng doanh thu theo khoảng thời gian
 router.get("/revenue", asyncHandler(BillController.getTotalRevenue));
