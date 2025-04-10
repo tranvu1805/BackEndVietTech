@@ -356,11 +356,7 @@ class BillController {
       const { vnp_ResponseCode, vnp_TxnRef } = req.query;
 
       if (vnp_ResponseCode !== '00') {
-        return res.status(400).json({
-          code: 400,
-          message: 'Thanh toán thất bại!',
-          status: 'error',
-        });
+        return res.redirect(`http://localhost:3056/payment-failure?reason=${vnp_ResponseCode}&orderCode=${vnp_TxnRef}`);
       }
 
       const bill = await billRepo.findOne({ order_code: vnp_TxnRef });
@@ -380,7 +376,7 @@ class BillController {
       }
       
 
-      return res.redirect(`http://your-client-app.com/payment-success?billId=${bill._id}`);
+      return res.redirect(`http://localhost:3056/payment-success?billId=${bill._id}`);
     } catch (error) {
       console.error('Lỗi xử lý VNPay Return:', error);
       return res.status(500).json({
