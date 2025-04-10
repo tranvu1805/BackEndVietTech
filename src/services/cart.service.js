@@ -603,7 +603,7 @@ class CartService {
     }
     await sendPushNotification({
       titleAdmin: "🧾 Đơn hàng mới!",
-      messageAdmin: `Đơn hàng #${orderCode} đã được đặt thành công.`,
+      messageAdmin: `Đơn hàng có mã #${orderCode} đã được đặt thành công.`,
       url: "/v1/api/admin/bills" || "https://viettech.store",
       userId: userId.toString(),
       targets: "admin",
