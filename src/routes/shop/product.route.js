@@ -22,7 +22,7 @@ router.get("/top-selling", asyncHandler(getTopSellingProducts));
 router.get("/category/:categoryId", getProductsByCategory);
 router.get("/:id", getProductById);
 router.post("/:productId/match-variant", asyncHandler(matchVariant));
-// router.use(authentication)
+router.use(authentication)
 
 
 router.post("/", upload.single('product_thumbnail'), createProduct);
