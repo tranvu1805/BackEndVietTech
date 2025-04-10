@@ -10,18 +10,22 @@ const AccountSchema = new mongoose.Schema(
         phone: { type: String, required: true, unique: true },
         address: { type: String, required: true },
         email: { type: String, required: true, unique: true },
-        profile_image: { 
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: "Image", 
+        profile_image: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Image",
             default: DEFAULT_PROFILE_IMAGE_ID // Gán giá trị mặc định
-        },        password: { type: String, required: true },
+        }, password: { type: String, required: true },
         role_id: { type: mongoose.Schema.Types.ObjectId, ref: "role", required: true },
-        status: { 
-            type: String, 
+        status: {
+            type: String,
             enum: ['active', 'inactive', 'suspended'], // Những trạng thái có thể có
             default: 'active', // Mặc định là active
-            required: true 
-        }
+            required: true
+        },
+        oneSignalId: {
+            type: String,
+            default: null
+        },
     },
     {
         timestamps: true,

@@ -487,10 +487,13 @@
                         localStorage.setItem('accessToken', data.result.metadata.tokens.accessToken);
                         localStorage.setItem('userId', data.result.metadata.account._id);
                         localStorage.setItem('refreshToken', data.result.metadata.tokens.refreshToken);
+                        localStorage.setItem('role', data.result.metadata.account.role); // <== Thêm dòng này
+
 
                         console.log("data", data.result.metadata.account._id);
                         console.log("data 2", data.result.metadata.tokens.accessToken);
                         console.log("Refresh Token:", data.result.metadata.tokens.refreshToken);
+                        console.log("Role:", data.result.metadata.account.role); // <== Thêm dòng này
                         
                         // Nếu đăng nhập thành công, chuyển hướng đến trang dashboard
                         window.location.href = data.redirectUrl;  // Đảm bảo rằng API trả về trường redirectUrl
