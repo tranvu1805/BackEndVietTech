@@ -16,6 +16,8 @@ const qs = require("qs");
 const crypto = require("crypto");
 const detailsVariantModel = require("../models/detailsVariant.model");
 const { log } = require("console");
+const { sendPushNotification } = require("../helpers/onesignal.helper");
+
 
 class CartService {
   //Start Repo
@@ -290,7 +292,7 @@ class CartService {
             item.productId.toString() === productId.toString() &&
             (detailsVariantId
               ? item.detailsVariantId?.toString() ===
-                detailsVariantId.toString()
+              detailsVariantId.toString()
               : !item.detailsVariantId)
         );
 
@@ -592,6 +594,17 @@ class CartService {
     } else {
       await currentCart.save();
     }
+    await sendPushNotification({
+      titleAdmin: "🧾 Đơn hàng mới!",
+      messageAdmin: `Đơn hàng #${orderCode} đã được đặt thành công.`,
+      url: "/v1/api/admin/bills" || "https://viettech.store",
+      userId: userId.toString(),
+      targets: "admin",
+      data: { orderCode }
+    });
+
+    
+
     // await currentCart.deleteOne()
     return newBill;
   }

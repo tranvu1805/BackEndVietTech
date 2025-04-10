@@ -7,6 +7,9 @@ const ejs = require('ejs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const { sendPushNotification } = require("../helpers/onesignal.helper");
+const accountModel = require("../models/account.model");
+const notificationModel = require("../models/notification.model");
 
 
 const logoPath = path.join(__dirname, '../../uploads/logo_viettech.png'); // đường dẫn thật
@@ -29,11 +32,13 @@ class BillController {
       const { billId } = req.params;
       const { status } = req.body;
       console.log("check req", req.user);
-      
+
       const userId = req.user.userId || req.user._id;
       console.log("check userId: ", userId);
 
       const oldBill = await BillService.getBillById({ billId });
+
+      console.log("check old bill", oldBill);
 
       const updatedBill = await BillService.updateBillStatus({
         billId,
@@ -49,6 +54,35 @@ class BillController {
         changed_by: userId,
         note: `Cập nhật trạng thái đơn hàng từ "${oldBill.status}" sang "${status}"`
       });
+
+      const account = await accountModel.findById(userId);
+      console.log("check account", account.oneSignalId);
+      if (account?.oneSignalId) {
+        await sendPushNotification({
+          titleUser: "Đơn hàng của bạn đã cập nhật",
+          messageUser: `Đơn hàng #${oldBill.order_code} đã được chuyển sang trạng thái "${status}"`,
+          titleAdmin: "📥 Có đơn hàng mới được cập nhật",
+          messageAdmin: `Đơn hàng #${oldBill.order_code} của người dùng vừa được cập nhật sang "${status}"`,
+          url: "/v1/api/admin/bills",
+          userId: oldBill.user_id,
+          targets: "both",
+          data: { billId, status },
+          type: "order"
+        });
+        
+
+        // await notificationModel.create({
+        //   receiverId: userId, // ai sẽ nhìn thấy thông báo
+        //   senderId: req.user?._id, // người thao tác cập nhật
+        //   title: "Đơn hàng đã cập nhật!",
+        //   message: `Đơn hàng #${oldBill.order_code} đã chuyển sang trạng thái "${status}"`,
+        //   url: `/v1/api/admin/bills`, // cho web chuyển hướng
+        //   type: "order",
+        //   data: { billId: billId, status: status } // để app mobile có thể deep-link nếu cần
+        // });
+
+      }
+
 
       return res.status(200).json({
         message: "Bill status updated successfully",
@@ -316,7 +350,7 @@ class BillController {
     try {
       const { userId } = req.params;
       console.log("userId: ", userId);
-      
+
       const bills = await BillService.getBillsByUserId({ userId });
 
       return res.status(200).json({
