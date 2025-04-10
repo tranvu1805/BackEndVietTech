@@ -32,9 +32,7 @@ router.post("/create_payment_url", (req, res) => {
   let signData = querystring.stringify(vnp_Params, { encode: false });
   let hmac = crypto.createHmac("sha512", config.vnp_HashSecret);
   let signed = hmac.update(signData).digest("hex");
-  vnp_Params["vnp_SecureHash"] = signed;
-
-  // 👉 Tạo URL redirect đến trang thanh toán VNPAY
+  vnp_Params["vnp_SecureHash"] = signed; 
   let paymentUrl = `${config.vnp_Url}?${querystring.stringify(vnp_Params)}`;
   res.json({ status: "success", paymentUrl });
 });

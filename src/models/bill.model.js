@@ -70,7 +70,12 @@ const BillSchema = new mongoose.Schema(
         discount_amount: {
             type: Number,
             default: 0, // Lưu số tiền đã giảm
-        }
+        },
+        isPay: {
+            type: Boolean,
+            default: false, // Mặc định là false, sau khi ck thành công sẽ cập nhật thành true
+        },
+
     },
     {
         timestamps: true,

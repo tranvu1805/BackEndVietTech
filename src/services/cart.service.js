@@ -15,6 +15,8 @@ const moment = require("moment");
 const qs = require("qs");
 const crypto = require("crypto");
 const detailsVariantModel = require("../models/detailsVariant.model");
+
+const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
 const { log } = require("console");
 const { sendPushNotification } = require("../helpers/onesignal.helper");
 
@@ -358,7 +360,7 @@ class CartService {
 
   //End Repo
 
-  // thanh toán
+  
   static async checkout({
     userId,
     address,
@@ -371,6 +373,7 @@ class CartService {
       cart_userId: userId,
       cart_state: "active",
     });
+
     if (!currentCart) {
       return {
         code: 400,
@@ -387,7 +390,6 @@ class CartService {
       };
     }
 
-    // Chỉ lấy sản phẩm có isSelected == true
     const selectedProducts = currentCart.cart_products.filter(
       (p) => p.isSelected
     );
@@ -403,9 +405,7 @@ class CartService {
     let total = 0;
     const bulkUpdateOps = [];
 
-    // currentCart.cart_products.forEach((e) => (total += e.price * e.quantity));
     for (const item of selectedProducts) {
-      console.log("🔹 productModel:", productModel);
       const product = await productModel.findById(item.productId);
 
       if (!product) {
@@ -444,18 +444,12 @@ class CartService {
           };
         }
 
-        // Giảm tồn kho của variant
         await detailsVariantModel.updateOne(
           { _id: item.detailsVariantId },
           { $inc: { stock: -item.quantity } }
         );
       }
 
-      console.log(
-        `🔹 Trước khi cập nhật: ${product.product_name} (Stock: ${product.product_stock})`
-      );
-
-      // Giảm số lượng tồn kho
       bulkUpdateOps.push({
         updateOne: {
           filter: { _id: item.productId },
@@ -466,23 +460,13 @@ class CartService {
       total += item.price * item.quantity;
     }
 
-    // Cập nhật tồn kho của tất cả sản phẩm cùng lúc
     if (bulkUpdateOps.length > 0) {
       await productModel.bulkWrite(bulkUpdateOps);
-    }
-
-    // Kiểm tra lại stock sau khi cập nhật
-    for (const item of selectedProducts) {
-      const updatedProduct = await productModel.findById(item.productId);
-      console.log(
-        `✅ Sau khi cập nhật: ${updatedProduct.product_name} (Stock: ${updatedProduct.product_stock})`
-      );
     }
 
     const shippingFee = 35000;
     total += shippingFee;
 
-    // Kiểm tra mã giảm giá
     let discountAmount = 0;
     let discount = null;
 
@@ -513,7 +497,6 @@ class CartService {
           };
         }
 
-        // Tính discountAmount
         if (discount.discountType === "percentage") {
           discountAmount = (discount.discountValue / 100) * total;
           if (discount.maxDiscountAmount) {
@@ -530,48 +513,11 @@ class CartService {
       }
     }
 
-    total -= discountAmount; // Trừ vào tổng tiền
+    total -= discountAmount;
 
-    // Sinh mã đơn hàng ngẫu nhiên 5 chữ số
     const orderCode = Math.floor(10000 + Math.random() * 90000);
 
-    if (payment_method === "vnpay") {
-      // Tạo request VNPay
-      const date = new Date();
-      const createDate = moment(date).format("YYYYMMDDHHmmss");
-      const orderInfo = `Thanh toán đơn hàng #${orderCode}`;
-
-      let vnp_Params = {
-        vnp_Version: "2.1.0",
-        vnp_Command: "pay",
-        vnp_TmnCode: vnpayConfig.vnp_TmnCode,
-        vnp_Amount: Math.round(total * 100), // VNPay
-        vnp_CurrCode: "VND",
-        vnp_TxnRef: orderCode.toString(),
-        vnp_OrderInfo: orderInfo,
-        vnp_OrderType: "billpayment",
-        vnp_Locale: "vn",
-        vnp_ReturnUrl: vnpayConfig.vnp_ReturnUrl,
-        vnp_IpAddr: "127.0.0.1",
-        vnp_CreateDate: createDate,
-      };
-
-      // Sắp xếp tham số theo thứ tự alphabet
-      vnp_Params = Object.fromEntries(Object.entries(vnp_Params).sort());
-
-      // Tạo chuỗi query và mã hóa với SHA512
-      const signData = qs.stringify(vnp_Params, { encode: false });
-      const hmac = crypto.createHmac("sha512", vnpayConfig.vnp_HashSecret);
-      const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
-      vnp_Params.vnp_SecureHash = signed;
-
-      const paymentUrl = `${vnpayConfig.vnp_Url}?${qs.stringify(vnp_Params, {
-        encode: false,
-      })}`;
-
-      return { code: 200, status: "redirect", paymentUrl };
-    }
-
+    // Tạo đơn hàng trước
     const newBill = await billRepo.create({
       user_id: currentCart.cart_userId,
       products: selectedProducts,
@@ -584,7 +530,7 @@ class CartService {
       status: "pending",
       payment_method: payment_method || "tm",
       discount_code: discount_code || null,
-      discount_amount: discountAmount || 0, // Số tiền đã giảm
+      discount_amount: discountAmount || 0,
     });
 
     if (discount) {
@@ -593,6 +539,7 @@ class CartService {
         { $inc: { usageCount: 1 } }
       );
     }
+
     currentCart.cart_products = currentCart.cart_products.filter(
       (p) => !p.isSelected
     );
@@ -601,6 +548,42 @@ class CartService {
     } else {
       await currentCart.save();
     }
+
+    // Nếu là VNPay thì trả về link thanh toán
+    if (payment_method === "vnpay") {
+      const vnpay = new VNPay({
+        tmnCode: 'HMC4RYL1',
+        secureSecret: 'GP6FEUU3UDKCOXM1P5OE3AU1AJN5CDP4',
+        vnpayHost: 'https://sandbox.vnpayment.vn',
+        testMode: true,
+        hashAlgorithm: 'SHA512',
+        loggerFn: ignoreLogger,
+      });
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const vnpayResponse = await vnpay.buildPaymentUrl({
+        vnp_Amount: total,
+        vnp_IpAddr: '127.0.0.1',
+        vnp_TxnRef: orderCode.toString(),
+        vnp_OrderInfo: `Thanh toán đơn hàng #${orderCode}`,
+        vnp_OrderType: ProductCode.Other,
+        vnp_ReturnUrl: `http://localhost:3056/v1/api/bill/vnpay-return`,
+        vnp_Locale: VnpLocale.VN,
+        vnp_CreateDate: dateFormat(new Date()),
+        vnp_ExpireDate: dateFormat(tomorrow),
+      });
+
+      return {
+        code: 200,
+        message: "Redirect to VNPay",
+        paymentUrl: vnpayResponse,
+        billId: newBill._id,
+      };
+    }
+
+    // Nếu là COD hoặc thanh toán khác
     await sendPushNotification({
       titleAdmin: "🧾 Đơn hàng mới!",
       messageAdmin: `Đơn hàng có mã #${orderCode} đã được đặt thành công.`,
@@ -615,6 +598,7 @@ class CartService {
     // await currentCart.deleteOne()
     return newBill;
   }
+
 
   static async updateIsSelected({
     userId,

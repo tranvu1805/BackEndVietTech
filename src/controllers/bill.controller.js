@@ -7,6 +7,10 @@ const ejs = require('ejs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const { VNPay } = require('vnpay');
+const { billRepo } = require('../models/bill.model');
+
+
 const { sendPushNotification } = require("../helpers/onesignal.helper");
 const accountModel = require("../models/account.model");
 const notificationModel = require("../models/notification.model");
@@ -363,6 +367,59 @@ class BillController {
     }
   }
 
+  static async handleVnpayReturn(req, res, next) {
+    try {
+      const vnpay = new VNPay({
+        tmnCode: 'HMC4RYL1',
+        secureSecret: 'GP6FEUU3UDKCOXM1P5OE3AU1AJN5CDP4',
+        vnpayHost: 'https://sandbox.vnpayment.vn',
+        testMode: true,
+        hashAlgorithm: 'SHA512',
+      });
+
+      const isValid = vnpay.verifyReturnUrl(req.query);
+
+      if (!isValid) {
+        return res.status(400).json({
+          code: 400,
+          message: 'Checksum không hợp lệ!',
+          status: 'error',
+        });
+      }
+
+      const { vnp_ResponseCode, vnp_TxnRef } = req.query;
+
+      if (vnp_ResponseCode !== '00') {
+        return res.redirect(`http://localhost:3056/payment-failure?reason=${vnp_ResponseCode}&orderCode=${vnp_TxnRef}`);
+      }
+
+      const bill = await billRepo.findOne({ order_code: vnp_TxnRef });
+
+      if (!bill) {
+        return res.status(404).json({
+          code: 404,
+          message: 'Không tìm thấy đơn hàng!',
+          status: 'error',
+        });
+      }
+
+      if (!bill.isPay) {
+        bill.isPay = true;
+        await bill.save();
+        console.log(`Cập nhật trạng thái isPay=true cho đơn hàng___ ${bill.order_code}`);
+      }
+      
+
+      return res.redirect(`http://localhost:3056/payment-success?billId=${bill._id}`);
+    } catch (error) {
+      console.error('Lỗi xử lý VNPay Return:', error);
+      return res.status(500).json({
+        code: 500,
+        message: 'Lỗi máy chủ khi xử lý thanh toán!',
+        status: 'error',
+      });
+    }
+  }
 
 }
 
