@@ -4,7 +4,7 @@ OneSignalDeferred.push(async (OneSignal) => {
     try {
         // Khởi tạo OneSignal
         await OneSignal.init({
-            appId: "29ae4e65-bafd-49fb-8c3b-cde54d2bf2bb",
+            appId: "72f70b7a-10a0-476e-b0c6-5f558f9e89b8",
             notifyButton: { enable: true }, // Hiển thị nút thông báo
             serviceWorkerPath: "/OneSignalSDKWorker.js", // Đường dẫn đến service worker
         });
