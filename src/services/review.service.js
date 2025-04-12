@@ -6,59 +6,61 @@ const mongoose = require('mongoose');
 class ReviewService {
     static async addReview(account_id, product_id, contents_review, rating, image_ids = []) {
         try {
-            // Kiểm tra xem tài khoản đã đánh giá sản phẩm này chưa
-            const existingReview = await Review.findOne({ account_id, product_id });
+            // Tìm xem review đã tồn tại chưa
+            let existingReview = await Review.findOne({ account_id, product_id });
     
+            const now = new Date();
             if (existingReview) {
-                return {
-                    success: false,
-                    message: "Bạn đã đánh giá sản phẩm này trước đó!"
-                };
+                // Nếu đã tồn tại → cập nhật lại nội dung
+                existingReview.contents_review = contents_review;
+                existingReview.rating = rating;
+                existingReview.image_ids = image_ids;
+                existingReview.updatedAt = now;
+    
+                await existingReview.save();
+            } else {
+                // Nếu chưa có → tạo mới
+                existingReview = new Review({
+                    account_id,
+                    product_id,
+                    contents_review,
+                    rating,
+                    image_ids,
+                    createdAt: now,
+                    updatedAt: now
+                });
+    
+                await existingReview.save();
             }
     
-            // Nếu chưa có đánh giá, tạo mới review
-            const newReview = new Review({
-                account_id,
-                product_id,
-                contents_review,
-                rating,  // Thêm trường rating
-                image_ids  // Lưu danh sách ảnh nếu có
-            });
-    
-            await newReview.save();
-    
-            // Lấy thông tin chi tiết của ảnh nếu có
+            // Lấy thông tin chi tiết ảnh (nếu có)
             const images = await Image.find({ _id: { $in: image_ids } });
     
             return {
                 success: true,
-                message: "Review added successfully",
+                message: existingReview ? "Review submitted successfully" : "Review added successfully",
                 data: {
-                    _id: newReview._id,
-                    account_id: newReview.account_id,
-                    product_id: newReview.product_id,
-                    contents_review: newReview.contents_review,
-                    rating: newReview.rating, // Trả về rating
-                    createdAt: newReview.createdAt,
-                    updatedAt: newReview.updatedAt,
+                    _id: existingReview._id,
+                    account_id: existingReview.account_id,
+                    product_id: existingReview.product_id,
+                    contents_review: existingReview.contents_review,
+                    rating: existingReview.rating,
+                    createdAt: existingReview.createdAt,
+                    updatedAt: existingReview.updatedAt,
                     images: images.map(image => ({
                         _id: image._id,
-                        file_name: image.file_name,
-                        file_path: image.file_path,
-                        file_size: image.file_size,
-                        file_type: image.file_type,
                         url: image.url,
-                        uploaded_at: image.uploaded_at,
-                        createdAt: image.createdAt,
-                        updatedAt: image.updatedAt,
-                        __v: image.__v
+                        file_name: image.file_name,
+                        file_type: image.file_type,
+                        file_size: image.file_size
                     }))
                 }
             };
         } catch (error) {
-            throw new Error("Lỗi khi thêm review: " + error.message);
+            throw new Error("Lỗi khi xử lý review: " + error.message);
         }
     }
+    
     
     static async getReviewsByProductId(productId) {
         try {

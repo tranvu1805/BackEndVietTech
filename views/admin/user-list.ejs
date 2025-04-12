@@ -40,7 +40,7 @@
         }
 
         /* User profile image styling */
-       
+
 
         /* Buttons styling */
         .btn {
@@ -147,7 +147,7 @@
             margin-top: 30px;
         }
 
-       
+
         /* Modal styling */
         .modal-content {
             border-radius: var(--border-radius);
@@ -401,6 +401,13 @@
                                                             onclick="handleEditUser(this)">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
+
+                                                        <button class="btn btn-outline-secondary"
+                                                            onclick="viewPurchaseHistory('<%= user._id %>')">
+                                                            <i class="fas fa-clock-rotate-left"></i>
+                                                        </button>
+
+
                                                         <div class="form-check form-switch m-0">
                                                             <input class="form-check-input user-status-switch"
                                                                 type="checkbox" role="switch"
@@ -533,8 +540,28 @@
                         </div>
                     </div>
 
+                    <div class="modal fade" id="purchaseHistoryModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title fw-bold">
+                                        <i class="fas fa-clock-rotate-left me-2"></i>Lịch sử mua hàng
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Đóng"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <ul class="list-group" id="orderHistoryList">
+                                        <!-- Đơn hàng sẽ được render tại đây -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
                     <!-- Pagination -->
-                    
+
 
                     <nav>
                         <ul class="pagination justify-content-center mt-4">
@@ -739,6 +766,84 @@
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });
+
+        const userOrderCache = {};
+
+        const STATUS_LABELS = {
+            active: "Đang xử lý",
+            completed: "Hoàn tất",
+            cancelled: "Đã hủy",
+            pending: "Chờ xác nhận"
+        };
+
+        const STATUS_CLASSES = {
+            active: "badge bg-info",
+            completed: "badge bg-success",
+            cancelled: "badge bg-danger",
+            pending: "badge bg-warning text-dark"
+        };
+
+
+        async function viewPurchaseHistory(userId) {
+            const orderList = document.getElementById('orderHistoryList');
+            orderList.innerHTML = '<li class="list-group-item text-center"><div class="spinner-border text-primary" role="status"></div><div>Đang tải đơn hàng...</div></li>';
+            new bootstrap.Modal(document.getElementById('purchaseHistoryModal')).show();
+
+            if (userOrderCache[userId]) {
+                renderBills(userOrderCache[userId]);
+                return;
+            }
+
+            try {
+                const res = await fetch(`/v1/api/bill/user/${userId}`, {
+                    headers: {
+                        'Authorization': localStorage.getItem('accessToken'),
+                        'x-client-id': localStorage.getItem('userId'),
+                        'x-api-key': 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683'
+                    }
+                });
+
+                const data = await res.json();
+                const bills = data.metadata?.bills || [];
+
+                // Lưu cache
+                userOrderCache[userId] = bills;
+
+                renderBills(bills);
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi!', 'Không thể lấy lịch sử mua hàng', 'error');
+            }
+        }
+
+        function renderBills(bills) {
+            const orderList = document.getElementById('orderHistoryList');
+            orderList.innerHTML = '';
+
+            if (bills.length === 0) {
+                orderList.innerHTML = '<li class="list-group-item">Chưa có đơn hàng nào</li>';
+            } else {
+                bills.forEach(bill => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.innerHTML = `
+                <div><strong>Mã đơn:</strong> ${bill._id}</div>
+                <div><strong>Tổng tiền:</strong> ${bill.total?.toLocaleString() || 0}đ</div>
+                <div><strong>Ngày mua:</strong> ${new Date(bill.createdAt).toLocaleString()}</div>
+                <div><strong>Trạng thái:</strong> 
+                    <span class="${STATUS_CLASSES[bill.status] || 'badge bg-secondary'}">
+                        ${STATUS_LABELS[bill.status] || "Không xác định"}
+                    </span>
+                 </div>
+
+            `;
+                    orderList.appendChild(li);
+                });
+            }
+        }
+
+
+
     </script>
 </body>
 

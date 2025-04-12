@@ -9,6 +9,7 @@ const {
   getAllProducts_Admin,
   getProductsByCategory,
   getTopSellingProducts,
+  matchVariant,
 } = require("../../controllers/product.controller");
 const { authentication } = require("../../auth/authUtils");
 const upload = require("../../auth/middlewares/upload.middleware");
@@ -20,8 +21,8 @@ router.get("/", getAllProducts);
 router.get("/top-selling", asyncHandler(getTopSellingProducts));
 router.get("/category/:categoryId", getProductsByCategory);
 router.get("/:id", getProductById);
-
-// router.use(authentication)
+router.post("/:productId/match-variant", asyncHandler(matchVariant));
+router.use(authentication)
 
 
 router.post("/", upload.single('product_thumbnail'), createProduct);
