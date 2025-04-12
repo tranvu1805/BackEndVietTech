@@ -73,7 +73,7 @@ class BillController {
           data: { billId, status },
           type: "order"
         });
-        
+
 
         // await notificationModel.create({
         //   receiverId: userId, // ai sẽ nhìn thấy thông báo
@@ -390,7 +390,7 @@ class BillController {
       const { vnp_ResponseCode, vnp_TxnRef } = req.query;
 
       if (vnp_ResponseCode !== '00') {
-        return res.redirect(`http://localhost:3056/payment-failure?reason=${vnp_ResponseCode}&orderCode=${vnp_TxnRef}`);
+        return res.redirect(`https://www.viettech.store/payment-failure?reason=${vnp_ResponseCode}&orderCode=${vnp_TxnRef}`);
       }
 
       const bill = await billRepo.findOne({ order_code: vnp_TxnRef });
@@ -407,10 +407,13 @@ class BillController {
         bill.isPay = true;
         await bill.save();
         console.log(`Cập nhật trạng thái isPay=true cho đơn hàng___ ${bill.order_code}`);
+        console.log(`Cập nhật trạng thái người nhận ${bill.receiver_name}`);
+        console.log(`Cập nhật trạng thái người nhận ${bill.phone_number}`);
+        console.log(`Cập nhật trạng thái người nhận ${bill.address}`);
       }
-      
 
-      return res.redirect(`http://localhost:3056/payment-success?billId=${bill._id}`);
+
+      return res.redirect(`https://www.viettech.store/payment-success?orderCode=${bill.order_code}&receiverName=${encodeURIComponent(bill.receiver_name)}&phoneNumber=${bill.phone_number}&address=${encodeURIComponent(bill.address)}`);
     } catch (error) {
       console.error('Lỗi xử lý VNPay Return:', error);
       return res.status(500).json({

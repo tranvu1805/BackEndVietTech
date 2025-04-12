@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Payment Successful</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+            padding: 50px;
+            width: 100%;
+            max-width: 700px; /* Tăng độ rộng */
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1.success {
+            color: #2ecc71;
+            font-size: 2.8em;
+            margin-bottom: 25px;
+        }
+
+        p {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 18px;
+        }
+
+        p strong {
+            font-size: 1.3em;
+            color: #333;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 14px 30px;
+            background-color: #2ecc71;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .button:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            font-size: 0.95em;
+            color: #777;
+            text-align: center;
+            max-width: 700px;
+        }
+
+        .footer a {
+            color: #2ecc71;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="success">Thanh toán thành công!</h1>
+        <p>Cảm ơn bạn đã thanh toán.</p>
+        <p>Mã đơn hàng: <strong><%= orderCode %></strong></p>
+        <p>Người nhận: <strong><%= receiverName %></strong></p>
+        <p>Số điện thoại: <strong><%= phoneNumber %></strong></p>
+        <p>Địa chỉ: <strong><%= address %></strong></p>
+    </div>
+
+    <div class="footer">
+        <p>Liên hệ hỗ trợ: <a href="mailto:support@viettech.com">support@viettech.com</a> | Hotline: <strong>1900 1234</strong></p>
+        <p>© 2025 VietTech Payment System</p>
+    </div>
+</body>
+
+</html>

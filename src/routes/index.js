@@ -38,6 +38,7 @@ router.use("/v1/api/notification",notificationRoutes); // Định tuyến thông
 router.use("/v1/api/vnpay", vnpayRoutes); // Định tuyến VNPay API
 
 
+
 // Route mặc định (Home Page)
 router.get("/", (req, res) => {
   res.render("home/login");
@@ -47,6 +48,19 @@ router.post("/login", accessController.loginAdmin);
 router.get("/user/bills/:billId", asyncHandler(BillController.renderInvoicePage));
 
 router.use("/v1/api/cart", require("./cart"));
+
+// Route cho thanh toán thành công
+router.get('/payment-success', (req, res) => {
+  const { orderCode, receiverName, phoneNumber, address } = req.query;
+  res.render('payment/payment-success', { orderCode, receiverName, phoneNumber, address });
+});
+
+
+// Route cho thanh toán thất bại
+router.get('/payment-failure', (req, res) => {
+  const { reason, orderCode } = req.query;
+  res.render('payment/payment-failure', { reason, orderCode });
+});
 
 // Middleware xử lý lỗi 404 nếu không tìm thấy route nào phù hợp
 router.use((req, res) => {
