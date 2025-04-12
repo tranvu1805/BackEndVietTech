@@ -390,7 +390,7 @@ class BillController {
       const { vnp_ResponseCode, vnp_TxnRef } = req.query;
 
       if (vnp_ResponseCode !== '00') {
-        return res.redirect(`http://103.166.184.249:3056/payment-failure?reason=${vnp_ResponseCode}&orderCode=${vnp_TxnRef}`);
+        return res.redirect(`https://www.viettech.store/payment-failure?reason=${vnp_ResponseCode}&orderCode=${vnp_TxnRef}`);
       }
 
       const bill = await billRepo.findOne({ order_code: vnp_TxnRef });
@@ -413,7 +413,7 @@ class BillController {
       }
 
 
-      return res.redirect(`http://103.166.184.249:3056/payment-success?orderCode=${bill.order_code}&receiverName=${encodeURIComponent(bill.receiver_name)}&phoneNumber=${bill.phone_number}&address=${encodeURIComponent(bill.address)}`);
+      return res.redirect(`https://www.viettech.store/payment-success?orderCode=${bill.order_code}&receiverName=${encodeURIComponent(bill.receiver_name)}&phoneNumber=${bill.phone_number}&address=${encodeURIComponent(bill.address)}`);
     } catch (error) {
       console.error('Lỗi xử lý VNPay Return:', error);
       return res.status(500).json({
