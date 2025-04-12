@@ -360,7 +360,7 @@ class CartService {
 
   //End Repo
 
-  
+
   static async checkout({
     userId,
     address,
@@ -368,7 +368,12 @@ class CartService {
     receiver_name,
     payment_method,
     discount_code,
+    req
   }) {
+    const clientIp =
+      req.headers['x-forwarded-for']?.toString().split(',')[0] ||
+      req.socket?.remoteAddress ||
+      '127.0.0.1';
     const currentCart = await cart.findOne({
       cart_userId: userId,
       cart_state: "active",
@@ -523,7 +528,7 @@ class CartService {
       products: selectedProducts,
       order_code: orderCode,
       address: address,
-      total: total,
+      total: total * 100,
       shipping_fee: shippingFee,
       phone_number: phone_number,
       receiver_name: receiver_name,
@@ -562,10 +567,11 @@ class CartService {
 
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-
+      console.log('client id_____:', clientIp);
+      
       const vnpayResponse = await vnpay.buildPaymentUrl({
         vnp_Amount: total,
-        vnp_IpAddr: '127.0.0.1',
+        vnp_IpAddr: clientIp,
         vnp_TxnRef: orderCode.toString(),
         vnp_OrderInfo: `Thanh toán đơn hàng #${orderCode}`,
         vnp_OrderType: ProductCode.Other,
@@ -593,7 +599,7 @@ class CartService {
       data: { orderCode }
     });
 
-    
+
 
     // await currentCart.deleteOne()
     return newBill;
@@ -1014,10 +1020,10 @@ class CartService {
             },
             variant_details: variant
               ? {
-                  price: variant.price,
-                  stock: variant.stock,
-                  variantDetails: variant.variantDetails,
-                }
+                price: variant.price,
+                stock: variant.stock,
+                variantDetails: variant.variantDetails,
+              }
               : null,
           };
         })

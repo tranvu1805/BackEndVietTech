@@ -8,6 +8,8 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 
 const app = express();
+app.set('trust proxy', true);
+
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
