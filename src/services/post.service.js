@@ -9,15 +9,20 @@ const { post } = require("../models/post.model");
 const { StatusCodes } = require("../utils/httpStatusCode");
 
 class PostService {
-  // Các repository methods
-  static async createPostRepo({ title, content, account_id, status }) {
-    return await post.create({ title, content, account_id, status });
+  // Repository methods
+  static async createPostRepo(payload) {
+    return await post.create(payload);
   }
+
   static async getPostByIdRepo({ postId }) {
     try {
       const foundPost = await post
         .findById(postId)
         .populate("account_id")
+        .populate("category_id")
+        .populate("related_products")
+        .populate("thumbnail")
+        .populate("images")
         .lean();
       if (!foundPost) {
         throw new NotFoundError("Post not found");
@@ -31,24 +36,12 @@ class PostService {
       throw error;
     }
   }
-  static async updatePostRepo({ postId, title, content, status, account_id }) {
-    const filter = { _id: postId };
-    const updateData = {
-      $set: {
-        title,
-        content,
-        status,
-        updatedBy: account_id,
-        updatedAt: new Date(),
-      },
-    };
 
-    const options = { new: true };
-
+  static async updatePostRepo({ postId, ...updateFields }) {
     const updatedPost = await post.findOneAndUpdate(
-      filter,
-      updateData,
-      options
+      { _id: postId },
+      { $set: { ...updateFields, updatedAt: new Date() } },
+      { new: true }
     );
 
     if (!updatedPost) {
@@ -75,7 +68,7 @@ class PostService {
       const posts = await post
         .find(filter)
         .select(select)
-        .sort({ createdAt: -1 }) // Sắp xếp theo thời gian tạo, mới nhất trước
+        .sort({ createdAt: -1 })
         .lean();
 
       return posts;
@@ -85,59 +78,48 @@ class PostService {
     }
   }
 
-  // Service methods sử dụng repositories
-  static async createPost({ title, content, account_id, status }) {
-    if (!title || !content) {
+  // Service methods
+  static async createPost(payload) {
+    const { title, content, slug } = payload;
+    if (!title || !content || !slug) {
       throw new ErrorResponse(
-        "Title and content are required",
+        "Title, slug, and content are required",
         StatusCodes.BAD_REQUEST
       );
     }
-    const newPost = await PostService.createPostRepo({
-      title,
-      content,
-      account_id,
-      status: status || "draft",
-    });
 
-    return newPost;
+    const existing = await post.findOne({ slug });
+    if (existing) {
+      throw new ConflictRequestError("Slug already exists");
+    }
+
+    return await PostService.createPostRepo(payload);
   }
 
-  static async updatePost({ postId, title, content, status, account_id }) {
+  static async updatePost({ postId, ...updateFields }) {
     try {
       if (!postId) {
-        throw new ErrorRequest("Post ID is required", StatusCodes.BAD_REQUEST);
+        throw new ErrorResponse("Post ID is required", StatusCodes.BAD_REQUEST);
       }
 
-      // Kiểm tra post có tồn tại không
       const existingPost = await post.findById(postId);
       if (!existingPost) {
         throw new NotFoundError("Post not found");
       }
 
-      // Gọi repository để cập nhật bài viết
-      const updatedPost = await PostService.updatePostRepo({
-        postId,
-        title,
-        content,
-        status,
-        account_id,
-      });
-
-      return updatedPost;
+      return await PostService.updatePostRepo({ postId, ...updateFields });
     } catch (error) {
       console.error("Error updating post:", error);
       throw error;
     }
   }
 
-  static async deletePost({ postId, account_id }) {
+  static async deletePost({ postId }) {
     try {
       if (!postId) {
-        throw new BadRequestError("Post ID is required");
+        throw new ErrorResponse("Post ID is required", StatusCodes.BAD_REQUEST);
       }
 
-      // Gọi repository để xóa bài viết
       const deletedPost = await PostService.deletePostRepo({ postId });
 
       return {
@@ -150,16 +132,9 @@ class PostService {
     }
   }
 
-  static async getAllPosts({
-    filter = {},
-    select = "",
-    sortBy = "createdAt",
-  } = {}) {
+  static async getAllPosts({ filter = {}, select = "", sortBy = "createdAt" } = {}) {
     try {
-      const posts = await PostService.getAllPostRepo({
-        filter,
-        select,
-      });
+      const posts = await PostService.getAllPostRepo({ filter, select });
 
       return {
         data: posts,
@@ -170,13 +145,13 @@ class PostService {
       throw error;
     }
   }
+
   static async getPostById({ postId }) {
     try {
       if (!postId) {
         throw new ErrorResponse("Post ID is required", StatusCodes.BAD_REQUEST);
       }
-      const postData = await PostService.getPostByIdRepo({ postId });
-      return postData;
+      return await PostService.getPostByIdRepo({ postId });
     } catch (error) {
       console.error("Error getting post by ID:", error);
       throw error;

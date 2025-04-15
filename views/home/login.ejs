@@ -10,14 +10,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #1a237e;
-            --secondary-color: #ff6d00;
-            --background-color: #f8f9fa;
+            --primary-color: #2e7d32;
+            /* Xanh lá cây */
+            --secondary-color: #ffffff;
+            /* Trắng */
+            --background-color: #f0f7f0;
             --text-color: #424242;
             --light-color: #ffffff;
             --border-color: #e0e0e0;
             --danger-color: #d32f2f;
             --success-color: #2e7d32;
+            --accent-color: #4caf50;
+            --dark-green: #1b5e20;
         }
 
         body {
@@ -27,6 +31,362 @@
             display: flex;
             align-items: center;
             overflow-x: hidden;
+        }
+
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background: linear-gradient(135deg, #1b5e20 0%, #43a047 100%);
+            z-index: 9999;
+        }
+
+        .splash-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .viettech-logo-splash {
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--secondary-color);
+            margin: 0;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            position: relative;
+            letter-spacing: -1px;
+        }
+
+        .viettech-logo-splash span {
+            color: #f8f8f8;
+            position: relative;
+            display: inline-block;
+        }
+
+        .viettech-logo-splash span::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--secondary-color);
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            animation: shimmerLine 2s infinite;
+        }
+
+        @keyframes shimmerLine {
+            0% {
+                opacity: 0.7;
+                transform: scaleX(0.95);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scaleX(1.05);
+            }
+
+            100% {
+                opacity: 0.7;
+                transform: scaleX(0.95);
+            }
+        }
+
+        .splash-tagline {
+            color: var(--secondary-color);
+            font-size: 1.25rem;
+            margin-top: 1.5rem;
+            font-weight: 400;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.5s forwards;
+        }
+
+        /* Progress indicator */
+        .progress-container {
+            width: 280px;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-top: 3rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+            position: relative;
+            animation: progressAnimation 3s ease-in-out forwards;
+        }
+
+        .progress-glow {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 30px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 100%);
+            filter: blur(3px);
+            border-radius: 10px;
+            animation: progressGlow 3s ease-in-out forwards;
+        }
+
+        @keyframes progressAnimation {
+            0% {
+                width: 0%;
+            }
+
+            20% {
+                width: 20%;
+            }
+
+            50% {
+                width: 60%;
+            }
+
+            80% {
+                width: 85%;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+
+        @keyframes progressGlow {
+            0% {
+                left: -30px;
+            }
+
+            100% {
+                left: 280px;
+            }
+        }
+
+        .loading-status {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            opacity: 0.8;
+            text-align: center;
+            min-height: 1.2em;
+        }
+
+        /* Visual effects */
+        .circle-ripple {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+            animation: rippleEffect 7s ease-out infinite;
+            z-index: 1;
+        }
+
+        .circle-ripple:nth-child(2) {
+            width: 700px;
+            height: 700px;
+            animation-delay: 2s;
+        }
+
+        .circle-ripple:nth-child(3) {
+            width: 900px;
+            height: 900px;
+            animation-delay: 4s;
+        }
+
+        @keyframes rippleEffect {
+            0% {
+                transform: scale(0.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: floatParticle 15s linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-20vh) translateX(20vw);
+                opacity: 0;
+            }
+        }
+
+        /* Animated icon row */
+        .icon-row {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+            opacity: 0;
+            animation: fadeIn 1s ease 1.5s forwards;
+        }
+
+        .splash-icon {
+            width: 48px;
+            height: 48px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: pulseIcon 2s infinite;
+        }
+
+        .splash-icon:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .splash-icon:nth-child(3) {
+            animation-delay: 0.8s;
+        }
+
+        .splash-icon:nth-child(4) {
+            animation-delay: 1.2s;
+        }
+
+        @keyframes pulseIcon {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Logo reveal animation */
+        .logo-reveal {
+            opacity: 0;
+            transform: scale(0.8);
+            animation: revealLogo 1s ease-out forwards;
+        }
+
+        @keyframes revealLogo {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .viettech-logo-splash {
+                font-size: 3.5rem;
+            }
+
+            .splash-tagline {
+                font-size: 1rem;
+            }
+
+            .progress-container {
+                width: 220px;
+            }
+
+            .icon-row {
+                gap: 1.5rem;
+            }
+
+            .splash-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .viettech-logo-splash {
+                font-size: 2.8rem;
+            }
+
+            .icon-row {
+                gap: 1rem;
+            }
+
+            .splash-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
         }
 
         .viettech-container {
@@ -193,7 +553,7 @@
         }
 
         .btn-viettech:hover {
-            background: linear-gradient(135deg, #0d1b69 0%, #232f78 100%);
+            background: linear-gradient(135deg, #1b5e20 0%, #388e3c 100%);
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(26, 35, 126, 0.35);
         }
@@ -246,7 +606,7 @@
 
         .orange-badge {
             background-color: rgba(255, 109, 0, 0.08);
-            color: var(--secondary-color);
+            color: var(--primary-color);
         }
 
         .alert {
@@ -273,7 +633,7 @@
         }
 
         .forgot-link:hover {
-            color: var(--secondary-color);
+            color: var(--primary-color);
             text-decoration: underline;
         }
 
@@ -288,6 +648,7 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -299,6 +660,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -342,87 +704,91 @@
 </head>
 
 <body>
+
     <div class="container viettech-container">
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
-                <div class="viettech-logo">
-                    <h1>Viet<span>Tech</span></h1>
-                    <p class="logo-tagline">Hệ thống quản trị cửa hàng điện tử</p>
-                </div>
+                <div id="loginPage" style="display: none;">
+                    <div class="viettech-logo">
+                        <h1>Viet<span>Tech</span></h1>
+                        <p class="logo-tagline">Hệ thống quản trị cửa hàng điện tử</p>
+                    </div>
 
-                <div class="admin-card">
-                    <div class="card-header">
-                        <h2>Đăng nhập quản trị</h2>
-                        <p>Đăng nhập để quản lý cửa hàng điện tử Viettech</p>
-                        <div class="admin-icon">
-                            <i class="fas fa-user-shield"></i>
+                    <div class="admin-card">
+                        <div class="card-header">
+                            <h2>Đăng nhập quản trị</h2>
+                            <p>Đăng nhập để quản lý cửa hàng điện tử Viettech</p>
+                            <div class="admin-icon">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <form id="loginForm">
+                                <div class="mb-4">
+                                    <label for="username" class="form-label">Tên đăng nhập</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input type="text" class="form-control" id="email" name="email"
+                                            placeholder="Nhập tên đăng nhập" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="password" class="form-label">Mật khẩu</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input type="password" class="form-control" id="password" name="password"
+                                            placeholder="Nhập mật khẩu" required>
+                                        <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
+                                            <i class="fas fa-eye"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                                        <label class="form-check-label" for="rememberMe">
+                                            Ghi nhớ đăng nhập
+                                        </label>
+                                    </div>
+
+                                    <a href="#" class="forgot-link">Quên mật khẩu?</a>
+                                </div>
+
+                                <button type="submit" class=" btn-viettech">
+                                    <i class="fas fa-sign-in-alt me-2"></i> Đăng nhập
+                                </button>
+
+                                <div id="errorMessage" class="alert alert-danger" style="display: none;">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    <span id="errorText"></span>
+                                </div>
+
+                                <div class="dashboard-features">
+                                    <div class="feature-badge">
+                                        <i class="fas fa-box tech-icon"></i> Quản lý sản phẩm
+                                    </div>
+                                    <div class="feature-badge orange-badge">
+                                        <i class="fas fa-shopping-cart tech-icon"></i> Đơn hàng
+                                    </div>
+                                    <div class="feature-badge">
+                                        <i class="fas fa-users tech-icon"></i> Khách hàng
+                                    </div>
+                                    <div class="feature-badge orange-badge">
+                                        <i class="fas fa-chart-line tech-icon"></i> Báo cáo
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
 
-                    <div class="card-body">
-                        <form id="loginForm">
-                            <div class="mb-4">
-                                <label for="username" class="form-label">Tên đăng nhập</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <input type="text" class="form-control" id="email" name="email"
-                                        placeholder="Nhập tên đăng nhập" required>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="password" class="form-label">Mật khẩu</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                    <input type="password" class="form-control" id="password" name="password"
-                                        placeholder="Nhập mật khẩu" required>
-                                    <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
-                                        <i class="fas fa-eye"></i>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="rememberMe">
-                                    <label class="form-check-label" for="rememberMe">
-                                        Ghi nhớ đăng nhập
-                                    </label>
-                                </div>
-
-                                <a href="#" class="forgot-link">Quên mật khẩu?</a>
-                            </div>
-
-                            <button type="submit" class=" btn-viettech">
-                                <i class="fas fa-sign-in-alt me-2"></i> Đăng nhập
-                            </button>
-
-                            <div id="errorMessage" class="alert alert-danger" style="display: none;">
-                                <i class="fas fa-exclamation-circle me-2"></i>
-                                <span id="errorText"></span>
-                            </div>
-
-                            <div class="dashboard-features">
-                                <div class="feature-badge">
-                                    <i class="fas fa-box tech-icon"></i> Quản lý sản phẩm
-                                </div>
-                                <div class="feature-badge orange-badge">
-                                    <i class="fas fa-shopping-cart tech-icon"></i> Đơn hàng
-                                </div>
-                                <div class="feature-badge">
-                                    <i class="fas fa-users tech-icon"></i> Khách hàng
-                                </div>
-                                <div class="feature-badge orange-badge">
-                                    <i class="fas fa-chart-line tech-icon"></i> Báo cáo
-                                </div>
-                            </div>
-                        </form>
+                    <div class="tech-footer">
+                        <p>© 2025 Viettech Electronics. Tất cả quyền được bảo lưu.</p>
+                        <p>Liên hệ hỗ trợ kỹ thuật: <span
+                                style="color: var(--primary-color); font-weight: 500;">admin@viettech.vn</span></p>
                     </div>
-                </div>
-
-                <div class="tech-footer">
-                    <p>© 2025 Viettech Electronics. Tất cả quyền được bảo lưu.</p>
-                    <p>Liên hệ hỗ trợ kỹ thuật: <span style="color: var(--primary-color); font-weight: 500;">admin@viettech.vn</span></p>
                 </div>
             </div>
         </div>
@@ -444,6 +810,74 @@
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
             }
+        });
+
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+
+                // Vị trí ngẫu nhiên
+                const size = Math.random() * 4 + 2;
+                const x = Math.random() * 100;
+                const y = 100 + Math.random() * 50;
+                const delay = Math.random() * 15;
+
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${x}vw`;
+                particle.style.opacity = Math.random() * 0.5 + 0.3;
+                particle.style.animationDelay = `${delay}s`;
+
+                container.appendChild(particle);
+            }
+        }
+
+        // Cập nhật trạng thái tải
+        const loadingMessages = [
+            "Đang kết nối hệ thống...",
+            "Đang tải dữ liệu người dùng...",
+            "Đang chuẩn bị bảng điều khiển...",
+            "Đang kiểm tra quyền truy cập...",
+            "Hoàn tất - Chào mừng trở lại!"
+        ];
+
+        let messageIndex = 0;
+        const loadingStatus = document.getElementById('loadingStatus');
+
+        function updateLoadingMessage() {
+            if (messageIndex < loadingMessages.length) {
+                loadingStatus.textContent = loadingMessages[messageIndex];
+                messageIndex++;
+
+                if (messageIndex < loadingMessages.length) {
+                    setTimeout(updateLoadingMessage, 750);
+                }
+            }
+        }
+
+        // Khởi tạo khi tải trang
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            setTimeout(updateLoadingMessage, 500);
+
+            // Tự động tắt splash và hiện login sau 4s
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                const login = document.getElementById('loginPage');
+
+                splash.style.opacity = '1';
+                splash.style.transition = 'opacity 0.8s ease';
+                splash.style.opacity = '0';
+
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    login.style.display = 'block';
+                }, 800); // chờ fade-out hoàn tất
+            }, 4000); // thời gian splash
         });
 
         // Xử lý đăng nhập
@@ -476,8 +910,8 @@
                     // Khôi phục trạng thái nút
                     loginButton.innerHTML = originalText;
                     loginButton.disabled = false;
-                   
-                    
+
+
 
                     if (data.status === "error") {
                         // Nếu có lỗi, hiển thị thông báo lỗi
@@ -494,9 +928,12 @@
                         console.log("data 2", data.result.metadata.tokens.accessToken);
                         console.log("Refresh Token:", data.result.metadata.tokens.refreshToken);
                         console.log("Role:", data.result.metadata.account.role); // <== Thêm dòng này
-                        
+
                         // Nếu đăng nhập thành công, chuyển hướng đến trang dashboard
-                        window.location.href = data.redirectUrl;  // Đảm bảo rằng API trả về trường redirectUrl
+
+                        setTimeout(() => {
+                            window.location.href = data.redirectUrl;
+                        }, 1800);// Đảm bảo rằng API trả về trường redirectUrl
                     }
                 })
                 .catch(error => {
@@ -511,6 +948,36 @@
                 });
         });
     </script>
+    <div id="splashScreen">
+        <div class="particles-container" id="particles-container"></div>
+
+        <div class="circle-ripple"></div>
+        <div class="circle-ripple"></div>
+        <div class="circle-ripple"></div>
+
+        <div class="splash-container">
+            <div class="logo-reveal">
+                <h1 class="viettech-logo-splash">Viet<span>Tech</span></h1>
+            </div>
+            <p class="splash-tagline">Hệ thống quản trị cửa hàng điện tử</p>
+
+            <div class="icon-row">
+                <div class="splash-icon"><i class="fas fa-box"></i></div>
+                <div class="splash-icon"><i class="fas fa-shopping-cart"></i></div>
+                <div class="splash-icon"><i class="fas fa-users"></i></div>
+                <div class="splash-icon"><i class="fas fa-chart-line"></i></div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-glow"></div>
+                </div>
+            </div>
+            <div class="loading-status" id="loadingStatus">Đang kết nối hệ thống...</div>
+        </div>
+    </div>
+
+
 </body>
 
 </html>

@@ -7,23 +7,43 @@ router.get("/list", postController.getPostListPage);
 router.get("/create", postController.getCreatePostPage);
 router.get("/edit/:id", postController.getEditPostPage);
 router.put("/:id/toggle-status", postController.togglePostStatus);
-router.get('/preview/:id', async (req, res) => {
-    const postId = req.params.id;
-
+router.get('/:id/preview', async (req, res) => {
     try {
-        const foundPost = await post.findById(postId).lean();
-        if (!foundPost) return res.status(404).send("Không tìm thấy bài viết");
+        const { id } = req.params;
+        const postData = await post.findById(id)
+            .populate('thumbnail')
+            .populate("images")
+            .populate('category_id')
+            .populate('account_id') // 👈 THÊM DÒNG NÀY
+            .lean();
 
-        // Trả về đoạn HTML để gắn vào modal
-        const html = `
-            <h5>${foundPost.title}</h5>
-            <div style="white-space: pre-wrap;">${foundPost.content}</div>
-        `;
-        res.send(html);
+
+        if (!postData) {
+            return res.status(404).json({ message: 'Không tìm thấy bài viết' });
+        }
+
+        console.log("postData:", postData);
+
+
+        return res.json({
+            title: postData.title,
+            author: postData.account_id?.full_name || postData.author || 'Không rõ',
+            createdAt: postData.createdAt,
+            category: postData.category_id?.name || '',
+            thumbnail: postData.thumbnail?.url || '',
+            content: postData.content,
+            meta_description: postData.meta_description || '',
+            tags: postData.tags || [],
+            gallery: (postData.images || []).map(img => ({
+                url: img.url,
+                file_path: img.file_path
+            }))
+        });
+
 
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Lỗi server");
+        console.error("Lỗi preview:", err);
+        return res.status(500).json({ message: "Lỗi server" });
     }
 });
 
