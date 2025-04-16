@@ -605,6 +605,197 @@ class CartService {
     return newBill;
   }
 
+  
+  static async checkoutNow({
+    userId,
+    productId,
+    quantity,
+    detailsVariantId,
+    address,
+    phone_number,
+    receiver_name,
+    payment_method,
+    discount_code,
+    req,
+  }) {
+    const clientIp =
+      req.headers['x-forwarded-for']?.toString().split(',')[0] ||
+      req.socket?.remoteAddress ||
+      '127.0.0.1';
+  
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return {
+        code: 404,
+        message: `Product not found`,
+        status: "error",
+      };
+    }
+  
+    if (product.product_stock < quantity) {
+      return {
+        code: 400,
+        message: `Not enough stock for product ${product.product_name}`,
+        status: "error",
+      };
+    }
+  
+    let price = product.product_price;
+    let variant = null;
+  
+    if (detailsVariantId) {
+      variant = await detailsVariantModel.findById(detailsVariantId);
+      if (!variant) {
+        return {
+          code: 404,
+          message: `Variant not found`,
+          status: "error",
+        };
+      }
+      if (variant.stock < quantity) {
+        return {
+          code: 400,
+          message: `Not enough stock for variant`,
+          status: "error",
+        };
+      }
+      await detailsVariantModel.updateOne(
+        { _id: detailsVariantId },
+        { $inc: { stock: -quantity } }
+      );
+      price = variant.price || price;
+    }
+  
+    await productModel.updateOne(
+      { _id: productId },
+      { $inc: { product_stock: -quantity } }
+    );
+  
+    let total = price * quantity;
+    const shippingFee = 35000;
+    total += shippingFee;
+  
+    let discountAmount = 0;
+    let discount = null;
+  
+    if (discount_code) {
+      discount = await discountRepo.findOne({
+        code: discount_code,
+        isDraft: false,
+        startDate: { $lte: new Date() },
+        endDate: { $gte: new Date() },
+      }).lean();
+  
+      if (discount) {
+        if (discount.minOrderValue && total < discount.minOrderValue) {
+          return {
+            code: 400,
+            message: `Đơn hàng chưa đủ giá trị tối thiểu để áp dụng mã giảm giá.`,
+            status: "error",
+          };
+        }
+  
+        if (discount.usageLimit && discount.usageCount >= discount.usageLimit) {
+          return {
+            code: 400,
+            message: `Mã giảm giá đã được sử dụng hết lượt.`,
+            status: "error",
+          };
+        }
+  
+        if (discount.discountType === "percentage") {
+          discountAmount = (discount.discountValue / 100) * total;
+          if (discount.maxDiscountAmount) {
+            discountAmount = Math.min(discountAmount, discount.maxDiscountAmount);
+          }
+        } else if (discount.discountType === "fixed") {
+          discountAmount = discount.discountValue;
+        } else if (discount.discountType === "shipping") {
+          discountAmount = shippingFee;
+        }
+      }
+    }
+  
+    total -= discountAmount;
+    const orderCode = Math.floor(10000 + Math.random() * 90000);
+  
+    const selectedProducts = [
+      {
+        productId,
+        detailsVariantId: detailsVariantId || null,
+        quantity,
+        price,
+        isSelected: true,
+      }
+    ];
+  
+    const newBill = await billRepo.create({
+      user_id: userId,
+      products: selectedProducts,
+      order_code: orderCode,
+      address,
+      total: total * 100,
+      shipping_fee: shippingFee,
+      phone_number,
+      receiver_name,
+      status: "pending",
+      payment_method: payment_method || "tm",
+      discount_code: discount_code || null,
+      discount_amount: discountAmount || 0,
+    });
+  
+    if (discount) {
+      await discountRepo.updateOne(
+        { _id: discount._id },
+        { $inc: { usageCount: 1 } }
+      );
+    }
+  
+    if (payment_method === "vnpay") {
+      const vnpay = new VNPay({
+        tmnCode: 'HMC4RYL1',
+        secureSecret: 'GP6FEUU3UDKCOXM1P5OE3AU1AJN5CDP4',
+        vnpayHost: 'https://sandbox.vnpayment.vn',
+        testMode: true,
+        hashAlgorithm: 'SHA512',
+        loggerFn: ignoreLogger,
+      });
+  
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+  
+      const vnpayResponse = await vnpay.buildPaymentUrl({
+        vnp_Amount: total,
+        vnp_IpAddr: clientIp,
+        vnp_TxnRef: orderCode.toString(),
+        vnp_OrderInfo: `Thanh toán đơn hàng #${orderCode}`,
+        vnp_OrderType: ProductCode.Other,
+        vnp_ReturnUrl: `http://localhost:3056/v1/api/bill/vnpay-return`,
+        vnp_Locale: VnpLocale.VN,
+        vnp_CreateDate: dateFormat(new Date()),
+        vnp_ExpireDate: dateFormat(tomorrow),
+      });
+  
+      return {
+        code: 200,
+        message: "Redirect to VNPay",
+        paymentUrl: vnpayResponse,
+        billId: newBill._id,
+      };
+    }
+  
+    await sendPushNotification({
+      titleAdmin: "🧾 Đơn hàng mới!",
+      messageAdmin: `Đơn hàng có mã #${orderCode} đã được đặt thành công.`,
+      url: "/v1/api/admin/bills" || "https://viettech.store",
+      userId: userId.toString(),
+      targets: "admin",
+      data: { orderCode }
+    });
+  
+    return newBill;
+  }
+  
 
   static async updateIsSelected({
     userId,

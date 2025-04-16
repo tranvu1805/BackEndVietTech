@@ -23,6 +23,19 @@ class CartController {
     }).send(res);
   };
 
+  checkoutNow = async (req, res, next) => {
+    try {
+      const result = await CartService.checkoutNow({ ...req.body, req });
+      new SuccessResponse({
+        message: "Checkout now successfully",
+        metadata: result,
+      }).send(res);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+
 
   updateIsSelected = async (req, res, next) => {
     new SuccessResponse({

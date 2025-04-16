@@ -13,6 +13,7 @@ router.put("", asyncHandler(cartController.update));
 router.get("", asyncHandler(cartController.listToCart));
 
 router.post("/checkout", asyncHandler(cartController.checkout));
+router.post("/checkout-now", asyncHandler(cartController.checkoutNow));
 
 // Cập nhật isSelected của sản phẩm
 router.post("/update-is-selected", asyncHandler(cartController.updateIsSelected));
