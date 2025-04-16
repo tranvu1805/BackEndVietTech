@@ -2,28 +2,231 @@ const accountModel = require("../models/account.model");
 const billModel = require("../models/bill.model");
 const productModel = require("../models/product.model");
 
+function getDateRange(filter) {
+    const now = new Date();
+    let startDate, endDate = now;
+
+    switch (filter) {
+        case 'day':
+            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            break;
+        case 'week': {
+            const day = now.getDay(); // 0 = Chủ Nhật, 1 = Thứ Hai, ..., 6 = Thứ Bảy
+            const diff = day === 0 ? -6 : 1 - day; // Nếu là Chủ Nhật thì lùi 6 ngày, còn lại lùi về Thứ Hai
+            const monday = new Date(now);
+            monday.setDate(now.getDate() + diff);
+            startDate = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate());
+            break;
+        }
+        case 'month':
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            break;
+        case 'year':
+            startDate = new Date(now.getFullYear(), 0, 1);
+            break;
+        default:
+            startDate = new Date(0); // Lấy tất cả
+    }
+
+    return { startDate, endDate };
+}
+
+
 class ReportService {
 
-    static async getAdminReport() {
-        const totalOrders = await billModel.billRepo.countDocuments();
-        const totalUsers = await accountModel.countDocuments();
-        const totalProducts = await productModel.countDocuments();
+
+
+    static async getAdminReport(filter) {
+        const { startDate, endDate } = getDateRange(filter);
+
+        console.log(`Filter: ${filter}, Start Date: ${startDate}, End Date: ${endDate}`);
+
+
+        const matchDate = {
+            createdAt: { $gte: startDate, $lte: endDate }
+        };
+
+        const totalOrders = await billModel.billRepo.countDocuments(matchDate);
+        const totalUsers = await accountModel.countDocuments(matchDate);
+        const totalProducts = await productModel.countDocuments(matchDate);
+
         const revenueResult = await billModel.billRepo.aggregate([
-            { $match: { status: 'completed' } },
+            { $match: { status: 'completed', ...matchDate } },
             { $group: { _id: null, total: { $sum: { $add: ['$total', '$shipping_fee'] } } } }
         ]);
         const totalRevenue = revenueResult[0]?.total || 0;
+
+        const topSelling = await billModel.billRepo.aggregate([
+            { $match: { status: 'completed', ...matchDate } },
+            { $unwind: "$products" },
+            {
+                $group: {
+                    _id: "$products.productId",
+                    quantity: { $sum: "$products.quantity" }
+                }
+            },
+            { $sort: { quantity: -1 } },
+            { $limit: 5 },
+            {
+                $lookup: {
+                    from: "Products",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "productInfo"
+                }
+            },
+            { $unwind: "$productInfo" },
+            {
+                $project: {
+                    _id: 0,
+                    productId: "$_id",
+                    quantity: 1,
+                    productName: "$productInfo.product_name",
+                    productPrice: "$productInfo.product_price",
+                    productStock: "$productInfo.product_stock"
+                }
+            }
+        ]);
+
+        const recentOrders = await billModel.billRepo.find(matchDate)
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .lean();
+
+
+        const categoryDistribution = await productModel.aggregate([
+            { $match: matchDate },
+            {
+                $group: {
+                    _id: "$category",
+                    count: { $sum: 1 }
+                },
+            },
+            { $sort: { count: -1 } },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "categoryInfo"
+                },
+            },
+            { $unwind: "$categoryInfo" },
+            {
+                $project: {
+                    _id: 0,
+                    categoryId: "$_id",
+                    categoryName: "$categoryInfo.name",
+                    count: 1
+                }
+            }
+        ]);
 
         return {
             totalOrders,
             totalUsers,
             totalProducts,
-            totalRevenue
+            totalRevenue,
+            topSelling,
+            recentOrders,
+            categoryDistribution,
         };
     }
 
-    // services/ReportService.js
+
     static async getChartData(filter, startDate, endDate) {
+        const matchCondition = {};
+        const now = new Date();
+        let fromDate, toDate;
+
+        switch (filter) {
+            case 'day':
+            case 'this_month':
+                fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                toDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                break;
+            case 'month':
+            case 'this_year':
+                fromDate = new Date(now.getFullYear(), 0, 1);
+                toDate = new Date(now.getFullYear() + 1, 0, 1);
+                break;
+            case 'year':
+                fromDate = new Date(now.getFullYear() - 5, 0, 1); // ví dụ 5 năm gần đây
+                toDate = new Date(now.getFullYear() + 1, 0, 1);
+                break;
+            default:
+                if (startDate && endDate) {
+                    fromDate = new Date(startDate);
+                    toDate = new Date(endDate);
+                    toDate.setDate(toDate.getDate() + 1);
+                }
+        }
+
+        if (fromDate && toDate) {
+            matchCondition.createdAt = { $gte: fromDate, $lt: toDate };
+        }
+
+        let groupBy, totalUnit, labels;
+
+        if (filter === 'day') {
+            groupBy = { $dayOfMonth: "$createdAt" };
+            totalUnit = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            labels = Array.from({ length: totalUnit }, (_, i) => `Ngày ${i + 1}`);
+        } else if (filter === 'month') {
+            groupBy = { $month: "$createdAt" };
+            totalUnit = 12;
+            labels = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+        } else if (filter === 'year') {
+            groupBy = { $year: "$createdAt" };
+            totalUnit = toDate.getFullYear() - fromDate.getFullYear();
+            labels = Array.from({ length: totalUnit }, (_, i) => `${fromDate.getFullYear() + i}`);
+        }
+
+        const makeAggregate = async (model, field) => {
+            const result = await model.aggregate([
+                { $match: { ...matchCondition, ...(field === 'revenue' ? { status: 'completed' } : {}) } },
+                {
+                    $group: {
+                        _id: groupBy,
+                        total: field === 'revenue'
+                            ? { $sum: { $add: ["$total", "$shipping_fee"] } }
+                            : { $sum: 1 }
+                    }
+                },
+                { $sort: { _id: 1 } }
+            ]);
+
+            const data = Array(totalUnit).fill(0);
+            result.forEach(item => {
+                const index = filter === 'year'
+                    ? item._id - fromDate.getFullYear()
+                    : item._id - 1;
+                if (index >= 0 && index < totalUnit) data[index] = item.total;
+            });
+
+            return data;
+        };
+
+        const [revenueData, orderData, userData] = await Promise.all([
+            makeAggregate(billModel.billRepo, 'revenue'),
+            makeAggregate(billModel.billRepo, 'orders'),
+            makeAggregate(accountModel, 'users')
+        ]);
+
+        return {
+            success: true,
+            data: {
+                labels,
+                revenueData,
+                orderData,
+                userData
+            }
+        };
+    }
+
+
+    // services/ReportService.js
+    static async getBasicChartData(filter, startDate, endDate) {
         const matchCondition = {};
 
         // Xử lý lọc thời gian
@@ -116,6 +319,8 @@ class ReportService {
 
 
 
+
+
     static async getAdvancedDashboard(filter, startDate, endDate) {
         const matchCondition = {};
         const now = new Date();
@@ -179,7 +384,7 @@ class ReportService {
                 },
                 { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } }
             ]),
-            
+
 
             billModel.billRepo.aggregate([
                 { $match: { ...matchCondition, status: 'completed' } },

@@ -18,10 +18,6 @@
             margin-bottom: 30px;
         }
 
-        /* .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    } */
         .card-header {
             padding: 15px 20px;
             font-size: 1.1rem;
@@ -49,6 +45,7 @@
 
         .img-thumbnail:hover {
             transform: scale(1.1);
+            cursor: pointer;
         }
 
         .badge {
@@ -68,19 +65,41 @@
             margin: 0 2px;
         }
 
-        .tab-container {
+        /* Cải thiện Tab Navigation */
+        .nav-tabs {
+            border-bottom: 2px solid #dee2e6;
             margin-bottom: 20px;
         }
 
         .nav-tabs .nav-link {
             font-weight: 600;
-            padding: 12px 20px;
+            padding: 12px 25px;
             border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+            color: #6c757d;
+            border: 1px solid transparent;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: #e9ecef #e9ecef #dee2e6;
+            color: #495057;
         }
 
         .nav-tabs .nav-link.active {
-            background-color: #f8f9fa;
-            border-bottom-color: transparent;
+            color: #fff;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            font-weight: bold;
+        }
+
+        .nav-tabs .nav-link .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 0.7rem;
+            padding: 3px 6px;
         }
 
         .tab-content {
@@ -102,6 +121,38 @@
             padding: 15px;
             background-color: #f8f9fa;
             border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Thêm hiệu ứng tab */
+        .tab-pane {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Cải thiện bảng */
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        /* Cải thiện phân trang */
+        .pagination .page-link {
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
         }
     </style>
 </head>
@@ -112,44 +163,70 @@
             <%- include('partials/header') %>
 
                 <div class="col-md-10 col-lg-10 ms-auto main-content">
-                    <nav class="top-navbar d-flex justify-content-between align-items-center">
+                    <nav class="top-navbar d-flex justify-content-between align-items-center mb-4">
                         <h4 class="mb-0 text-dark">Quản lý Đánh giá và Báo cáo sản phẩm</h4>
-                        <div class="search-bar">
+                        <form class="search-bar" id="searchForm" method="get" action="/v1/api/admin/reviews/list">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                <input type="text" class="form-control" placeholder="Tìm kiếm..." id="searchInput">
+                                <input type="text" class="form-control" placeholder="Tìm kiếm..." id="searchInput"
+                                    name="search" value="<%= query.search || '' %>">
                             </div>
-                        </div>
+                        </form>
+
                     </nav>
 
-                    <!-- Phân loại tab điều hướng -->
-
+                    <!-- Tab điều hướng cải tiến -->
+                    <ul class="nav nav-tabs" id="managementTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="reviews-tab" data-bs-toggle="tab"
+                                data-bs-target="#reviews-content" type="button" role="tab" aria-controls="reviews"
+                                aria-selected="true">
+                                <i class="fas fa-star me-2"></i>Đánh giá sản phẩm
+                                <span class="badge bg-primary">
+                                    <%= totalReviews %>
+                                </span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reports-tab" data-bs-toggle="tab"
+                                data-bs-target="#reports-content" type="button" role="tab" aria-controls="reports"
+                                aria-selected="false">
+                                <i class="fas fa-flag me-2"></i>Báo cáo đánh giá
+                                <span class="badge bg-danger">
+                                    <%= totalReports %>
+                                </span>
+                            </button>
+                        </li>
+                    </ul>
 
                     <!-- Nội dung tab -->
                     <div class="tab-content" id="managementTabsContent">
                         <!-- Tab đánh giá sản phẩm -->
-                        <div class="tab-pane fade show active" id="reviews" role="tabpanel"
+                        <div class="tab-pane fade show active" id="reviews-content" role="tabpanel"
                             aria-labelledby="reviews-tab">
                             <div class="p-4">
                                 <!-- Bộ lọc -->
                                 <div class="card-filter d-flex flex-wrap justify-content-between align-items-center">
                                     <div class="d-flex gap-3">
-                                        <select class="form-select" style="width: auto;">
-                                            <option selected>Xếp theo</option>
-                                            <option>Mới nhất</option>
-                                            <option>Điểm cao nhất</option>
-                                            <option>Điểm thấp nhất</option>
+                                        <select class="form-select" style="width: auto;" id="reviewSortSelect">
+                                            <option value="">Xếp theo</option>
+                                            <option value="latest" <%=query.sort==='latest' ? 'selected' : '' %>>Mới
+                                                nhất</option>
+                                            <option value="highest" <%=query.sort==='highest' ? 'selected' : '' %>>Điểm
+                                                cao nhất</option>
+                                            <option value="lowest" <%=query.sort==='lowest' ? 'selected' : '' %>>Điểm
+                                                thấp nhất</option>
                                         </select>
-                                        <select class="form-select" style="width: auto;">
-                                            <option selected>Số sao</option>
-                                            <option>5 sao</option>
-                                            <option>4 sao</option>
-                                            <option>3 sao</option>
-                                            <option>2 sao</option>
-                                            <option>1 sao</option>
+                                        <select class="form-select" style="width: auto;" id="reviewRatingSelect">
+                                            <option value="">Số sao</option>
+                                            <option value="5" <%=query.rating==='5' ? 'selected' : '' %>>5 sao</option>
+                                            <option value="4" <%=query.rating==='4' ? 'selected' : '' %>>4 sao</option>
+                                            <option value="3" <%=query.rating==='3' ? 'selected' : '' %>>3 sao</option>
+                                            <option value="2" <%=query.rating==='2' ? 'selected' : '' %>>2 sao</option>
+                                            <option value="1" <%=query.rating==='1' ? 'selected' : '' %>>1 sao</option>
                                         </select>
                                     </div>
-                                    <button class="btn btn-outline-secondary">
+                                    <button class="btn btn-outline-primary">
                                         <i class="fas fa-download me-1"></i> Xuất dữ liệu
                                     </button>
                                 </div>
@@ -166,9 +243,9 @@
                                     </div>
                                     <div class="card-body p-0">
                                         <div class="table-responsive">
-                                            <table class="table table-striped table-bordered align-middle mb-0"
+                                            <table
+                                                class="table table-striped table-hover table-bordered align-middle mb-0"
                                                 id="reviewsTable">
-
                                                 <thead class="table-light">
                                                     <tr>
                                                         <th style="width: 50px;">#</th>
@@ -183,7 +260,8 @@
                                                 </thead>
                                                 <tbody>
                                                     <% reviews.forEach((r, idx)=> { %>
-                                                        <tr>
+                                                        <tr data-id="<%= r._id %>">
+
                                                             <td>
                                                                 <%= idx + 1 %>
                                                             </td>
@@ -213,7 +291,8 @@
                                                                         <% } %>
                                                             </td>
                                                             <td>
-                                                                <span class="badge bg-success">
+                                                                <span
+                                                                    class="badge <%= r.rating >= 4 ? 'bg-success' : (r.rating >= 3 ? 'bg-info' : 'bg-warning text-dark') %>">
                                                                     <%= r.rating %>/5
                                                                 </span>
                                                             </td>
@@ -222,14 +301,19 @@
                                                             </td>
                                                             <td>
                                                                 <button
-                                                                    class="btn btn-sm btn-outline-primary action-btn"
-                                                                    title="Xem chi tiết"><i
-                                                                        class="fas fa-eye"></i></button>
+                                                                    class="btn btn-sm btn-outline-primary action-btn btn-view-review"
+                                                                    title="Xem chi tiết" data-id="<%= r._id %>">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+
+
                                                                 <button
                                                                     class="btn btn-sm btn-outline-warning action-btn"
-                                                                    title="Ẩn đánh giá"><i
-                                                                        class="fas fa-ban"></i></button>
-                                                                <!-- <button class="btn btn-sm btn-outline-danger action-btn" title="Xóa đánh giá"><i class="fas fa-trash"></i></button> -->
+                                                                    title="Ẩn đánh giá" data-id="<%= r._id %>"
+                                                                    data-status="<%= r.status || 'active' %>">
+                                                                    <i class="fas fa-ban"></i>
+                                                                </button>
+
                                                             </td>
                                                         </tr>
                                                         <% }) %>
@@ -250,41 +334,62 @@
 
                                         <nav>
                                             <ul class="pagination mb-0">
-                                                <% for (let i=1; i <=totalReviewPages; i++) { %>
-                                                    <li
-                                                        class="page-item <%= i === currentReviewPage ? 'active' : '' %>">
+                                                <% if (currentReviewPage> 1) { %>
+                                                    <li class="page-item">
                                                         <a class="page-link"
-                                                            href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, page: i, reportPage: currentReportPage }).toString() %>">
-                                                            <%= i %>
+                                                            href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, page: currentReviewPage-1, reportPage: currentReportPage }).toString() %>">
+                                                            <i class="fas fa-chevron-left"></i>
                                                         </a>
                                                     </li>
                                                     <% } %>
+
+                                                        <% for (let i=1; i <=totalReviewPages; i++) { %>
+                                                            <li
+                                                                class="page-item <%= i === currentReviewPage ? 'active' : '' %>">
+                                                                <a class="page-link"
+                                                                    href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, page: i, reportPage: currentReportPage }).toString() %>">
+                                                                    <%= i %>
+                                                                </a>
+                                                            </li>
+                                                            <% } %>
+
+                                                                <% if (currentReviewPage < totalReviewPages) { %>
+                                                                    <li class="page-item">
+                                                                        <a class="page-link"
+                                                                            href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, page: currentReviewPage+1, reportPage: currentReportPage }).toString() %>">
+                                                                            <i class="fas fa-chevron-right"></i>
+                                                                        </a>
+                                                                    </li>
+                                                                    <% } %>
                                             </ul>
                                         </nav>
-
-
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="" id="reports" role="tabpanel" aria-labelledby="reports-tab">
+                        <!-- Tab báo cáo đánh giá -->
+                        <div class="tab-pane fade" id="reports-content" role="tabpanel" aria-labelledby="reports-tab">
                             <div class="p-4">
                                 <!-- Bộ lọc -->
                                 <div class="card-filter d-flex flex-wrap justify-content-between align-items-center">
                                     <div class="d-flex gap-3">
-                                        <select class="form-select" style="width: auto;">
-                                            <option selected>Trạng thái</option>
-                                            <option>Đã xử lý</option>
-                                            <option>Đang chờ</option>
+                                        <select class="form-select" style="width: auto;" id="reportSortSelect">
+                                            <option value="">Xếp theo</option>
+                                            <option value="latest" <%=query.reportSort==='latest' ? 'selected' : '' %>
+                                                >Mới nhất</option>
+                                            <option value="oldest" <%=query.reportSort==='oldest' ? 'selected' : '' %>
+                                                >Cũ nhất</option>
                                         </select>
-                                        <select class="form-select" style="width: auto;">
-                                            <option selected>Xếp theo</option>
-                                            <option>Mới nhất</option>
-                                            <option>Cũ nhất</option>
+                                        <select class="form-select" style="width: auto;" id="reportStatusSelect">
+                                            <option value="">Trạng thái</option>
+                                            <option value="Đã xử lý" <%=query.reportStatus==='Đã xử lý' ? 'selected'
+                                                : '' %>>Đã xử lý</option>
+                                            <option value="Đang chờ" <%=query.reportStatus==='Đang chờ' ? 'selected'
+                                                : '' %>>Đang chờ</option>
                                         </select>
                                     </div>
-                                    <button class="btn btn-outline-secondary">
+                                    <button class="btn btn-outline-danger">
                                         <i class="fas fa-download me-1"></i> Xuất dữ liệu
                                     </button>
                                 </div>
@@ -301,9 +406,9 @@
                                     </div>
                                     <div class="card-body p-0">
                                         <div class="table-responsive">
-                                            <table class="table table-striped table-bordered align-middle mb-0"
+                                            <table
+                                                class="table table-striped table-hover table-bordered align-middle mb-0"
                                                 id="reportsTable">
-
                                                 <thead class="table-light">
                                                     <tr>
                                                         <th style="width: 50px;">#</th>
@@ -317,14 +422,17 @@
                                                 </thead>
                                                 <tbody>
                                                     <% reports.forEach((rep, idx)=> { %>
-                                                        <tr>
+                                                        <tr data-id="<%= rep._id %>">
+
                                                             <td>
                                                                 <%= idx + 1 %>
                                                             </td>
                                                             <td>
                                                                 <%= rep.account_id?.username %>
                                                             </td>
-                                                            <td><a href="#" class="text-primary">Xem đánh giá</a></td>
+                                                            <td><a href="#" class="text-primary"
+                                                                    data-bs-toggle="tooltip"
+                                                                    title="Nhấn để xem đánh giá">Xem đánh giá</a></td>
                                                             <td>
                                                                 <%= rep.reason %>
                                                             </td>
@@ -341,16 +449,20 @@
                                                             </td>
                                                             <td>
                                                                 <button
-                                                                    class="btn btn-sm btn-outline-primary action-btn"
-                                                                    title="Xem chi tiết"><i
-                                                                        class="fas fa-eye"></i></button>
+                                                                    class="btn btn-sm btn-outline-primary action-btn btn-view-report"
+                                                                    title="Xem chi tiết" data-id="<%= rep._id %>">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+
                                                                 <button
                                                                     class="btn btn-sm btn-outline-success action-btn"
-                                                                    title="Chấp nhận báo cáo"><i
-                                                                        class="fas fa-check"></i></button>
+                                                                    title="Chấp nhận báo cáo">
+                                                                    <i class="fas fa-check"></i>
+                                                                </button>
                                                                 <button class="btn btn-sm btn-outline-danger action-btn"
-                                                                    title="Từ chối báo cáo"><i
-                                                                        class="fas fa-times"></i></button>
+                                                                    title="Từ chối báo cáo">
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
                                                             </td>
                                                         </tr>
                                                         <% }) %>
@@ -371,18 +483,35 @@
 
                                         <nav>
                                             <ul class="pagination mb-0">
-                                                <% for (let i=1; i <=totalReportPages; i++) { %>
-                                                    <li
-                                                        class="page-item <%= i === currentReportPage ? 'active' : '' %>">
+                                                <% if (currentReportPage> 1) { %>
+                                                    <li class="page-item">
                                                         <a class="page-link"
-                                                            href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, reportPage: i, page: currentReviewPage }).toString() %>">
-                                                            <%= i %>
+                                                            href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, reportPage: currentReportPage-1, page: currentReviewPage }).toString() %>">
+                                                            <i class="fas fa-chevron-left"></i>
                                                         </a>
                                                     </li>
                                                     <% } %>
+
+                                                        <% for (let i=1; i <=totalReportPages; i++) { %>
+                                                            <li
+                                                                class="page-item <%= i === currentReportPage ? 'active' : '' %>">
+                                                                <a class="page-link"
+                                                                    href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, reportPage: i, page: currentReviewPage }).toString() %>">
+                                                                    <%= i %>
+                                                                </a>
+                                                            </li>
+                                                            <% } %>
+
+                                                                <% if (currentReportPage < totalReportPages) { %>
+                                                                    <li class="page-item">
+                                                                        <a class="page-link"
+                                                                            href="/v1/api/admin/reviews/list?<%= new URLSearchParams({ ...query, reportPage: currentReportPage+1, page: currentReviewPage }).toString() %>">
+                                                                            <i class="fas fa-chevron-right"></i>
+                                                                        </a>
+                                                                    </li>
+                                                                    <% } %>
                                             </ul>
                                         </nav>
-
                                     </div>
                                 </div>
                             </div>
@@ -390,6 +519,7 @@
                     </div>
                 </div>
         </div>
+
         <!-- Modal hiển thị ảnh đánh giá -->
         <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -405,29 +535,356 @@
                 </div>
             </div>
         </div>
-
     </div>
+
+    <!-- Modal xem chi tiết đánh giá -->
+    <div class="modal fade" id="reviewDetailModal" tabindex="-1" aria-labelledby="reviewDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="reviewDetailModalLabel">Chi tiết đánh giá</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body" id="reviewDetailContent">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal xem chi tiết báo cáo -->
+    <div class="modal fade" id="reportDetailModal" tabindex="-1" aria-labelledby="reportDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="reportDetailModalLabel">Chi tiết báo cáo đánh giá</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body" id="reportDetailContent">
+                    <div class="text-center">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Khởi tạo tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
         // Tìm kiếm đơn giản
-        document.getElementById('searchInput').addEventListener('input', function (e) {
-            const searchText = e.target.value.toLowerCase();
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const searchText = e.target.value.trim();
+                const url = new URL(window.location.href);
+                url.searchParams.set('search', searchText);
+                url.searchParams.set('page', 1); // reset về trang 1
+                window.location.href = url.toString();
+            }
+        });
 
-            // Tìm kiếm tất cả các bảng trong trang
-            const allTables = document.querySelectorAll('.table tbody');
 
-            allTables.forEach(tbody => {
-                tbody.querySelectorAll('tr').forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchText) ? '' : 'none';
-                });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedSearchText = sessionStorage.getItem('searchText');
+            if (savedSearchText) {
+                document.getElementById('searchInput').value = savedSearchText;
+                filterTable(savedSearchText);  // Gọi hàm để filter lại bảng khi chuyển tab
+            }
+        });
+
+
+        function filterTable(searchText) {
+            const activeTabId = document.querySelector('.tab-pane.active').id;
+            const tableSelector = activeTabId === 'reviews' ? '#reviewsTable tbody tr' : '#reportsTable tbody tr';
+
+            document.querySelectorAll(tableSelector).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        }
+
+
+        // Xử lý chuyển tab và cập nhật tìm kiếm
+        document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function (e) {
+                const searchText = document.getElementById('searchInput').value.toLowerCase();
+                if (searchText) {
+                    const activeTabId = e.target.getAttribute('aria-controls');
+                    const tableSelector = activeTabId === 'reviews' ? '#reviewsTable tbody tr' : '#reportsTable tbody tr';
+
+                    document.querySelectorAll(tableSelector).forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchText) ? '' : 'none';
+                    });
+                }
             });
         });
 
         function showImageInModal(url) {
             document.getElementById('modalReviewImage').src = url;
         }
+
+        // Xử lý các bộ lọc
+        document.getElementById('reviewSortSelect').addEventListener('change', function () {
+            const selectedSort = this.value;
+            const rating = document.getElementById('reviewRatingSelect').value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('sort', selectedSort);
+            if (rating !== "Số sao") {
+                url.searchParams.set('rating', rating);
+            }
+            url.searchParams.set('page', 1); // reset về trang 1 mỗi lần filter
+            window.location.href = url.toString();
+        });
+        document.getElementById('reviewRatingSelect').addEventListener('change', function () {
+            const selectedRating = this.value;
+            const sort = document.getElementById('reviewSortSelect').value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('rating', selectedRating);
+            if (sort !== "Xếp theo") {
+                url.searchParams.set('sort', sort);
+            }
+            url.searchParams.set('page', 1);
+            window.location.href = url.toString();
+        });
+
+
+        document.getElementById('reportSortSelect').addEventListener('change', function () {
+            const selectedSort = this.value;
+            const status = document.getElementById('reportStatusSelect').value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('reportSort', selectedSort);
+            if (status !== "Trạng thái") {
+                url.searchParams.set('reportStatus', status);
+            }
+            url.searchParams.set('reportPage', 1);
+            window.location.href = url.toString();
+        });
+        document.getElementById('reportStatusSelect').addEventListener('change', function () {
+            const selectedStatus = this.value;
+            const sort = document.getElementById('reportSortSelect').value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('reportStatus', selectedStatus);
+            if (sort !== "Xếp theo") {
+                url.searchParams.set('reportSort', sort);
+            }
+            url.searchParams.set('reportPage', 1);
+            window.location.href = url.toString();
+        });
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            attachReviewActionHandlers();
+            attachReportActionHandlers();
+        });
+
+        function attachReviewActionHandlers() {
+            document.querySelectorAll('.btn-outline-warning[title="Ẩn đánh giá"]').forEach(button => {
+                button.addEventListener('click', async function () {
+                    const reviewRow = this.closest('tr');
+                    const reviewId = this.dataset.id;
+                    const currentStatus = this.dataset.status;
+
+                    if (currentStatus === 'inactive') {
+                        return alert('Đánh giá này đã bị ẩn trước đó.');
+                    }
+
+                    if (confirm(`Đánh giá hiện tại đang ở trạng thái: "${currentStatus}". Bạn có chắc muốn ẩn đánh giá này?`)) {
+                        try {
+                            const res = await fetch(`/v1/api/admin/reviews/${reviewId}/status`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ status: 'inactive' })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('Ẩn đánh giá thành công!');
+                                location.reload();
+                            } else {
+                                alert('Không thể ẩn: ' + data.message);
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            alert('Lỗi khi gửi yêu cầu.');
+                        }
+                    }
+                });
+            });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.btn-view-review').forEach(button => {
+                button.addEventListener('click', async function () {
+                    const id = this.dataset.id;
+                    const modalBody = document.getElementById('reviewDetailContent');
+                    modalBody.innerHTML = `
+                <div class="text-center">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                  </div>
+                </div>`;
+
+                    const modal = new bootstrap.Modal(document.getElementById('reviewDetailModal'));
+                    modal.show();
+
+                    try {
+                        const res = await fetch(`/v1/api/admin/reviews/${id}`);
+                        const data = await res.json();
+
+                        if (data.success) {
+                            const r = data.data;
+                            modalBody.innerHTML = `
+                        <p><strong>Người đánh giá:</strong> ${r.account_id?.username || ''}</p>
+                        <p><strong>Email:</strong> ${r.account_id?.email || ''}</p>
+                        <p><strong>Sản phẩm:</strong> ${r.product_id?.product_name || ''}</p>
+                        <p><strong>Nội dung đánh giá:</strong></p>
+                        <div class="border rounded p-3 bg-light mb-3">${r.contents_review}</div>
+                        <p><strong>Điểm:</strong> <span class="badge bg-success">${r.rating}/5</span></p>
+                        <p><strong>Ngày đánh giá:</strong> ${new Date(r.createdAt).toLocaleString('vi-VN')}</p>
+                        <p><strong>Hình ảnh:</strong></p>
+                        <div class="d-flex flex-wrap gap-2">
+                            ${r.image_ids?.map(img => `<img src="${img.url}" class="img-thumbnail" style="max-height: 100px;" />`).join('') || '<span class="text-muted">Không có</span>'}
+                        </div>
+                    `;
+                        } else {
+                            modalBody.innerHTML = `<p class="text-danger">${data.message}</p>`;
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        modalBody.innerHTML = `<p class="text-danger">Lỗi khi tải dữ liệu.</p>`;
+                    }
+                });
+            });
+        });
+
+
+
+
+        function attachReportActionHandlers() {
+            // Chấp nhận báo cáo
+            document.querySelectorAll('.btn-outline-success[title="Chấp nhận báo cáo"]').forEach(button => {
+                button.addEventListener('click', async function () {
+                    const reportRow = this.closest('tr');
+                    const reportId = getRowId(reportRow);
+
+                    if (confirm('Bạn có chắc muốn duyệt báo cáo này không?')) {
+                        try {
+                            const res = await fetch(`/v1/api/admin/reviews/report/${reportId}/status`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ status: 'active' })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('Đã duyệt báo cáo!');
+                                location.reload();
+                            } else {
+                                alert('Không thể cập nhật: ' + data.message);
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            alert('Lỗi khi cập nhật báo cáo.');
+                        }
+                    }
+                });
+            });
+
+            // Từ chối (xóa) báo cáo
+            document.querySelectorAll('.btn-outline-danger[title="Từ chối báo cáo"]').forEach(button => {
+                button.addEventListener('click', async function () {
+                    const reportRow = this.closest('tr');
+                    const reportId = getRowId(reportRow);
+
+                    if (confirm('Bạn có chắc muốn xóa báo cáo này không?')) {
+                        try {
+                            const res = await fetch(`/v1/api/admin/reviews/report/${reportId}`, {
+                                method: 'DELETE'
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('Đã xóa báo cáo!');
+                                location.reload();
+                            } else {
+                                alert('Không thể xóa: ' + data.message);
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            alert('Lỗi khi xóa báo cáo.');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Hàm lấy id của hàng từ dataset hoặc cấu trúc hidden input (tuỳ bạn render thế nào)
+        function getRowId(row) {
+            const idCell = row.querySelector('td[data-id]');
+            if (idCell) return idCell.dataset.id;
+            // fallback nếu không có, bạn nên bổ sung ID vào mỗi hàng dưới dạng <td data-id="...">
+            return row.dataset.id || prompt("Không tìm thấy ID hàng. Nhập thủ công:");
+        }
+
+        document.querySelectorAll('.btn-view-report').forEach(button => {
+            button.addEventListener('click', async function () {
+                const id = this.dataset.id;
+                const modalBody = document.getElementById('reportDetailContent');
+                modalBody.innerHTML = `
+      <div class="text-center">
+        <div class="spinner-border text-danger" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+      </div>`;
+
+                const modal = new bootstrap.Modal(document.getElementById('reportDetailModal'));
+                modal.show();
+
+                try {
+                    const res = await fetch(`/v1/api/admin/reviews/report/${id}`);
+                    const data = await res.json();
+
+                    if (data.success) {
+                        const r = data.data;
+                        modalBody.innerHTML = `
+          <p><strong>Người báo cáo:</strong> ${r.account_id?.username || ''}</p>
+          <p><strong>Email:</strong> ${r.account_id?.email || ''}</p>
+          <p><strong>Lý do:</strong> ${r.reason}</p>
+          <p><strong>Trạng thái:</strong> ${r.status === 'active' ? '<span class="badge bg-success">Đã xử lý</span>' : '<span class="badge bg-warning text-dark">Đang chờ</span>'}</p>
+          <p><strong>Ngày báo cáo:</strong> ${new Date(r.createdAt).toLocaleString('vi-VN')}</p>
+          <hr>
+          <h6 class="mt-3">Đánh giá bị báo cáo:</h6>
+          ${r.review_id ? `
+            <p><strong>Người đánh giá:</strong> ${r.review_id.account_id?.username || '---'}</p>
+            <p><strong>Nội dung đánh giá:</strong></p>
+            <div class="border rounded p-3 bg-light mb-3">${r.review_id.contents_review}</div>
+          ` : '<p class="text-muted">Không tìm thấy đánh giá gốc</p>'}
+        `;
+                    } else {
+                        modalBody.innerHTML = `<p class="text-danger">${data.message}</p>`;
+                    }
+                } catch (err) {
+                    console.error(err);
+                    modalBody.innerHTML = `<p class="text-danger">Lỗi khi tải dữ liệu.</p>`;
+                }
+            });
+        });
+
     </script>
 </body>
 

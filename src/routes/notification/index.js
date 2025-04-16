@@ -34,4 +34,22 @@ router.put('/:id/read', async (req, res) => {
     }
 });
 
+router.put('/read-all', async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        const result = await notificationModel.updateMany(
+            { receiverId: userId, isRead: false }, // chỉ update nếu chưa đọc
+            { $set: { isRead: true } }
+        );
+
+        res.status(200).json({
+            message: 'Đã đánh dấu tất cả là đã đọc',
+            modifiedCount: result.modifiedCount
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Lỗi khi cập nhật tất cả thông báo', error: err });
+    }
+});
+
 module.exports = router;

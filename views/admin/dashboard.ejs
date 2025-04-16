@@ -165,12 +165,13 @@
                                             <i class="fas fa-calendar me-1"></i> Hôm nay
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
-                                            <li><a class="dropdown-item" href="#">Hôm nay</a></li>
-                                            <li><a class="dropdown-item" href="#">Tuần này</a></li>
-                                            <li><a class="dropdown-item" href="#">Tháng này</a></li>
-                                            <li><a class="dropdown-item" href="#">Năm này</a></li>
+                                            <li><a class="dropdown-item" href="#" data-filter="day">Hôm nay</a></li>
+                                            <li><a class="dropdown-item" href="#" data-filter="week">Tuần này</a></li>
+                                            <li><a class="dropdown-item" href="#" data-filter="month">Tháng này</a></li>
+                                            <li><a class="dropdown-item" href="#" data-filter="year">Năm nay</a></li>
                                         </ul>
                                     </div>
+
                                 </div>
 
                                 <!-- User Profile Dropdown -->
@@ -256,13 +257,17 @@
                         <div class="col-md-8">
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">Doanh thu theo tháng</h5>
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Ngày</button>
-                                        <button type="button"
-                                            class="btn btn-sm btn-outline-secondary active">Tháng</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Năm</button>
+                                    <h5 class="mb-0" id="basicRevenueTitle">Doanh thu theo tháng</h5>
+
+                                    <div class="btn-group" id="filter-group">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                            data-type="day">Ngày</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary active"
+                                            data-type="month">Tháng</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                            data-type="year">Năm</button>
                                     </div>
+
                                 </div>
                                 <div class="card-body">
                                     <div class="chart-container">
@@ -627,10 +632,10 @@
                     console.log("⚠ AccessToken đã hết hạn, đang làm mới...");
                     await refreshAccessToken(); // Gọi hàm làm mới token
                 }
-                await loadDashboardReport();
+                await loadDashboardReport('month');
                 await loadChartData(); // ✅ Thêm dòng này
                 await loadTopSellingProducts();
-                await loadRecentOrders();
+                // await loadRecentOrders();
 
             });
 
@@ -754,10 +759,31 @@
                 window.location.href = `/v1/api/admin/bills/${orderId}`;
             }
 
+            document.getElementById("filter-group").addEventListener("click", async function (e) {
+                if (e.target.matches("button[data-type]")) {
+                    document.querySelectorAll("#filter-group button").forEach(btn => btn.classList.remove("active"));
+                    e.target.classList.add("active");
 
-            async function loadDashboardReport() {
+                    const type = e.target.dataset.type; // 'day', 'month', 'year'
+
+                    // Cập nhật tiêu đề động
+                    const titleMap = {
+                        day: "Doanh thu theo ngày",
+                        month: "Doanh thu theo tháng",
+                        year: "Doanh thu theo năm"
+                    };
+                    document.getElementById("basicRevenueTitle").textContent = titleMap[type] || "Doanh thu";
+
+                    // Gọi lại API để update chart
+                    await loadChartData(type);
+                }
+            });
+
+
+
+            async function loadDashboardReport(filter = 'month') {
                 try {
-                    const res = await fetch("/v1/api/admin/reports/data", {
+                    const res = await fetch(`/v1/api/admin/reports/data?filter=${filter}`, {
                         headers: {
                             authorization: accessToken,
                             "x-client-id": userId,
@@ -765,12 +791,12 @@
                         }
                     });
 
-                    const { report } = await res.json(); // { report: { totalOrders, totalRevenue, ... } }
+                    const { report } = await res.json();
                     console.log("check report", report);
 
                     if (!report) throw new Error("Không có dữ liệu");
 
-                    // Gán vào các thẻ dashboard
+                    // Gán dữ liệu thống kê
                     document.querySelector(".card-stats.bg-primary h3").innerText =
                         report.totalOrders.toLocaleString("vi-VN");
 
@@ -783,17 +809,10 @@
                     document.querySelector(".card-stats.bg-warning h3").innerText =
                         report.totalProducts.toLocaleString("vi-VN");
 
-                    // Hiển thị top-selling
-                    document.getElementById("top-selling-body").innerHTML = report.topSelling.map(p => `
-            <tr>
-                <td>${p.product_name}</td>
-                <td>${p.totalSold}</td>
-                <td>${p.product_stock}</td>
-                <td>${(p.totalSold * p.product_price).toLocaleString('vi-VN')} ₫</td>
-            </tr>
-        `).join("");
+                    // Top sản phẩm
+                    updateCategoryChart(report.categoryDistribution);
 
-                    // Hiển thị đơn hàng gần đây
+                    // Đơn hàng gần đây
                     document.getElementById("recent-orders-body").innerHTML = report.recentOrders.map(bill => `
             <tr>
                 <td>#${bill._id}</td>
@@ -802,7 +821,13 @@
                 <td>${bill.total.toLocaleString()}₫</td>
                 <td><span class="badge bg-warning">${bill.status}</span></td>
                 <td><span class="badge bg-success">${bill.payment_method?.toUpperCase()}</span></td>
-                <td><div class="btn-group"><button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button></div></td>
+                <td>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewOrderDetail('${bill._id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </td>
             </tr>
         `).join("");
 
@@ -811,9 +836,10 @@
                 }
             }
 
-            async function loadChartData() {
+
+            async function loadChartData(type = 'month') {
                 try {
-                    const res = await fetch("/v1/api/admin/reports/chart-data", {
+                    const res = await fetch(`/v1/api/admin/reports/overview-chart-data?filter=${type}`, {
                         headers: {
                             authorization: accessToken,
                             "x-client-id": userId,
@@ -823,15 +849,35 @@
 
                     const { success, data } = await res.json();
                     if (!success || !data) throw new Error("Dữ liệu không hợp lệ");
+                    console.log("check chart data", data);
 
-                    console.log("📊 Dữ liệu biểu đồ:", data);
 
-                    // Gán lại dữ liệu cho biểu đồ
-                    revenueChart.data.datasets[0].data = data.revenueData.map(val => Math.floor(val / 1000000)); // chuyển về triệu VND
+                    revenueChart.data.labels = data.data.labels;
+                    revenueChart.data.datasets[0].data = data.data.revenueData.map(val => Math.floor(val / 1000000));
                     revenueChart.update();
                 } catch (error) {
                     console.error("❌ Lỗi khi tải dữ liệu biểu đồ:", error);
                 }
+            }
+
+            document.querySelectorAll('.dropdown-menu a[data-filter]').forEach(item => {
+                item.addEventListener('click', async function (e) {
+                    e.preventDefault();
+                    const filterType = this.getAttribute('data-filter'); // day / week / month / year
+                    document.querySelector('.dropdown-toggle').innerHTML = `<i class="fas fa-calendar me-1"></i> ${this.textContent}`;
+
+                    await loadDashboardReport(filterType); // Gọi API theo filter
+                });
+            });
+
+            function updateCategoryChart(categoryData = []) {
+                
+                const labels = categoryData.map(item => item.categoryName || "Không rõ");
+                const values = categoryData.map(item => item.count);
+
+                categoryChart.data.labels = labels;
+                categoryChart.data.datasets[0].data = values;
+                categoryChart.update();
             }
 
 

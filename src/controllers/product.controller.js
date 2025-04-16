@@ -440,6 +440,7 @@ const updateProduct = async (req, res) => {
             isPulished,
         } = req.body;
 
+        console.log("req.body:", JSON.stringify(req.body, null, 2));
         const product_thumbnail = req.file ? req.file.path : undefined;
 
         const product = await Product.findById(req.params.id);
@@ -465,11 +466,39 @@ const updateProduct = async (req, res) => {
                 });
             }
 
-            if (combinations || variant_prices || variant_stocks) {
+            // ✅ Kiểm tra chặt chẽ combinations và variant_prices
+            if (
+                (combinations && combinations.length > 0) ||
+                (variant_prices && variant_prices.length > 0)
+            ) {
                 return res.status(400).json({
                     success: false,
-                    message: "Không thể cập nhật biến thể sản phẩm đã từng bán",
+                    message: "Không thể cập nhật biến thể hoặc giá biến thể sản phẩm đã từng bán",
                 });
+            }
+
+            // ✅ Cho phép cập nhật variant_stocks nếu có
+            if (variant_stocks && variant_stocks.length > 0) {
+                try {
+                    const variants = await detailsVariantModel.find({ productId: product._id });
+                    if (variants.length !== variant_stocks.length) {
+                        return res.status(400).json({
+                            success: false,
+                            message: "Số lượng stock không khớp với số lượng biến thể",
+                        });
+                    }
+
+                    // Cập nhật stock cho từng biến thể
+                    for (let i = 0; i < variants.length; i++) {
+                        variants[i].stock = Number(variant_stocks[i]);
+                        await variants[i].save();
+                    }
+                } catch (err) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Lỗi khi cập nhật stock biến thể: " + err.message,
+                    });
+                }
             }
         }
 
@@ -479,7 +508,7 @@ const updateProduct = async (req, res) => {
         product.category = category || product.category;
         if (product_thumbnail) product.product_thumbnail = product_thumbnail;
 
-        // ✅ Nếu chưa từng bán thì mới cho update biến thể
+        // ✅ Nếu chưa từng bán thì cho phép cập nhật biến thể đầy đủ
         if (!isOrdered && combinations && variant_prices && variant_stocks) {
             try {
                 combinations = combinations.map((c, index) => {
@@ -510,7 +539,7 @@ const updateProduct = async (req, res) => {
                     product._id,
                     variant_attributes,
                     combinations,
-                    product.product_name // giữ nguyên name nếu bị khóa
+                    product.product_name
                 );
 
                 product.attributeIds = attributeIds;
@@ -529,7 +558,7 @@ const updateProduct = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: isOrdered
-                ? "Cập nhật giới hạn: sản phẩm đã từng bán nên không thể thay đổi tên, giá và biến thể"
+                ? "Cập nhật giới hạn: sản phẩm đã từng bán chỉ có thể cập nhật stock biến thể và các trường cho phép"
                 : "Cập nhật sản phẩm thành công",
             product,
         });

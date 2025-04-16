@@ -702,6 +702,30 @@
                 // Lấy dữ liệu từ form
                 const formData = new FormData(form);
 
+                if (isEdit) {
+                    // Xóa các trường combinations và variant_prices để tránh gửi dữ liệu không cần thiết
+                    const variantStocks = [];
+                    const variantRows = document.querySelectorAll('.variation-row');
+                    variantRows.forEach(row => {
+                        const stockField = row.querySelector('.variant-stock');
+                        const combinationInput = row.querySelector('input[name="combinations[]"]');
+                        if (stockField.value && combinationInput) {
+                            // Lưu stock và ánh xạ với combination
+                            variantStocks.push(stockField.value);
+                            // Xóa combination và price khỏi formData
+                            formData.delete('combinations[]');
+                            formData.delete('variant_prices[]');
+                        }
+                    });
+
+                    // Thêm variant_stocks vào formData
+                    variantStocks.forEach(stock => {
+                        formData.append('variant_stocks[]', stock);
+                    });
+                }
+
+
+
                 const apiUrl = form.getAttribute('action');
                 const accessToken = localStorage.getItem('accessToken');
                 const userId = localStorage.getItem('userId');
@@ -1174,28 +1198,26 @@
 
                 document.getElementById('variant-list-section').style.display = 'block';
                 const variantListContainer = document.getElementById('variant-list');
+                variantListContainer.innerHTML = ''; // Xóa các biến thể cũ
 
-                // Lưu các tổ hợp đã có để tránh trùng
                 const existingCombinations = new Set();
-                document.querySelectorAll('input[name="combinations[]"]').forEach(input => {
-                    existingCombinations.add(input.value);
-                });
+                if (isEdit && product && product.variants) {
+                    product.variants.forEach(v => {
+                        if (v.combination) {
+                            existingCombinations.add(JSON.stringify(v.combination));
+                        }
+                    });
+                }
 
-                // Tạo tổ hợp mới
                 const newVariants = generateCombinations(selectedAttributes);
                 console.log('Generated variants:', newVariants);
 
                 newVariants.forEach((variant, index) => {
                     const combinationString = JSON.stringify(variant);
-                    if (existingCombinations.has(combinationString)) return; // đã có, bỏ qua
-
-                    // Tìm biến thể cũ nếu đang ở mode edit
                     let existingVariant = null;
-                    if (product && product.variants) {
+                    if (isEdit && product && product.variants) {
                         existingVariant = product.variants.find(v =>
-                            Object.keys(variant).every(key =>
-                                v.combination && v.combination[key] === variant[key]
-                            )
+                            v.combination && JSON.stringify(v.combination) === combinationString
                         );
                     }
 
@@ -1206,26 +1228,26 @@
                     const variantName = Object.values(variant).join(' / ');
 
                     variantRow.innerHTML = `
-            <div class="row">
-                <div class="col-12 mb-3">
-                      <h6 class="mb-0 text-primary">Biến thể #${index + 1}: ${variantName}</h6>
-                </div>
-            </div>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Giá (VNĐ)</label>
-                    <input type="number" class="form-control shadow-sm variant-price"
-                        value="${existingVariant?.price || ''}" placeholder="Để trống nếu dùng giá mặc định">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Số lượng</label>
-                    <input type="number" class="form-control shadow-sm variant-stock"
-                        value="${existingVariant?.stock || ''}" placeholder="Để trống nếu dùng số lượng mặc định">
-                </div>
-            </div>
-        `;
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <h6 class="mb-0 text-primary">Biến thể #${index + 1}: ${variantName}</h6>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Giá (VNĐ)</label>
+                            <input type="number" class="form-control shadow-sm variant-price"
+                                value="${existingVariant?.price || ''}" placeholder="Để trống nếu dùng giá mặc định"
+                                ${isEdit ? 'disabled' : ''}>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số lượng</label>
+                            <input type="number" class="form-control shadow-sm variant-stock"
+                                value="${existingVariant?.stock || ''}" placeholder="Để trống nếu dùng số lượng mặc định">
+                        </div>
+                    </div>
+                `;
 
-                    // Hidden inputs
                     const combinationInput = document.createElement('input');
                     combinationInput.type = 'hidden';
                     combinationInput.name = 'combinations[]';
@@ -1238,7 +1260,6 @@
                     stockInput.type = 'hidden';
                     stockInput.name = 'variant_stocks[]';
 
-                    // Đồng bộ giá và tồn kho
                     const priceField = variantRow.querySelector('.variant-price');
                     const stockField = variantRow.querySelector('.variant-stock');
 
@@ -1252,9 +1273,11 @@
                         stockInput.value = stockField.value;
                     });
 
-                    // Gắn vào DOM
-                    variantRow.appendChild(combinationInput);
-                    variantRow.appendChild(priceInput);
+                    // Chỉ thêm combination và price trong chế độ tạo mới
+                    if (!isEdit) {
+                        variantRow.appendChild(combinationInput);
+                        variantRow.appendChild(priceInput);
+                    }
                     variantRow.appendChild(stockInput);
 
                     variantListContainer.appendChild(variantRow);

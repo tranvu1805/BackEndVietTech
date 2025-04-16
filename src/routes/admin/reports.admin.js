@@ -16,7 +16,8 @@ router.get('/', async (req, res) => {
 
 router.get('/data', async (req, res) => {
     try {
-        const report = await ReportService.getAdminReport();
+        const { filter = 'month' } = req.query; // Lấy filter từ query, mặc định là 'month'
+        const report = await ReportService.getAdminReport(filter);
         res.json({ success: true, report });
     } catch (err) {
         console.error('❌ Lỗi tải dữ liệu báo cáo:', err);
@@ -24,10 +25,23 @@ router.get('/data', async (req, res) => {
     }
 });
 
-router.get('/chart-data', async (req, res) => {
+
+router.get('/overview-chart-data', async (req, res) => {
     try {
         const { filter, startDate, endDate } = req.query;
         const data = await ReportService.getChartData(filter, startDate, endDate);
+        res.json({ success: true, data });
+    } catch (error) {
+        console.error("Error loading basic chart data:", error);
+        res.status(500).json({ success: false, message: 'Lỗi tải dữ liệu biểu đồ cơ bản' });
+    }
+});
+
+
+router.get('/chart-data', async (req, res) => {
+    try {
+        const { filter, startDate, endDate } = req.query;
+        const data = await ReportService.getBasicChartData(filter, startDate, endDate);
         res.json({ success: true, data });
     } catch (error) {
         console.error("Error loading chart data:", error);

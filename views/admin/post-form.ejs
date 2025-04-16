@@ -3,453 +3,1220 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Tạo Bài Viết Mới</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="/uploads/mini_logo.ico" type="image/x-icon">
-
+    <title>Quản Trị Hệ Thống - <%= action %> Bài Viết</title>
+    <link rel="icon" href="/uploads/mini_logo.ico" type="image/png">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
-    <!-- CKEditor -->
-    <script src="https://cdn.tiny.cloud/1/z3uhaa6g0x731hrlxvo422yx5ohw6mc6xfgfiroi5at4kesl/tinymce/6/tinymce.min.js"
-        referrerpolicy="origin"></script>
-
-
-
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #4a6bff;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --background-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-color: #212529;
-            --border-color: #dee2e6;
-            --hover-color: #eaefff;
-            --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-            --border-radius: 12px;
+            --primary-color: #4e73df;
+            --primary-dark: #3a5cca;
+            --secondary-color: #f8f9fc;
+            --accent-color: #5a5c69;
+            --success-color: #1cc88a;
+            --danger-color: #e74a3b;
+            --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.12);
+            --border-radius: 0.5rem;
             --transition-speed: 0.3s;
         }
 
         body {
-            background-color: var(--background-color);
-            font-family: 'Roboto', sans-serif;
-            color: var(--text-color);
+            background-color: #f8f9fc;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #444;
             line-height: 1.6;
         }
 
-        .form-container {
-            background: var(--card-bg);
+        .card {
+            border: none;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            padding: 30px;
-            margin-bottom: 40px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
             transition: transform var(--transition-speed), box-shadow var(--transition-speed);
         }
 
-        .form-container:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12);
+        .card:hover {
+            box-shadow: 0 0.3rem 2rem 0 rgba(58, 59, 69, 0.15);
         }
 
-        .form-header {
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-        }
-
-        .form-header h3 {
+        .card-header {
+            background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
+            color: white;
             font-weight: 600;
-            color: var(--primary-color);
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            border-bottom: none;
         }
 
-        .form-label {
-            font-weight: 500;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
+        .card-header i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+            background-color: white;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #eaecf4;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .form-section-title {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .form-section-title i {
+            color: var(--primary-color);
+            margin-right: 0.75rem;
+        }
+
+        .main-content {
+            padding: 2.5rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
         }
 
         .form-control,
         .form-select {
-            border-radius: 8px;
-            padding: 12px 15px;
-            border: 1px solid var(--border-color);
-            transition: all var(--transition-speed);
+            border-radius: 0.4rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e3e6f0;
+            font-size: 0.95rem;
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
         }
 
         .form-control:focus,
         .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(74, 107, 255, 0.15);
+            border-color: #bac8f3;
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
         }
 
         .btn {
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-weight: 500;
+            border-radius: 0.4rem;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
             transition: all var(--transition-speed);
         }
 
-        .btn-outline-secondary {
-            border-color: var(--secondary-color);
-            color: var(--secondary-color);
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.85rem;
         }
 
-        .btn-outline-secondary:hover {
-            background-color: var(--secondary-color);
-            color: white;
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, var(--primary-dark), #2d4dbd);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 115, 223, 0.25);
         }
 
         .btn-success {
-            background-color: var(--success-color);
-            border-color: var(--success-color);
-            padding: 10px 25px;
+            background: linear-gradient(to right, var(--success-color), #18a978);
+            border: none;
         }
 
         .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
+            background: linear-gradient(to right, #18a978, #138f67);
             transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 4px 12px rgba(28, 200, 138, 0.25);
         }
 
-        .input-group {
-            position: relative;
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
         }
 
-        .input-icon {
-            position: absolute;
-            top: 50%;
-            left: 15px;
-            transform: translateY(-50%);
-            color: var(--secondary-color);
-            z-index: 10;
-        }
-
-        .input-with-icon {
-            padding-left: 40px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        .badge-draft {
-            background-color: var(--secondary-color);
-        }
-
-        .badge-publish {
-            background-color: var(--success-color);
-        }
-
-        /* Custom select styling */
-        .status-select-container {
-            position: relative;
-        }
-
-        .custom-status-select {
-            width: 100%;
-            border-radius: 8px;
-            padding: 12px 15px 12px 40px;
-            appearance: none;
-            background-color: white;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-        }
-
-        .status-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .arrow-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-        }
-
-        /* Page title animation */
-        .page-title {
-            position: relative;
-            display: inline-block;
-        }
-
-        .page-title::after {
-            content: '';
-            position: absolute;
-            width: 30%;
-            height: 3px;
+        .btn-outline-primary:hover {
             background-color: var(--primary-color);
-            bottom: -5px;
-            left: 0;
-            transition: width 0.3s ease;
+            color: white;
+            transform: translateY(-2px);
         }
 
-        .page-title:hover::after {
-            width: 100%;
+        .thumbnail-preview {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border: 3px solid #e3e6f0;
+            background-color: white;
+            display: none;
+            margin: 0 auto 1.25rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all var(--transition-speed);
         }
 
-        /* Help tooltip */
-        .help-tooltip {
-            display: inline-block;
-            position: relative;
-            margin-left: 8px;
-            color: var(--secondary-color);
-            cursor: pointer;
+        .thumbnail-preview.show {
+            display: block;
+            animation: fadeInScale 0.4s ease-out;
         }
 
-        .tooltip-text {
-            visibility: hidden;
-            width: 200px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -100px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.8rem;
-        }
-
-        .help-tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .form-container {
-                padding: 20px;
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
             }
 
-            .btn {
-                padding: 8px 16px;
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Badge styling */
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+        }
+
+        .badge-required {
+            background-color: var(--danger-color);
+            border-radius: 12px;
+            margin-left: 0.5rem;
+        }
+
+        .badge.bg-light {
+            background-color: #f1f3f9 !important;
+            border: 1px solid #d1d3e2;
+            transition: all var(--transition-speed);
+        }
+
+        .badge.bg-light:hover {
+            background-color: #e9ecf7 !important;
+        }
+
+        .badge.bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        /* Custom switch styling */
+        .form-check-input {
+            cursor: pointer;
+            height: 1.15rem;
+            width: 2.25rem;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Improved header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e3e6f0;
+        }
+
+        .page-title {
+            font-weight: 700;
+            color: var(--accent-color);
+            margin: 0;
+        }
+
+        .back-button {
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 0.4rem;
+            transition: all var(--transition-speed);
+        }
+
+        .back-button:hover {
+            transform: translateX(-3px);
+        }
+
+        .input-group-text {
+            background-color: #f8f9fc;
+            border-color: #e3e6f0;
+            color: var(--accent-color);
+        }
+
+        /* Custom Modal Styling */
+        .modal-content {
+            border: none;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
+            color: white;
+            border-bottom: none;
+            padding: 1.2rem 1.5rem;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .btn-close {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+        }
+
+        /* Tags Input */
+        .tags-input-wrapper {
+            position: relative;
+            padding: 0.625rem;
+            background-color: #fff;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.4rem;
+            min-height: 3.125rem;
+        }
+
+        .tags-input-wrapper .tag {
+            display: inline-block;
+            background-color: #e3e6f0;
+            color: #444;
+            border-radius: 20px;
+            padding: 0.3125rem 0.625rem;
+            margin-right: 0.3125rem;
+            margin-bottom: 0.3125rem;
+            font-size: 0.8125rem;
+            transition: all var(--transition-speed);
+        }
+
+        .tags-input-wrapper .tag:hover {
+            background-color: #d1d3e2;
+        }
+
+        .tags-input-wrapper .tag .close {
+            margin-left: 0.3125rem;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.875rem;
+            color: #6e707e;
+        }
+
+        .tags-input {
+            border: none;
+            outline: none;
+            width: auto;
+            min-width: 3.125rem;
+            padding: 0.3125rem 0;
+        }
+
+        /* Product selector styling */
+        .product-selector {
+            border: 1px solid #e3e6f0;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .selected-products {
+            margin-top: 1rem;
+        }
+
+        .selected-product {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            background-color: #f8f9fc;
+            border-radius: 0.4rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e3e6f0;
+        }
+
+        .selected-product img {
+            width: 3.125rem;
+            height: 3.125rem;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            margin-right: 0.75rem;
+        }
+
+        .selected-product-name {
+            flex-grow: 1;
+            font-weight: 600;
+        }
+
+        .remove-product {
+            color: var(--danger-color);
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .remove-product:hover {
+            transform: scale(1.2);
+        }
+
+        /* Image gallery */
+        .gallery-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            width: 6.25rem;
+            height: 6.25rem;
+            border-radius: 0.25rem;
+            overflow: hidden;
+            border: 2px solid #e3e6f0;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .remove-image {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--danger-color);
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .gallery-item .remove-image:hover {
+            background-color: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+        }
+
+        .gallery-upload {
+            width: 6.25rem;
+            height: 6.25rem;
+            border: 2px dashed #e3e6f0;
+            border-radius: 0.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .gallery-upload:hover {
+            border-color: #bac8f3;
+            background-color: #f8f9fc;
+        }
+
+        /* WYSIWYG editor styling */
+        .editor-container {
+            border: 1px solid #e3e6f0;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .editor-toolbar {
+            padding: 0.625rem;
+            border-bottom: 1px solid #e3e6f0;
+            background-color: #f8f9fc;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .editor-toolbar button {
+            background-color: transparent;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.25rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .editor-toolbar button:hover {
+            background-color: #e9ecf7;
+        }
+
+        .editor-content {
+            min-height: 18.75rem;
+            padding: 1rem;
+            outline: none;
+        }
+
+        /* Animate items */
+        @keyframes slideInUp {
+            from {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-in {
+            animation: slideInUp 0.3s ease-out forwards;
+        }
+
+        /* Media queries for responsiveness */
+        @media (max-width: 768px) {
+            .sticky-sidebar {
+                position: static;
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="container mt-5">
-        <div class="form-container">
-            <div class="form-header d-flex justify-content-between align-items-center">
-                <!-- Đầu file -->
-                <h3 class="mb-0 page-title">
-                    <i class="fas fa-pen-nib me-2 text-primary"></i>
-                    <%= isEdit ? "Chỉnh sửa bài viết" : "Tạo bài viết mới" %>
-                </h3>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-md-10 col-lg-10 mx-auto main-content animate-in">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-newspaper me-2"></i>
+                        <%= action==='Edit' ? 'Sửa' : 'Thêm' %> Bài Viết
+                    </h1>
+                    <a href="/v1/api/admin/posts/list" class="btn btn-outline-secondary shadow-sm back-button">
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
 
-                <a href="/v1/api/admin/posts/list" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-1"></i> Quay lại
-                </a>
+                <form action="<%= action === 'Edit' ? '/v1/api/post/' + post._id : '/v1/api/post' %>"
+                    method="<%= action === 'Edit' ? 'PUT' : 'POST' %>" enctype="multipart/form-data" id="postForm">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <!-- Thông tin cơ bản -->
+                            <div class="card animate-in" style="animation-delay: 0.1s;">
+                                <div class="card-header">
+                                    <i class="fas fa-info-circle"></i> Thông tin bài viết
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-section">
+                                        <div class="mb-4">
+                                            <label for="title" class="form-label">
+                                                Tiêu đề <span class="badge bg-danger badge-required">Bắt buộc</span>
+                                            </label>
+                                            <input type="text" class="form-control shadow-sm" id="title" name="title"
+                                                value="<%= post ? post.title : '' %>"
+                                                placeholder="Nhập tiêu đề bài viết" required>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="slug" class="form-label">
+                                                Đường dẫn <span class="badge bg-danger badge-required">Bắt buộc</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">/blog/</span>
+                                                <input type="text" class="form-control shadow-sm" id="slug" name="slug"
+                                                    value="<%= post ? post.slug : '' %>" placeholder="ten-bai-viet"
+                                                    required>
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                    id="generate-slug">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <small class="form-text text-muted">Đường dẫn SEO friendly, ví dụ:
+                                                tieu-de-bai-viet</small>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="meta_description" class="form-label">
+                                                Mô tả ngắn (Meta description)
+                                            </label>
+                                            <textarea class="form-control shadow-sm" id="meta_description"
+                                                name="meta_description" rows="3"
+                                                placeholder="Nhập mô tả ngắn về bài viết (tối đa 160 ký tự cho SEO)"><%= post ? post.meta_description : '' %></textarea>
+                                            <small class="form-text text-muted">
+                                                <span id="meta-count">0</span>/160 ký tự
+                                            </small>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="category_id" class="form-label">
+                                                Danh mục
+                                            </label>
+                                            <select class="form-select shadow-sm" id="category_id" name="category_id">
+                                                <option value="" selected>Chọn danh mục</option>
+                                                <% if (categories && categories.length> 0) { %>
+                                                    <% categories.forEach(category=> { %>
+                                                        <option value="<%= category._id %>" <%=post && post.category_id
+                                                            && post.category_id.toString()===category._id.toString()
+                                                            ? 'selected' : '' %>>
+                                                            <%= category.name %>
+                                                        </option>
+                                                        <% }); %>
+                                                            <% } else { %>
+                                                                <option value="" disabled>Không có danh mục nào</option>
+                                                                <% } %>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="tags-input" class="form-label">Tags</label>
+                                            <div class="tags-input-wrapper">
+                                                <div id="tags-container">
+                                                    <% if (post && post.tags && post.tags.length> 0) { %>
+                                                        <% post.tags.forEach(tag=> { %>
+                                                            <span class="tag">
+                                                                <%= tag %>
+                                                                    <span class="close">&times;</span>
+                                                                    <input type="hidden" name="tags[]"
+                                                                        value="<%= tag %>">
+                                                            </span>
+                                                            <% }); %>
+                                                                <% } %>
+                                                </div>
+                                                <input type="text" class="tags-input" id="tags-input"
+                                                    placeholder="Thêm tag và nhấn Enter">
+                                            </div>
+                                            <small class="form-text text-muted">Nhập tag và nhấn Enter để thêm</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nội dung bài viết -->
+                                    <div class="form-section">
+                                        <div class="form-section-title">
+                                            <i class="fas fa-edit"></i> Nội dung bài viết
+                                        </div>
+                                        <div class="mb-4">
+                                            <div class="editor-container">
+                                                <div class="editor-toolbar">
+                                                    <button type="button" data-command="bold" title="In đậm">
+                                                        <i class="fas fa-bold"></i>
+                                                    </button>
+                                                    <button type="button" data-command="italic" title="In nghiêng">
+                                                        <i class="fas fa-italic"></i>
+                                                    </button>
+                                                    <button type="button" data-command="underline" title="Gạch chân">
+                                                        <i class="fas fa-underline"></i>
+                                                    </button>
+                                                    <button type="button" data-command="strikeThrough"
+                                                        title="Gạch ngang">
+                                                        <i class="fas fa-strikethrough"></i>
+                                                    </button>
+                                                    <button type="button" data-command="heading" data-value="H2"
+                                                        title="Tiêu đề">
+                                                        <i class="fas fa-heading"></i>
+                                                    </button>
+                                                    <button type="button" data-command="createLink"
+                                                        title="Chèn liên kết">
+                                                        <i class="fas fa-link"></i>
+                                                    </button>
+                                                    <button type="button" data-command="insertImage" title="Chèn ảnh">
+                                                        <i class="fas fa-image"></i>
+                                                    </button>
+                                                    <button type="button" data-command="insertOrderedList"
+                                                        title="Danh sách có thứ tự">
+                                                        <i class="fas fa-list-ol"></i>
+                                                    </button>
+                                                    <button type="button" data-command="insertUnorderedList"
+                                                        title="Danh sách không thứ tự">
+                                                        <i class="fas fa-list-ul"></i>
+                                                    </button>
+                                                    <button type="button" data-command="justifyLeft" title="Căn trái">
+                                                        <i class="fas fa-align-left"></i>
+                                                    </button>
+                                                    <button type="button" data-command="justifyCenter" title="Căn giữa">
+                                                        <i class="fas fa-align-center"></i>
+                                                    </button>
+                                                    <button type="button" data-command="justifyRight" title="Căn phải">
+                                                        <i class="fas fa-align-right"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="editor-content" id="editor-content" contenteditable="true">
+                                                    <%= post ? post.content : '' %>
+                                                </div>
+                                                <textarea name="content" id="content-hidden"
+                                                    style="display:none;"><%= post ? post.content : '' %></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sản phẩm liên quan -->
+                                    <div class="form-section">
+                                        <div
+                                            class="form-section-title d-flex justify-content-between align-items-center">
+                                            <div><i class="fas fa-boxes"></i> Sản phẩm liên quan</div>
+                                            <button type="button" class="btn btn-outline-primary btn-sm shadow-sm"
+                                                data-bs-toggle="modal" data-bs-target="#relatedProductsModal">
+                                                <i class="fas fa-plus me-1"></i> Thêm sản phẩm
+                                            </button>
+                                        </div>
+
+                                        <div id="related-products-container" class="selected-products">
+                                            <% if (post && post.related_products && post.related_products.length> 0) {
+                                                %>
+                                                <% post.related_products.forEach(product=> { %>
+                                                    <div class="selected-product">
+                                                        <img src="<%= product.product_thumbnail ? '/' + product.product_thumbnail : '/uploads/default-product.jpg' %>"
+                                                            alt="<%= product.product_name %>">
+                                                        <div class="selected-product-name">
+                                                            <%= product.product_name %>
+                                                        </div>
+                                                        <input type="hidden" name="related_products[]"
+                                                            value="<%= product._id %>">
+                                                        <i class="fas fa-times remove-product"></i>
+                                                    </div>
+                                                    <% }); %>
+                                                        <% } else { %>
+                                                            <div class="text-muted">Chưa có sản phẩm liên quan nào</div>
+                                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="sticky-sidebar">
+                                <!-- Ảnh đại diện bài viết -->
+                                <div class="card animate-in" style="animation-delay: 0.2s;">
+                                    <div class="card-header">
+                                        <i class="fas fa-image"></i> Ảnh đại diện
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <div class="thumbnail-container">
+                                                    <img id="thumbnail-preview"
+                                                        src="<%= post && post.thumbnail && post.thumbnail.url ? post.thumbnail.url : '/uploads/default-post-thumbnail.jpg' %>"
+                                                        class="img-fluid thumbnail-preview <%= post && post.thumbnail ? 'show' : '' %>"
+                                                        alt="Ảnh đại diện bài viết">
+
+                                                </div>
+
+                                                <div class="mt-3 text-center">
+                                                    <label for="thumbnail" class="btn btn-outline-primary shadow-sm">
+                                                        <i class="fas fa-upload me-2"></i> Chọn ảnh
+                                                    </label>
+                                                    <input type="file" id="thumbnail" name="thumbnail" accept="image/*"
+                                                        class="d-none">
+                                                </div>
+                                                <small class="form-text text-muted mt-2">Định dạng: JPG, PNG, GIF.
+                                                    Kích thước tối đa: 2MB</small>
+                                                <% if (post && post.thumbnail) { %>
+                                                    <button type="button" id="remove-thumbnail"
+                                                        class="btn btn-outline-danger btn-sm mt-3 shadow-sm">
+                                                        <i class="fas fa-trash me-1"></i> Xóa ảnh
+                                                    </button>
+                                                    <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Bộ sưu tập ảnh -->
+                                <div class="card animate-in" style="animation-delay: 0.3s;">
+                                    <div class="card-header">
+                                        <i class="fas fa-images"></i> Bộ sưu tập ảnh
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="gallery-container" id="gallery-container">
+                                            <% if (post && post.images && post.images.length> 0) { %>
+                                                <% post.images.forEach(image=> { %>
+                                                    <div class="gallery-item">
+                                                        <img src="/<%= image.file_path %>" alt="Gallery image">
+                                                        <input type="hidden" name="images[]" value="<%= image._id %>">
+                                                        <div class="remove-image" data-image-id="<%= image._id %>">
+                                                            <i class="fas fa-times"></i>
+                                                        </div>
+                                                    </div>
+                                                    <% }); %>
+                                                        <% } %>
+                                                            <label for="gallery-upload" class="gallery-upload">
+                                                                <i class="fas fa-plus"></i>
+                                                                <span>Thêm ảnh</span>
+                                                            </label>
+                                                            <input type="file" id="gallery-upload"
+                                                                name="gallery_uploads" multiple accept="image/*">
+
+                                        </div>
+                                        <small class="form-text text-muted mt-2">Có thể chọn nhiều ảnh cùng lúc</small>
+                                    </div>
+                                </div>
+
+                                <!-- Trạng thái và hành động -->
+                                <div class="card animate-in" style="animation-delay: 0.4s;">
+                                    <div class="card-header">
+                                        <i class="fas fa-sliders-h"></i> Trạng thái và xuất bản
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-4">
+                                            <label class="form-label d-block">Trạng thái</label>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="is_active"
+                                                    name="is_active" <%=post && post.is_active ? 'checked' : '' %>>
+                                                <label class="form-check-label" for="is_active">
+                                                    Hiển thị bài viết
+                                                </label>
+                                            </div>
+                                            <small class="form-text text-muted">Bài viết sẽ hiển thị trên website khi
+                                                kích hoạt</small>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label class="form-label d-block">Ghim lên đầu</label>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="is_featured"
+                                                    name="is_featured" <%=post && post.is_featured ? 'checked' : '' %>>
+                                                <label class="form-check-label" for="is_featured">
+                                                    Ghim bài viết
+                                                </label>
+                                            </div>
+                                            <small class="form-text text-muted">Bài viết được ghim sẽ hiển thị ở đầu
+                                                danh sách</small>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="published_at" class="form-label">Ngày xuất bản</label>
+                                            <input type="datetime-local" class="form-control shadow-sm"
+                                                id="published_at" name="published_at"
+                                                value="<%= post && post.published_at ? new Date(post.published_at).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16) %>">
+                                            <small class="form-text text-muted">Bài viết sẽ hiển thị từ thời điểm
+                                                này</small>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="author" class="form-label">Tác giả</label>
+                                            <input type="text" class="form-control shadow-sm" id="author" name="author"
+                                                value="<%= post ? post.author : currentUser.fullname %>"
+                                                placeholder="Tên tác giả">
+                                        </div>
+
+                                        <div class="d-grid gap-2 mt-4">
+                                            <button type="submit" class="btn btn-primary shadow">
+                                                <i class="fas fa-save me-2"></i>
+                                                <%= action==='Edit' ? 'Cập nhật' : 'Lưu' %> bài viết
+                                            </button>
+                                            <a href="/v1/api/admin/posts/list"
+                                                class="btn btn-outline-secondary shadow-sm">
+                                                <i class="fas fa-times me-2"></i> Hủy
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
-
-            <form id="postForm">
-                <input type="hidden" id="postId" value="<%= postModel?._id || '' %>">
-
-                <!-- Tiêu đề -->
-                <div class="mb-4">
-                    <label for="title" class="form-label">
-                        Tiêu đề bài viết
-                        <span class="help-tooltip">
-                            <i class="fas fa-question-circle"></i>
-                            <span class="tooltip-text">Tiêu đề nên ngắn gọn và hấp dẫn</span>
-                        </span>
-                    </label>
-                    <div class="input-group">
-                        <i class="fas fa-heading input-icon"></i>
-                        <input type="text" class="form-control input-with-icon" id="title" name="title" required
-                            value="<%= postModel?.title || '' %>" placeholder="Nhập tiêu đề hấp dẫn...">
-
-                    </div>
-                </div>
-
-                <!-- Nội dung -->
-                <div class="mb-4">
-                    <label for="content" class="form-label">
-                        Nội dung bài viết
-                        <span class="help-tooltip">
-                            <i class="fas fa-question-circle"></i>
-                            <span class="tooltip-text">Sử dụng trình soạn thảo để định dạng nội dung</span>
-                        </span>
-                    </label>
-                    <textarea id="content" name="content" class="form-control" rows="10" required>
-                        <%= postModel?.content || '' %>
-                      </textarea>
-                </div>
-
-                <!-- Trạng thái -->
-                <div class="mb-4">
-                    <label for="status" class="form-label">Trạng thái</label>
-                    <div class="status-select-container">
-                        <i class="fas fa-toggle-on status-icon text-secondary"></i>
-                        <select class="custom-status-select" id="status" name="status">
-                            <option value="draft" <%=postModel?.status==='draft' ? 'selected' : '' %>>Bản nháp</option>
-                            <option value="publish" <%=postModel?.status==='publish' ? 'selected' : '' %>>Đăng ngay</option>
-
-                        </select>
-                        <i class="fas fa-chevron-down arrow-icon text-secondary"></i>
-                    </div>
-                </div>
-                <input type="hidden" id="statusInput" name="status" value="draft">
-
-                <!-- Submit -->
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                    <button type="button" class="btn btn-outline-secondary me-2" id="btnSaveDraft">
-                        <i class="fas fa-save me-1"></i> Lưu nháp
-                    </button>
-                    <button type="button" class="btn btn-success" id="btnPublish">
-                        <i class="fas fa-paper-plane me-1"></i> Tạo bài viết
-                    </button>
-                </div>
-
-            </form>
         </div>
     </div>
 
-    <!-- CKEditor init -->
+
+    <div class="modal fade" id="relatedProductsModal" tabindex="-1" aria-labelledby="relatedProductsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="relatedProductsModalLabel">Chọn sản phẩm liên quan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" id="product-search"
+                                placeholder="Tìm kiếm sản phẩm...">
+                        </div>
+                    </div>
+                    <div class="product-list" id="product-list">
+                        <!-- Danh sách sản phẩm được nạp bằng AJAX -->
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Đang tải...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="add-selected-products">Thêm sản phẩm đã
+                        chọn</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & jQuery JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        tinymce.init({
-            selector: '#content',
-            height: 500,
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview', 'anchor',
-                'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'emoticons'
-            ],
-            toolbar: 'undo redo | blocks | bold italic underline forecolor backcolor | ' +
-                'alignleft aligncenter alignright alignjustify | ' +
-                'bullist numlist outdent indent | image media link | ' +
-                'emoticons | removeformat | fullscreen preview code | help',
+        let galleryFiles = [];
+        $(document).ready(() => {
+            // ==============================
+            // Slug Generator
+            // ==============================
+            const generateSlug = (title) => {
+                return title.toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
+                    .replace(/[^\w\s-]/g, '') // Remove special chars
+                    .replace(/\s+/g, '-')     // Replace spaces with hyphens
+                    .replace(/-+/g, '-')      // Collapse multiple hyphens
+                    .trim();
+            };
 
-            menubar: 'file edit view insert format tools table help',
-            image_caption: true,
-            automatic_uploads: true,
-            file_picker_types: 'image media',
-            file_picker_callback: function (callback, value, meta) {
-                if (meta.filetype === 'image') {
-                    const input = document.createElement('input');
-                    input.setAttribute('type', 'file');
-                    input.setAttribute('accept', 'image/*');
+            $('#generate-slug').on('click', () => {
+                const title = $('#title').val();
+                if (!title) return;
+                $('#slug').val(generateSlug(title));
+            });
 
-                    input.onchange = function () {
-                        const file = this.files[0];
-                        const reader = new FileReader();
-
-                        reader.onload = function () {
-                            const id = 'blobid' + (new Date()).getTime();
-                            const blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                            const base64 = reader.result.split(',')[1];
-                            const blobInfo = blobCache.create(id, file, base64);
-                            blobCache.add(blobInfo);
-
-                            callback(blobInfo.blobUri(), { title: file.name });
-                        };
-                        reader.readAsDataURL(file);
-                    };
-
-                    input.click();
+            $('#title').on('input', () => {
+                if ($('#slug').val() === '') {
+                    $('#generate-slug').click();
                 }
-            },
-            content_style: 'body { font-family: Roboto, sans-serif; font-size: 16px; line-height: 1.6; }'
-        });
+            });
 
-        const btnDraft = document.getElementById('btnSaveDraft');
-        const btnPublish = document.getElementById('btnPublish');
-        const statusInput = document.getElementById('statusInput');
-        const form = document.getElementById('postForm');
+            // ==============================
+            // Meta Description Counter
+            // ==============================
+            const updateMetaCounter = () => {
+                const count = $('#meta_description').val().length;
+                $('#meta-count').text(count).toggleClass('text-danger', count > 160);
+            };
+            $('#meta_description').on('input', updateMetaCounter).trigger('input');
 
-        btnDraft.addEventListener("click", async () => {
-            await sendPost("draft");
-        });
+            // ==============================
+            // Tag Input Logic
+            // ==============================
+            const addTag = (tag) => {
+                const tagHtml = `
+            <span class="tag">
+                ${tag}
+                <span class="close">&times;</span>
+                <input type="hidden" name="tags[]" value="${tag}">
+            </span>`;
+                $('#tags-container').append(tagHtml);
+            };
 
-        btnPublish.addEventListener("click", async () => {
-            await sendPost("publish");
-        });
+            $('#tags-input').on('keydown', function (e) {
+                if (['Enter', ','].includes(e.key)) {
+                    e.preventDefault();
+                    const tag = $(this).val().trim();
+                    if (tag) {
+                        addTag(tag);
+                        $(this).val('');
+                    }
+                }
+            });
 
-        async function sendPost(status) {
-            const title = document.getElementById("title").value.trim();
-            const content = tinymce.get("content").getContent();
-            const postId = document.getElementById("postId")?.value;
-            const token = localStorage.getItem("accessToken");
-            const clientId = localStorage.getItem("userId");
+            $(document).on('click', '.tag .close', function () {
+                $(this).parent('.tag').remove();
+            });
 
-            if (!title || !content) {
-                alert("Vui lòng nhập đầy đủ tiêu đề và nội dung.");
-                return;
-            }
+            // ==============================
+            // WYSIWYG Toolbar Commands
+            // ==============================
+            const executeEditorCommand = (command, value = null) => {
+                if (command === 'createLink' || command === 'insertImage') {
+                    const url = prompt(`Nhập URL ${command === 'createLink' ? 'liên kết' : 'ảnh'}:`);
+                    if (url) document.execCommand(command, false, url);
+                } else if (command === 'heading') {
+                    document.execCommand('formatBlock', false, `<${value}>`);
+                } else {
+                    document.execCommand(command, false, value);
+                }
+                updateContentField();
+            };
 
-            const payload = { title, content, status, account_id: clientId };
-            const endpoint = postId ? `/v1/api/post/${postId}` : `/v1/api/post`;
-            const method = postId ? "PUT" : "POST";
+            $('.editor-toolbar button').on('click', function () {
+                const command = $(this).data('command');
+                const value = $(this).data('value') || null;
+                executeEditorCommand(command, value);
+            });
 
-            try {
-                btnPublish.disabled = true;
-                btnPublish.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang gửi...';
+            const updateContentField = () => {
+                $('#content-hidden').val($('#editor-content').html());
+            };
 
-                const response = await fetch(endpoint, {
-                    method,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": token,
-                        "x-client-id": clientId,
-                        "x-api-key": "your-api-key"
-                    },
-                    body: JSON.stringify(payload)
+            $('#editor-content').on('keyup blur', updateContentField);
+            $('#postForm').on('submit', updateContentField);
+
+            // ==============================
+            // Thumbnail Preview + Remove
+            // ==============================
+            $('#thumbnail').on('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        $('#thumbnail-preview')
+                            .attr('src', e.target.result)
+                            .addClass('show');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            $('#remove-thumbnail').on('click', () => {
+                $('#thumbnail-preview').removeClass('show').attr('src', '');
+                $('#thumbnail').val('');
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'remove_thumbnail',
+                    value: '1'
+                }).appendTo('#postForm');
+            });
+
+            // ==============================
+            // Gallery Upload Preview
+            // ==============================
+
+
+            $('#gallery-upload').on('change', function () {
+                const files = Array.from(this.files);
+                // Thêm các tệp mới vào mảng galleryFiles
+                galleryFiles = [...galleryFiles, ...files];
+
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const item = `
+                <div class="gallery-item temp-item">
+                    <img src="${e.target.result}" alt="Gallery image">
+                    <div class="remove-image">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>`;
+                        $(item).insertBefore('.gallery-upload');
+                    };
+                    reader.readAsDataURL(file);
                 });
 
-                const data = await response.json();
+                // Xóa giá trị input để cho phép chọn lại tệp, nhưng tệp đã được lưu vào galleryFiles
+                this.value = '';
+            });
+
+            $(document).on('click', '.gallery-item.temp-item .remove-image', function () {
+                const index = $(this).closest('.gallery-item').index();
+                galleryFiles.splice(index, 1); // Xóa tệp tương ứng khỏi mảng
+                $(this).closest('.gallery-item').remove();
+            });
+
+            // Remove gallery image
+            $(document).on('click', '.gallery-item .remove-image', function () {
+                const imageId = $(this).data('image-id');
+                if (imageId) {
+                    // Add hidden field to indicate image removal
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'remove_images[]',
+                        value: imageId
+                    }).appendTo('#postForm');
+                }
+                $(this).closest('.gallery-item').remove();
+            });
+
+            // Load products for related products modal
+            $('#relatedProductsModal').on('show.bs.modal', function () {
+                loadProducts();
+            });
+
+            function loadProducts() {
+                $.ajax({
+                    url: '/v1/api/shop/products/',
+                    type: 'GET',
+                    success: function (data) {
+                        console.log("succes dta", data);
+
+                        renderProducts(data.products);
+                    },
+                    error: function () {
+                        $('#product-list').html('<div class="alert alert-danger">Không thể tải danh sách sản phẩm</div>');
+                    }
+                });
+            }
+
+            function renderProducts(products) {
+                let html = '';
+                if (products.length > 0) {
+                    html += '<div class="list-group">';
+                    console.log("check pro", products);
+
+                    products.forEach(product => {
+                        html += `
+                            <div class="list-group-item list-group-item-action d-flex align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input product-checkbox" type="checkbox" value="${product._id}" 
+                                        data-name="${product.product_name}" data-thumbnail="${product.product_thumbnail || '/uploads/default-product.jpg'}">
+                                </div>
+                                <img src="${product.product_thumbnail ? '/' + product.product_thumbnail : '/uploads/default-product.jpg'}" 
+                                    class="ms-2 me-3" style="width: 50px; height: 50px; object-fit: cover;" alt="${product.product_name}">
+                                <div>
+                                    <h6 class="mb-1">${product.product_name}</h6>
+                                    <small class="text-muted">SKU: ${product.product_slug || 'N/A'}</small>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                } else {
+                    html = '<div class="alert alert-info">Không có sản phẩm nào</div>';
+                }
+                $('#product-list').html(html);
+            }
+
+            // Product search filter
+            $('#product-search').on('input', function () {
+                const query = $(this).val().toLowerCase();
+                $('.list-group-item').each(function () {
+                    const productName = $(this).find('h6').text().toLowerCase();
+                    const productSku = $(this).find('small').text().toLowerCase();
+                    if (productName.includes(query) || productSku.includes(query)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+            // Add selected products
+            $('#add-selected-products').click(function () {
+                const selectedProducts = $('.product-checkbox:checked');
+                if (selectedProducts.length > 0) {
+                    selectedProducts.each(function () {
+                        const productId = $(this).val();
+                        const productName = $(this).data('name');
+                        const productThumbnail = $(this).data('thumbnail');
+
+                        // Check if product already added
+                        if ($('#related-products-container').find(`input[value="${productId}"]`).length === 0) {
+                            const productHtml = `
+                                <div class="selected-product">
+                                    <img src="${productThumbnail}" alt="${productName}">
+                                    <div class="selected-product-name">${productName}</div>
+                                    <input type="hidden" name="related_products[]" value="${productId}">
+                                    <i class="fas fa-times remove-product"></i>
+                                </div>
+                            `;
+
+                            // Remove "no products" message if present
+                            if ($('#related-products-container').find('.text-muted').length > 0) {
+                                $('#related-products-container').empty();
+                            }
+
+                            $('#related-products-container').append(productHtml);
+                        }
+                    });
+                    $('#relatedProductsModal').modal('hide');
+                }
+            });
+
+            // Remove related product
+            $(document).on('click', '.remove-product', function () {
+                $(this).closest('.selected-product').remove();
+
+                // Show "no products" message if all products removed
+                if ($('#related-products-container').find('.selected-product').length === 0) {
+                    $('#related-products-container').html('<div class="text-muted">Chưa có sản phẩm liên quan nào</div>');
+                }
+            });
+        });
+
+        document.getElementById("postForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+
+            // Thêm các tệp từ galleryFiles vào FormData
+            galleryFiles.forEach(file => {
+                formData.append('gallery_uploads', file);
+            });
+
+            // Thêm nội dung editor
+            const content = document.getElementById("editor-content").innerHTML;
+            formData.set("content", content);
+            formData.set("account_id", localStorage.getItem("userId"));
+
+            const postId = "<%= post ? post._id : '' %>";
+            const isEdit = <%= action === 'Edit' ? 'true' : 'false' %>;
+
+            const endpoint = isEdit ? `/v1/api/post/${postId}` : `/v1/api/post`;
+            const method = isEdit ? "PUT" : "POST";
+
+            for (let pair of formData.entries()) {
+                console.log(pair[0], pair[1]);
+            }
+
+
+            const headers = {
+                "Authorization": localStorage.getItem("accessToken"),
+                "x-client-id": localStorage.getItem("userId"),
+                "x-api-key": "c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683"
+            };
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: method,
+                    headers: headers,
+                    body: formData
+                });
+
+                const result = await response.json();
                 if (response.ok) {
-                    alert(postId ? "Cập nhật thành công!" : "Tạo bài viết thành công!");
+                    alert("Thao tác thành công!");
                     window.location.href = "/v1/api/admin/posts/list";
                 } else {
-                    alert("Lỗi: " + data.message);
+                    alert("Lỗi: " + result.message);
                 }
             } catch (err) {
-                console.error(err);
-                alert("Có lỗi xảy ra.");
-            } finally {
-                btnPublish.disabled = false;
-                btnPublish.innerHTML = '<i class="fas fa-paper-plane me-1"></i> Gửi bài viết';
-            }
-        }
-
-
-
-
-        // Thay đổi icon trạng thái
-        document.getElementById('status').addEventListener('change', function () {
-            const statusIcon = document.querySelector('.status-icon');
-            if (this.value === 'publish') {
-                statusIcon.classList.remove('fa-toggle-on', 'text-secondary');
-                statusIcon.classList.add('fa-toggle-on', 'text-success');
-            } else {
-                statusIcon.classList.remove('fa-toggle-on', 'text-success');
-                statusIcon.classList.add('fa-toggle-on', 'text-secondary');
+                console.error("Lỗi gửi bài viết:", err);
+                alert("Đã xảy ra lỗi khi gửi dữ liệu.");
             }
         });
+
     </script>
 </body>
 
