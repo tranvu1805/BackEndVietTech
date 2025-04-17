@@ -58,29 +58,29 @@ class AccessService {
     }
   }
 
-
   static async loginAdmin({ email, password }) {
     try {
       console.log(`📌 [ADMIN LOGIN] Đăng nhập admin với email: ${email}`);
 
       const account = await accountModel
         .findOne({ email })
-        .populate("role_id", "name");
+        .populate("role_id", "name")
+        .populate("profile_image", "url");
 
       if (!account) {
         return { code: 400, message: "Email hoặc mật khẩu không đúng!", status: "error" };
       }
-
-      console.log("check role", account.role_id.name);
-
 
       const isPasswordValid = await bcrypt.compare(password, account.password);
       if (!isPasswordValid) {
         return { code: 400, message: "Email hoặc mật khẩu không đúng!", status: "error" };
       }
 
-      // // ✅ Kiểm tra role
-      if (!account.role_id || account.role_id.name.toLowerCase() !== "admin") {
+      // ✅ Cho phép Admin và Staff
+      const allowedRoles = ["admin", "staff"];
+      const userRole = account.role_id?.name?.toLowerCase();
+
+      if (!userRole || !allowedRoles.includes(userRole)) {
         return {
           code: 403,
           message: "Tài khoản không có quyền truy cập hệ thống quản trị!",
@@ -88,12 +88,11 @@ class AccessService {
         };
       }
 
-      // ✅ Tạo token như bình thường
       const privateKey = crypto.randomBytes(64).toString("hex");
       const publicKey = crypto.randomBytes(64).toString("hex");
 
       const tokens = await createToKenPair(
-        { userId: account._id, email, role: account.role_id.name, },
+        { userId: account._id, email, role: account.role_id.name },
         publicKey,
         privateKey,
       );
@@ -105,6 +104,9 @@ class AccessService {
         refreshTokens: [tokens.refreshToken],
       });
 
+      console.log("avatar", account.profile_image);
+      
+
       return {
         code: 200,
         message: "Đăng nhập admin thành công!",
@@ -115,7 +117,8 @@ class AccessService {
               fields: ["_id", "username", "full_name", "email", "phone"],
               object: account,
             }),
-            role: account.role_id.name, // 👈 Thêm dòng này
+            role: account.role_id.name, // 👈 Cần để render UI phân quyền
+            avatar: account.profile_image?.url || null,
           },
           tokens,
         },
@@ -125,6 +128,7 @@ class AccessService {
       return { code: 500, message: "Lỗi máy chủ nội bộ", status: "error" };
     }
   }
+
 
 
   static async logout({ refreshToken }) {

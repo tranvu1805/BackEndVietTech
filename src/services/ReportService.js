@@ -41,6 +41,9 @@ class ReportService {
 
         console.log(`Filter: ${filter}, Start Date: ${startDate}, End Date: ${endDate}`);
 
+        console.log("Start Date:", startDate);
+        console.log("End Date:", endDate);
+
 
         const matchDate = {
             createdAt: { $gte: startDate, $lte: endDate }
@@ -94,6 +97,9 @@ class ReportService {
             .lean();
 
 
+        const debugProducts = await productModel.find({ createdAt: { $gte: startDate, $lte: endDate } });
+        console.log("Filtered products:", debugProducts.length);
+
         const categoryDistribution = await productModel.aggregate([
             { $match: matchDate },
             {
@@ -121,6 +127,9 @@ class ReportService {
                 }
             }
         ]);
+
+        console.log("categoryDistribution", matchDate, categoryDistribution);
+
 
         return {
             totalOrders,
@@ -500,7 +509,10 @@ class ReportService {
 
         ]);
 
-        const { revenueData, orderData, userData } = await this.getChartData(filter, startDate, endDate);
+        const { revenueData, orderData, userData } = await this.getBasicChartData(filter, startDate, endDate);
+
+        console.log("revenue", revenueData);
+
 
         return {
             revenueByDay,

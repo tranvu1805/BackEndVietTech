@@ -89,8 +89,8 @@
 
         .nav-tabs .nav-link.active {
             color: #fff;
-            background-color: #0d6efd;
-            border-color: #0d6efd;
+            background-color: #2ecc71;
+            border-color: #2ecc71;
             font-weight: bold;
         }
 
@@ -226,7 +226,7 @@
                                             <option value="1" <%=query.rating==='1' ? 'selected' : '' %>>1 sao</option>
                                         </select>
                                     </div>
-                                    <button class="btn btn-outline-primary">
+                                    <button class="btn btn-outline-success">
                                         <i class="fas fa-download me-1"></i> Xuất dữ liệu
                                     </button>
                                 </div>
@@ -234,7 +234,7 @@
                                 <!-- Bảng đánh giá -->
                                 <div class="card shadow-sm">
                                     <div
-                                        class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+                                        class="card-header bg-success text-white d-flex align-items-center justify-content-between">
                                         <span><i class="fas fa-star me-2"></i> Danh sách đánh giá sản phẩm</span>
                                         <div>
                                             <button class="btn btn-sm btn-light me-2"><i
@@ -301,7 +301,7 @@
                                                             </td>
                                                             <td>
                                                                 <button
-                                                                    class="btn btn-sm btn-outline-primary action-btn btn-view-review"
+                                                                    class="btn btn-sm btn-outline-success action-btn btn-view-review"
                                                                     title="Xem chi tiết" data-id="<%= r._id %>">
                                                                     <i class="fas fa-eye"></i>
                                                                 </button>
@@ -430,7 +430,7 @@
                                                             <td>
                                                                 <%= rep.account_id?.username %>
                                                             </td>
-                                                            <td><a href="#" class="text-primary"
+                                                            <td><a href="#" class="text-success"
                                                                     data-bs-toggle="tooltip"
                                                                     title="Nhấn để xem đánh giá">Xem đánh giá</a></td>
                                                             <td>
@@ -517,6 +517,7 @@
                             </div>
                         </div>
                     </div>
+                    <%- include('partials/footer') %>
                 </div>
         </div>
 

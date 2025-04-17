@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Thông báo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .notification-item {
+      border-left: 4px solid #f0f0f0;
+      transition: all 0.2s ease;
+    }
+
+    .notification-item:hover {
+      background-color: #f1f1f1;
+      cursor: pointer;
+    }
+
+    .notification-item.unread {
+      border-left-color: #ffc107;
+      background-color: rgba(255, 243, 205, 0.2);
+    }
+
+    .notification-time {
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+
+    .notification-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .notification-message {
+      margin-bottom: 0.25rem;
+    }
+
+    .notification-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+    }
+
+    .icon-order {
+      background-color: #dbeeff;
+      color: #007bff;
+    }
+
+    .icon-alert {
+      background-color: #fff3cd;
+      color: #ffc107;
+    }
+
+    .icon-system {
+      background-color: #e9ecef;
+      color: #6c757d;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px;
+      color: #6c757d;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #dee2e6;
+    }
+  </style>
+</head>
+
+<body class="container mt-4">
+  <a href="/v1/api/admin/dashboard" class="btn btn-outline-secondary shadow-sm back-button mb-4">
+    <i class="fas fa-arrow-left"></i> Quay lại trang chủ
+  </a>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">Thông báo</h3>
+    <button class="btn btn-sm btn-outline-primary" id="markAllReadBtn">
+      <i class="fas fa-check-double me-1"></i> Đánh dấu tất cả đã đọc
+    </button>
+  </div>
+
+  <% if (notifications.length===0) { %>
+    <div class="empty-state">
+      <i class="fas fa-bell-slash"></i>
+      <p>Không có thông báo nào.</p>
+    </div>
+    <% } else { %>
+      <div class="list-group">
+        <% notifications.forEach(noti=> { %>
+          <div class="list-group-item notification-item <%= noti.isRead ? '' : 'unread' %> p-3"
+            data-id="<%= noti._id %>" data-url="<%= noti.url || '' %>">
+            <div class="d-flex">
+              <div class="me-3">
+                <div class="notification-icon icon-<%= noti.type || 'system' %>">
+                  <% if (noti.type==='order' ) { %>
+                    <i class="fas fa-shopping-cart"></i>
+                    <% } else if (noti.type==='alert' ) { %>
+                      <i class="fas fa-exclamation-triangle"></i>
+                      <% } else { %>
+                        <i class="fas fa-bell"></i>
+                        <% } %>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <div class="notification-title">
+                  <%= noti.title %>
+                </div>
+                <div class="notification-message text-secondary">
+                  <%= noti.message %>
+                </div>
+                <div class="notification-time">
+                  <%= new Date(noti.createdAt).toLocaleString('vi-VN', { day: '2-digit' , month: '2-digit' ,
+                    year: 'numeric' , hour: '2-digit' , minute: '2-digit' }) %>
+                </div>
+              </div>
+              <% if (!noti.isRead) { %>
+                <div class="ms-2 d-flex align-items-start">
+                  <span class="badge rounded-pill bg-warning">Mới</span>
+                </div>
+                <% } %>
+            </div>
+          </div>
+          <% }) %>
+      </div>
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          <% for (let i=1; i <=totalPages; i++) { %>
+            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %>">
+                <%= i %>
+              </a>
+            </li>
+            <% } %>
+        </ul>
+      </nav>
+
+      <% } %>
+
+
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            // Đánh dấu từng thông báo là đã đọc
+            document.querySelectorAll('.notification-item').forEach(item => {
+              item.addEventListener('click', function () {
+                const id = this.dataset.id;
+                const url = this.dataset.url;
+
+                // Gửi PUT request để đánh dấu là đã đọc
+                if (this.classList.contains('unread')) {
+                  fetch(`/v1/api/notification/${id}/read`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' }
+                  }).then(res => {
+                    if (res.ok) this.classList.remove('unread');
+                  });
+                }
+
+                // Điều hướng nếu có URL
+                if (url) window.location.href = url;
+              });
+            });
+
+            // Đánh dấu tất cả là đã đọc
+            const markAllBtn = document.getElementById('markAllReadBtn');
+            if (markAllBtn) {
+              markAllBtn.addEventListener('click', async () => {
+                const res = await fetch('/v1/api/notification/read-all', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' }
+                });
+                if (res.ok) {
+                  document.querySelectorAll('.notification-item.unread').forEach(el => el.classList.remove('unread'));
+                }
+              });
+            }
+          });
+        </script>
+
+</body>
+
+</html>

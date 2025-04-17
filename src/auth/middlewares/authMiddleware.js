@@ -36,7 +36,7 @@ const authentication = async (req, res, next) => {
             return res.redirect("/");
         }
 
-      
+
 
 
 
@@ -85,9 +85,25 @@ const isAdmin = (req, res, next) => {
 };
 
 
+const authorizeRoles = (...allowedRoles) => {
+    return (req, res, next) => {
+        const user = req.user;
+        console.log("user 3", user);
+        
+        if (!user || !allowedRoles.includes(user.role.toLowerCase())) {
+            return res.status(403).json({
+                message: "Bạn không có quyền truy cập chức năng này!",
+                status: "error"
+            });
+        }
+
+        next();
+    };
+};
 
 module.exports = {
     authentication,
     authSession,
+    authorizeRoles,
     isAdmin
 };

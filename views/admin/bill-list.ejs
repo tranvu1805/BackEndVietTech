@@ -11,6 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -54,9 +55,7 @@
             text-align: center;
         }
 
-        .main-content {
-            padding: 20px;
-        }
+ 
 
         .page-header {
             border-bottom: 1px solid #dee2e6;
@@ -303,13 +302,7 @@
             position: relative;
         }
 
-        .main-content {
-            margin-left: 16.666667%;
-            /* Tránh bị đè bởi sidebar cố định */
-            padding: 20px;
-            overflow-y: auto;
-            height: 100vh;
-        }
+
     </style>
 </head>
 
@@ -332,14 +325,14 @@
 
                             <div class="ms-auto d-flex align-items-center">
                                 <div class="dropdown">
-                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                                        data-bs-toggle="dropdown">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-                                                style="width: 40px; height: 40px;font-weight: bold;">V</div>
-                                            <span>Admin</span>
-                                        </div>
-                                    </a>
+                                    <button class="user-dropdown border-0 d-flex align-items-center" type="button"
+                                        id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img id="user-avatar" src="https://via.placeholder.com/40?text=U" alt="Avatar"
+                                            class="rounded-circle me-2" width="36" height="36"
+                                            style="object-fit: cover;">
+                                        <span class="d-none d-md-inline" id="user-fullname">Admin</span>
+                                        <i class="fas fa-chevron-down ms-2 small"></i>
+                                    </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a>
                                         </li>
@@ -890,6 +883,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <%- include('partials/footer') %>
 
                 </div>
 
@@ -897,6 +891,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
     <script>
         const accessToken = localStorage.getItem('accessToken');
         const userId = localStorage.getItem('userId');

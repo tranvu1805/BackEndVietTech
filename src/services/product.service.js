@@ -6,6 +6,7 @@ const slugify = require("slugify");
 
 const detailsVariantModel = require("../models/detailsVariant.model");
 const attributeModel = require("../models/attribute.model");
+const logModel = require("../models/log.model");
 
 const generateSKU = (productName, combination) => {
     const productSlug = slugify(productName, { lower: true, strict: true });
@@ -42,11 +43,27 @@ class ProductService {
             });
         }
 
+
         // Tạo sản phẩm mới với các thuộc tính hợp lệ và biến thể
-        return await Product.create({
+        const newProduct = await Product.create({
             ...data,
             product_attributes: validAttributes,
         });
+
+        // Log sau khi tạo thành công
+        await Log.create({
+            action: 'create',
+            target_type: 'Product',
+            target_id: newProduct._id,
+            after: newProduct,
+            changed_by: req.user?._id,
+            note: `Tạo mới sản phẩm: ${newProduct.product_name}`
+        });
+
+        return newProduct;
+
+
+
     };
 
     static async getAllProducts() {
@@ -57,7 +74,7 @@ class ProductService {
         return await Product.find({ category: categoryId });
     };
 
-    static async getTopSellingProducts(limit = 5) {
+    static async getTopSellingProducts(limit = 6) {
         const result = await billModel.billRepo.aggregate([
             { $unwind: "$products" },
             {
@@ -104,7 +121,74 @@ class ProductService {
         return result;
     }
 
-    static async createVariantsAndCombinations(productId, variant_attributes, combinations, productName) {
+    static async getListTopSellingProducts({ month, page = 1, limit = 10, search }) {
+        const match = {};
+
+        if (month) {
+            const year = new Date().getFullYear();
+            const start = new Date(year, month - 1, 1);
+            const end = new Date(year, month, 0, 23, 59, 59);
+            match.createdAt = { $gte: start, $lte: end };
+        }
+
+        const pipeline = [
+            { $unwind: "$products" },
+            { $match: match },
+            {
+                $addFields: {
+                    "products.productId": {
+                        $cond: [
+                            { $not: [{ $eq: [{ $type: "$products.productId" }, "objectId"] }] },
+                            { $toObjectId: "$products.productId" },
+                            "$products.productId"
+                        ]
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: "Products",
+                    localField: "products.productId",
+                    foreignField: "_id",
+                    as: "product"
+                }
+            },
+            { $unwind: "$product" },
+            {
+                $match: search
+                    ? { "product.product_name": { $regex: search, $options: "i" } }
+                    : {}
+            },
+            {
+                $group: {
+                    _id: "$products.productId",
+                    totalSold: { $sum: "$products.quantity" },
+                    product_name: { $first: "$product.product_name" },
+                    product_stock: { $first: "$product.product_stock" },
+                    product_price: { $first: "$product.product_price" }
+                }
+            },
+            { $sort: { totalSold: -1 } },
+            {
+                $facet: {
+                    data: [
+                        { $skip: (page - 1) * limit },
+                        { $limit: limit }
+                    ],
+                    totalCount: [{ $count: "count" }]
+                }
+            }
+        ];
+
+        const result = await billModel.billRepo.aggregate(pipeline);
+
+        const products = result[0].data;
+        const totalCount = result[0].totalCount[0]?.count || 0;
+        const totalPages = Math.ceil(totalCount / limit);
+
+        return { products, totalCount, totalPages };
+    }
+    static async createVariantsAndCombinations(productId, variant_attributes, combinations, productName, userId) {
         const variantMap = {};
         const attributeIds = [];
 
@@ -133,6 +217,13 @@ class ProductService {
             const sku = generateSKU(productName, combo.combination);
             const existing = await detailsVariantModel.findOne({ sku });
             if (existing) {
+                await logModel.create({
+                    action: 'warning',
+                    target_type: 'DetailsVariant',
+                    target_id: existing._id,
+                    changed_by: userId,
+                    note: `Cố gắng thêm SKU trùng: ${sku}`
+                });
                 throw new Error(`Tổ hợp biến thể đã tồn tại (SKU: ${sku})`);
             }
         }
@@ -150,7 +241,7 @@ class ProductService {
 
             const sku = generateSKU(productName, combo.combination);
 
-            await detailsVariantModel.create({
+            const newVariant = await detailsVariantModel.create({
                 productId,
                 variantDetails,
                 price: combo.price,
@@ -158,6 +249,18 @@ class ProductService {
                 stock: combo.stock,
                 sku
             });
+
+            await logModel.create({
+                action: 'create',
+                target_type: 'DetailsVariant',
+                target_id: newVariant._id,
+                after: newVariant,
+                changed_by: userId,
+                note: `Tạo biến thể SKU: ${sku} cho sản phẩm: ${productName}`
+            });
+
+
+
         }
 
         return {

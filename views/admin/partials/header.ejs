@@ -24,13 +24,13 @@
         <i class="fas fa-shopping-cart"></i> Đơn hàng
       </a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item nav-item admin-only">
       <a class="nav-link" href="/v1/api/admin/discounts/list" id="discounts">
         <i class="fas fa-percent"></i> Mã giảm giá
       </a>
     </li>
 
-    <li class="nav-item">
+    <li class="nav-item nav-item admin-only">
       <a class="nav-link" href="/v1/api/admin/user/list" id="customers">
         <i class="fas fa-users"></i> Khách hàng
       </a>
@@ -48,7 +48,7 @@
     </li>
 
 
-    <li class="nav-item">
+    <li class="nav-item nav-item admin-only">
       <a class="nav-link" href="/v1/api/admin/reports/" id="reports-tab">
         <i class="fas fa-chart-bar"></i> Báo cáo
       </a>
@@ -73,5 +73,23 @@
         link.classList.remove('active');
       }
     });
+
+    const role = localStorage.getItem('role');
+    console.log('Role:', role); // Kiểm tra giá trị role trong console
+
+    if (role !== 'Admin') {
+      const adminOnlyIds = ['discounts', 'customers', 'reports-tab'];
+
+      adminOnlyIds.forEach(id => {
+        const linkEl = document.getElementById(id);
+        if (linkEl) {
+          linkEl.closest('li')?.remove(); // Xóa <li> chứa <a>
+        }
+      });
+    } else {
+      document.querySelectorAll('.admin-only').forEach(el => {
+        el.style.display = 'block';
+      });
+    }
   });
 </script>

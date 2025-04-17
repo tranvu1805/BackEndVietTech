@@ -11,6 +11,7 @@ const productModel = require("../models/product.model");
 const detailsVariantModel = require("../models/detailsVariant.model");
 const attributeModel = require("../models/attribute.model");
 const { billRepo } = require("../models/bill.model");
+const logModel = require("../models/log.model");
 
 
 
@@ -103,6 +104,16 @@ const createProduct = async (req, res) => {
             product_thumbnail
         });
 
+        await logModel.create({
+            action: 'create',
+            target_type: 'Product',
+            target_id: product._id,
+            after: product,
+            changed_by: req.user?.userId,
+            note: `Tạo sản phẩm: ${product.product_name}`
+        });
+
+
         try {
             // ✅ Gọi service để tạo biến thể và tổ hợp (có check trùng)
             const { skipped, createdCount, attributeIds } =
@@ -110,7 +121,8 @@ const createProduct = async (req, res) => {
                     product._id,
                     variant_attributes,
                     combinations,
-                    product_name
+                    product_name,
+                    req.user?._id
                 );
             console.log("check attributeIds: ", attributeIds);
 
@@ -406,6 +418,19 @@ const toggleProductStatus_Admin = async (req, res) => {
 
         await product.save();
 
+        
+
+        await logModel.create({
+            action: 'status_change',
+            target_type: 'Product',
+            target_id: product._id,
+            before: { isDraft: !product.isDraft },
+            after: { isDraft: product.isDraft },
+            changed_by: req.user?.userId,
+            note: `Chuyển trạng thái sản phẩm: ${product.product_name} → ${product.isDraft ? 'Bản nháp' : 'Công khai'}`
+        });
+
+
         return res.status(200).json({
             success: true,
             message: product.isDraft ? "Đã chuyển sang Bản nháp" : "Đã chuyển sang Hiển thị",
@@ -555,6 +580,18 @@ const updateProduct = async (req, res) => {
         product.isPulished = isPulished === 'on';
 
         await product.save();
+
+        await logModel.create({
+            action: 'update',
+            target_type: 'Product',
+            target_id: product._id,
+            before: { ...product.toObject() }, // hoặc clone trước khi update
+            after: { ...product.toObject() },  // sau khi update
+            changed_by: req.user?.userId,
+            note: `Cập nhật sản phẩm: ${product.product_name} (ID: ${product._id})`
+        });
+
+
         return res.status(200).json({
             success: true,
             message: isOrdered
@@ -824,6 +861,24 @@ const getTopSellingProducts = async (req, res) => {
     }
 };
 
+
+const getTopSellingList = async (req, res) => {
+    try {
+        const { month, page, limit, search } = req.query;
+        const result = await ProductService.getListTopSellingProducts({
+            month: Number(month),
+            page: Number(page),
+            limit: Number(limit),
+            search
+        });
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error("🔥 Lỗi khi lấy top sản phẩm bán chạy:", error);
+        return res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+
+};
+
 // 🟢 8. Tìm biến thể khớp với thuộc tính đã chọn
 const matchVariant = async (req, res) => {
     try {
@@ -904,5 +959,6 @@ module.exports = {
     getProductsByCategory,
     getTopSellingProducts,
     toggleProductStatus_Admin,
-    matchVariant
+    matchVariant,
+    getTopSellingList
 };

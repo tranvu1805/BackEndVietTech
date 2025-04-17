@@ -10,6 +10,7 @@ const {
   getProductsByCategory,
   getTopSellingProducts,
   matchVariant,
+  getTopSellingList,
 } = require("../../controllers/product.controller");
 const { authentication } = require("../../auth/authUtils");
 const upload = require("../../auth/middlewares/upload.middleware");
@@ -18,6 +19,7 @@ const asyncHandler = require("../../helpers/asyncHandler");
 
 
 router.get("/", getAllProducts);
+router.get("/top-selling-list", asyncHandler(getTopSellingList));
 router.get("/top-selling", asyncHandler(getTopSellingProducts));
 router.get("/category/:categoryId", getProductsByCategory);
 router.get("/:id", getProductById);
