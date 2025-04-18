@@ -1,10 +1,13 @@
 // routes/admin/reports.admin.js
 const express = require("express");
 const ReportService = require("../../services/ReportService");
+const { authorizeRoles } = require("../../auth/middlewares/authMiddleware");
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+
+
+router.get('/',authorizeRoles("admin"), async (req, res) => {
     try {
         const report = await ReportService.getAdminReport();
         res.render('admin/admin-report', { report });
@@ -62,6 +65,9 @@ router.get('/advanced-dashboard', async (req, res) => {
         // Get detailed dashboard data
         const dashboardData = await ReportService.getAdvancedDashboard(filter, startDate, endDate);
 
+        // console.log(`Advanced dashboard data: ${JSON.stringify(dashboardData)}`);
+        
+
         // Combine all data
         const data = {
             ...dashboardData,
@@ -92,7 +98,7 @@ router.get('/export', async (req, res) => {
 
         // Get report data
         const report = await ReportService.getAdminReport();
-        const chartData = await ReportService.getChartData(filter, startDate, endDate);
+        const chartData = await ReportService.getBasicChartData(filter, startDate, endDate);
         const advancedData = await ReportService.getAdvancedDashboard(filter, startDate, endDate);
 
         // This would normally use a library like ExcelJS or json2csv to generate the file

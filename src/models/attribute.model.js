@@ -16,7 +16,11 @@ const AttributeSchema = new Schema({
     values: {
         type: [String], // ví dụ: ["Đỏ", "Xanh", "Vàng"]
         required: true
-    }
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false // mặc định là chưa bị xóa
+    },
 }, { collection: COLLECTION_NAME, timestamps: true });
 
 module.exports = mongoose.model(DOCUMENT_NAME, AttributeSchema);

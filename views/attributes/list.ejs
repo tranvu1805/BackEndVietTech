@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Thuộc tính</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .btn-action {
+            transition: all 0.2s;
+        }
+        
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+        
+        .badge-attribute {
+            font-size: 0.9em;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 20px;
+            display: inline-block;
+            background-color: #e9ecef;
+        }
+        
+        .attribute-values-container {
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .page-title {
+            color: #343a40;
+            font-weight: 600;
+        }
+        
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="page-title mb-0">
+                            <i class="fas fa-tags me-2"></i>Quản lý Thuộc tính
+                        </h3>
+                        <a href="/v1/api/admin/products/list" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Quay về Sản phẩm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form thêm / cập nhật -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0" id="formTitle">Thêm thuộc tính mới</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="attributeForm" class="row g-3">
+                            <input type="hidden" id="attributeId">
+                            <div class="col-md-4">
+                                <label for="attrName" class="form-label">Tên thuộc tính</label>
+                                <input type="text" name="name" id="attrName" class="form-control" placeholder="Màu sắc, Kích thước..." required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="attrValues" class="form-label">Giá trị thuộc tính</label>
+                                <input type="text" name="values" id="attrValues" class="form-control" placeholder="Đỏ, Xanh, Vàng..." required>
+                                <div class="form-text">Phân tách các giá trị bởi dấu phẩy</div>
+                            </div>
+                            <div class="col-12 mt-4">
+                                <button class="btn btn-primary" type="submit" id="saveButton">
+                                    <i class="fas fa-save me-1"></i>Lưu thuộc tính
+                                </button>
+                                <button class="btn btn-outline-secondary ms-2" type="button" id="resetButton" style="display: none;">
+                                    <i class="fas fa-times me-1"></i>Hủy
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách thuộc tính -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Danh sách thuộc tính</h5>
+                        <div class="input-group" style="max-width: 300px;">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Tìm thuộc tính...">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 30%">Tên thuộc tính</th>
+                                        <th>Giá trị</th>
+                                        <th style="width: 150px;" class="text-center">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% attributes.forEach(attr=> { %>
+                                        <tr>
+                                            <td>
+                                                <strong><%= attr.name %></strong>
+                                            </td>
+                                            <td>
+                                                <div class="attribute-values-container">
+                                                    <% attr.values.forEach(value => { %>
+                                                        <span class="badge-attribute"><%= value %></span>
+                                                    <% }) %>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-primary btn-action me-1" 
+                                                        onclick="editAttribute('<%= attr._id %>', '<%= attr.name %>', '<%= attr.values.join(', ') %>')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger btn-action" 
+                                                        onclick="deleteAttribute('<%= attr._id %>')">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast thông báo -->
+    <div class="toast-container">
+        <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" id="successToast">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="successMessage">Thao tác thành công!</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" id="errorToast">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span id="errorMessage">Đã xảy ra lỗi!</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toast notifications
+        const successToast = document.getElementById('successToast');
+        const errorToast = document.getElementById('errorToast');
+        const successToastObj = new bootstrap.Toast(successToast, { delay: 3000 });
+        const errorToastObj = new bootstrap.Toast(errorToast, { delay: 3000 });
+        
+        // Form elements
+        const attributeForm = document.getElementById('attributeForm');
+        const attributeId = document.getElementById('attributeId');
+        const attrName = document.getElementById('attrName');
+        const attrValues = document.getElementById('attrValues');
+        const formTitle = document.getElementById('formTitle');
+        const saveButton = document.getElementById('saveButton');
+        const resetButton = document.getElementById('resetButton');
+        
+        // Reset form
+        function resetForm() {
+            attributeId.value = '';
+            attrName.value = '';
+            attrValues.value = '';
+            formTitle.textContent = 'Thêm thuộc tính mới';
+            saveButton.innerHTML = '<i class="fas fa-save me-1"></i>Lưu thuộc tính';
+            resetButton.style.display = 'none';
+        }
+        
+        // Edit attribute
+        function editAttribute(id, name, values) {
+            attributeId.value = id;
+            attrName.value = name;
+            attrValues.value = values;
+            formTitle.textContent = 'Cập nhật thuộc tính';
+            saveButton.innerHTML = '<i class="fas fa-save me-1"></i>Cập nhật';
+            resetButton.style.display = 'inline-block';
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+        
+        // Delete attribute
+        async function deleteAttribute(id) {
+            if (!confirm('Bạn có chắc muốn xoá thuộc tính này không?')) return;
+            
+            try {
+                const response = await fetch(`/v1/api/shop/attributes/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('successMessage').textContent = 'Xóa thuộc tính thành công';
+                    successToastObj.show();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    document.getElementById('errorMessage').textContent = result.message || 'Xóa thuộc tính thất bại';
+                    errorToastObj.show();
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'Lỗi kết nối, vui lòng thử lại';
+                errorToastObj.show();
+            }
+        }
+        
+        // Submit form
+        attributeForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = attributeId.value;
+            const name = attrName.value.trim();
+            const values = attrValues.value.split(',').map(v => v.trim()).filter(v => v);
+            
+            if (!name || values.length === 0) {
+                document.getElementById('errorMessage').textContent = 'Vui lòng nhập đầy đủ thông tin';
+                errorToastObj.show();
+                return;
+            }
+            
+            try {
+                const payload = { name, values };
+                const response = await fetch(`/v1/api/shop/attributes${id ? '/' + id : ''}`, {
+                    method: id ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('successMessage').textContent = id ? 'Cập nhật thành công' : 'Thêm mới thành công';
+                    successToastObj.show();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    document.getElementById('errorMessage').textContent = result.message || 'Thao tác thất bại';
+                    errorToastObj.show();
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'Lỗi kết nối, vui lòng thử lại';
+                errorToastObj.show();
+            }
+        });
+        
+        // Reset button handler
+        resetButton.addEventListener('click', resetForm);
+        
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const name = row.querySelector('td:first-child').textContent.toLowerCase();
+                const values = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                
+                if (name.includes(searchTerm) || values.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

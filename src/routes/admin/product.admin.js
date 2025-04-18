@@ -65,7 +65,9 @@ router.get("/edit/:id", async (req, res) => {
     const { id } = req.params;
     try {
         const rawProduct = await getProductById_Admin(id);
-        const product = rawProduct.toObject(); // ✅ chuyển thành object thường
+        console.log("check rawProduct: ", rawProduct);
+        
+        const product = rawProduct;
 
         const inputCategories = await getAllCategories();
         const categories = inputCategories.categories;

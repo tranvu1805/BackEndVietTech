@@ -10,6 +10,7 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -176,14 +177,14 @@
 
                                 <!-- User Profile Dropdown -->
                                 <div class="dropdown">
-                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                                        data-bs-toggle="dropdown">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-                                                style="width: 40px; height: 40px;">AD</div>
-                                            <span>Admin</span>
-                                        </div>
-                                    </a>
+                                    <button class="user-dropdown border-0 d-flex align-items-center" type="button"
+                                        id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img id="user-avatar" src="https://via.placeholder.com/40?text=U" alt="Avatar"
+                                            class="rounded-circle me-2" width="36" height="36"
+                                            style="object-fit: cover;">
+                                        <span class="d-none d-md-inline" id="user-fullname">Admin</span>
+                                        <i class="fas fa-chevron-down ms-2 small"></i>
+                                    </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Hồ sơ</a>
                                         </li>
@@ -304,7 +305,10 @@
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h5 class="mb-0">Hoạt động gần đây</h5>
-                                    <a href="#" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                        data-bs-target="#logModal">
+                                        Xem tất cả
+                                    </button>
                                 </div>
                                 <div class="card-body">
                                     <div class="recent-activity-item">
@@ -375,7 +379,11 @@
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h5 class="mb-0">Sản phẩm bán chạy</h5>
-                                    <a href="/admin/products" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                        data-bs-target="#topSellingModal">
+                                        Xem tất cả
+                                    </button>
+
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -402,13 +410,92 @@
                         </div>
                     </div>
 
+                    <!-- Modal: Xem tất cả hoạt động gần đây -->
+                    <div class="modal fade" id="logModal" tabindex="-1" aria-labelledby="logModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="logModalLabel">Tất cả hoạt động gần đây</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Đóng"></button>
+                                </div>
+                                <div class="modal-body" id="logModalBody">
+                                    <p class="text-center text-muted">Đang tải dữ liệu...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="modal fade" id="topSellingModal" tabindex="-1" aria-labelledby="topSellingModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="topSellingModalLabel">Top sản phẩm bán chạy</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Đóng"></button>
+                                </div>
+                                <div class="modal-body">
+
+                                    <!-- Bộ lọc -->
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <div>
+                                            <select class="form-select form-select-sm" id="filter-month"
+                                                style="width: auto;">
+                                                <% for(let i=1; i <=12; i++) { %>
+                                                    <option value="<%= i %>">Tháng <%= i %>
+                                                    </option>
+                                                    <% } %>
+                                            </select>
+                                        </div>
+
+                                        <div class="input-group input-group-sm" style="max-width: 300px;">
+                                            <input id="searchInput" type="text" class="form-control"
+                                                placeholder="Tìm sản phẩm...">
+                                            <button class="btn btn-outline-secondary" id="btnSearch"><i
+                                                    class="fas fa-search"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bảng -->
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Sản phẩm</th>
+                                                    <th>Đã bán</th>
+                                                    <th>Tồn kho</th>
+                                                    <th>Doanh thu</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="top-selling-modal-body">
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted">Đang tải...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Phân trang -->
+                                    <nav class="mt-3">
+                                        <ul class="pagination justify-content-end" id="pagination-container"></ul>
+                                    </nav>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
                     <!-- Recent Orders -->
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h5 class="mb-0">Đơn hàng gần đây</h5>
-                                    <a href="/admin/orders" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                                    <a href="bills/" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -443,6 +530,31 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <!-- In a real implementation, you would add Chart.js or other visualization libraries here -->
         <script>
+            const actionIconMap = {
+                create: 'fas fa-plus-circle bg-success',
+                update: 'fas fa-edit bg-warning',
+                delete: 'fas fa-trash bg-danger',
+                status_change: 'fas fa-toggle-on bg-info'
+            };
+
+            const getActionIcon = (action = '') => actionIconMap[action] || 'fas fa-history bg-secondary';
+
+            const actionLabelMap = {
+                create: "Đã tạo mới",
+                update: "Đã cập nhật",
+                delete: "Đã xóa",
+                status_change: "Thay đổi trạng thái"
+            };
+
+            const targetLabelMap = {
+                Product: "sản phẩm",
+                Bill: "đơn hàng",
+                User: "người dùng",
+                Category: "danh mục"
+            };
+
+            const getActionLabel = (action) => actionLabelMap[action] || action;
+            const getTargetLabel = (target) => targetLabelMap[target] || target;
             const accessToken = localStorage.getItem('accessToken');
             const userId = localStorage.getItem('userId');
             const apiKey = 'c244dcd1532c91ab98a1c028e4f24f81457cdb2ac83e2ca422d36046fec84233589a4b51eda05e24d8871f73653708e3b13cf6dd1415a6330eaf6707217ef683'
@@ -563,6 +675,10 @@
             //     }
             // }
 
+
+
+
+
             async function loadRecentOrders() {
                 try {
                     const res = await fetch('/v1/api/bill', {
@@ -612,12 +728,106 @@
             }
 
 
+            /**
+  * Loads recent activity logs and displays them in the UI
+  * Enhanced with better error handling, comments, and code styling
+  */
+            async function loadRecentActivities() {
+                const activityContainer = document.querySelector('.card-body .recent-activity-item')?.parentNode;
+                if (!activityContainer) {
+                    console.warn('Activity container not found in DOM');
+                    return;
+                }
+
+                try {
+                    // Fetch recent activity logs from API
+                    const res = await fetch('/v1/api/log/recent', {
+                        headers: {
+                            authorization: accessToken,
+                            "x-client-id": userId,
+                            "x-api-key": apiKey
+                        }
+                    });
+
+                    // Check if the response is OK
+                    if (!res.ok) {
+                        throw new Error(`API request failed with status: ${res.status}`);
+                    }
+
+                    const { logs } = await res.json();
+
+                    // Handle empty logs scenario
+                    if (!logs || logs.length === 0) {
+                        activityContainer.innerHTML = `
+        <div class="text-muted text-center py-3">
+          <i class="fas fa-info-circle me-2"></i>Không có hoạt động nào.
+        </div>`;
+                        return;
+                    }
+
+                    // Render activity logs with enhanced UI
+                    activityContainer.innerHTML = logs.map(log => {
+                        const timestamp = new Date(log.changed_at).toLocaleString('vi-VN');
+                        const userName = log.changed_by?.full_name || 'Không xác định';
+                        const iconClass = getActionIcon(log.action);
+
+                        return `
+    <div class="recent-activity-item mb-3">
+      <div class="d-flex align-items-center">
+        <div class="flex-shrink-0">
+          <div class="rounded-circle text-white d-flex align-items-center justify-content-center"
+               style="width: 42px; height: 42px;">
+            <i class="${iconClass} p-2 rounded-circle text-white"
+               style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;"></i>
+          </div>
+        </div>
+        <div class="flex-grow-1 ms-3">
+          <h6 class="mb-1 fw-bold">${getActionLabel(log.action)} ${getTargetLabel(log.target_type)}</h6>
+
+          <p class="text-muted mb-1">${log.note || 'Không có ghi chú'}</p>
+          <small class="text-muted d-flex align-items-center">
+            <i class="fas fa-user me-1"></i> ${userName} 
+            <span class="mx-2">•</span>
+            <i class="fas fa-clock me-1"></i> ${timestamp}
+          </small>
+        </div>
+      </div>
+    </div>
+  `;
+                    }).join("");
+
+
+                } catch (err) {
+                    console.error("Lỗi khi load hoạt động gần đây:", err);
+                    activityContainer.innerHTML = `
+      <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.
+      </div>`;
+                }
+            }
 
 
             document.addEventListener("DOMContentLoaded", async function () {
                 const accessToken = localStorage.getItem("accessToken");
                 // await loadRevenue();
                 // await loadTotalOrders();
+                await loadRecentActivities();
+                const fullName = localStorage.getItem("full_name");
+                console.log("check full name", fullName);
+
+                function getInitials(name) {
+                    const parts = name.trim().split(" ");
+                    if (parts.length >= 2) {
+                        return parts[0][0].toUpperCase() + parts[parts.length - 1][0].toUpperCase();
+                    }
+                    return name[0]?.toUpperCase() || "";
+                }
+
+                const avatarEl = document.getElementById("user-initials");
+                if (avatarEl) {
+                    avatarEl.innerText = getInitials(fullName);
+                }
 
 
                 if (!accessToken) {
@@ -871,7 +1081,7 @@
             });
 
             function updateCategoryChart(categoryData = []) {
-                
+
                 const labels = categoryData.map(item => item.categoryName || "Không rõ");
                 const values = categoryData.map(item => item.count);
 
@@ -880,7 +1090,144 @@
                 categoryChart.update();
             }
 
+            const name = JSON.parse(localStorage.getItem("account")) || "Người dùng";
+            console.log("Name:", name);
+            const avatar = localStorage.getItem("avatar") || "https://via.placeholder.com/40?text=U";
 
+
+
+            const nameEl = document.getElementById("user-fullname");
+            const avatarEl = document.getElementById("user-avatar");
+
+            if (nameEl) nameEl.textContent = name.full_name;
+            if (avatarEl) avatarEl.src = name.avatar
+
+
+            let currentPage = 1;
+            let selectedMonth = new Date().getMonth() + 1;
+            let searchKeyword = "";
+
+            async function fetchTopSellingModal(page = 1) {
+                const month = document.getElementById("filter-month").value;
+                const search = document.getElementById("searchInput").value;
+                console.log("check month", month);
+                
+
+                try {
+                    const res = await fetch(`/v1/api/shop/products/top-selling-list?month=${month}&page=${page}&limit=5&search=${search}`);
+                    const data = await res.json();
+
+                    console.log("check top selling modal", data);
+
+
+                    if (!data.products || data.products.length === 0) {
+                        document.getElementById("top-selling-modal-body").innerHTML = `<tr><td colspan="4" class="text-center text-muted">Không có dữ liệu</td></tr>`;
+                        return;
+                    }
+
+                    const rows = data.products.map(p => `
+            <tr>
+                <td>${p.product_name}</td>
+                <td>${p.totalSold}</td>
+                <td>${p.product_stock}</td>
+                <td>${(p.totalSold * p.product_price).toLocaleString('vi-VN')} ₫</td>
+            </tr>
+        `).join("");
+
+                    document.getElementById("top-selling-modal-body").innerHTML = rows;
+
+                    // Pagination
+                    let paginationHTML = "";
+                    for (let i = 1; i <= data.totalPages; i++) {
+                        paginationHTML += `<li class="page-item ${i === page ? "active" : ""}">
+                <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+            </li>`;
+                    }
+                    document.getElementById("pagination-container").innerHTML = paginationHTML;
+
+                } catch (err) {
+                    console.error("Lỗi khi fetch top-selling modal:", err);
+                }
+            }
+
+            function changePage(page) {
+                currentPage = page;
+                fetchTopSellingModal(page);
+            }
+
+            document.getElementById("filter-month").addEventListener("change", () => {
+                currentPage = 1;
+                fetchTopSellingModal();
+            });
+            document.getElementById("btnSearch").addEventListener("click", () => {
+                currentPage = 1;
+                fetchTopSellingModal();
+            });
+
+            // Khi mở modal
+            document.getElementById("topSellingModal").addEventListener("show.bs.modal", () => {
+                fetchTopSellingModal();
+            });
+
+
+            document.getElementById("logModal").addEventListener("show.bs.modal", () => {
+                loadAllLogs();
+            });
+
+            async function loadAllLogs() {
+                const container = document.getElementById("logModalBody");
+                container.innerHTML = `<p class="text-center text-muted">Đang tải...</p>`;
+
+                try {
+                    const res = await fetch('/v1/api/log/all', {
+                        headers: {
+                            authorization: accessToken,
+                            'x-client-id': userId,
+                            'x-api-key': apiKey
+                        }
+                    });
+
+                    const { logs } = await res.json();
+
+                    if (!logs || logs.length === 0) {
+                        container.innerHTML = `<p class="text-center text-muted">Không có hoạt động nào.</p>`;
+                        return;
+                    }
+
+                    container.innerHTML = logs.map(log => {
+                        const timestamp = new Date(log.changed_at).toLocaleString('vi-VN');
+                        const user = log.changed_by?.full_name || 'Không xác định';
+                        const iconClass = getActionIcon(log.action);
+                        const actionText = getActionLabel(log.action);
+                        const targetText = getTargetLabel(log.target_type);
+
+                        return `
+        <div class="recent-activity-item border-bottom pb-2 mb-2">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <div class="rounded-circle text-white d-flex align-items-center justify-content-center"
+                   style="width: 42px; height: 42px;">
+                <i class="${iconClass} p-2 rounded-circle text-white"
+                   style="width: 42px; height: 42px;"></i>
+              </div>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <h6 class="mb-1 fw-bold">${actionText} ${targetText}</h6>
+              <p class="text-muted mb-1">${log.note || "Không có ghi chú"}</p>
+              <small class="text-muted">
+                <i class="fas fa-user me-1"></i> ${user}
+                <span class="mx-2">•</span>
+                <i class="fas fa-clock me-1"></i> ${timestamp}
+              </small>
+            </div>
+          </div>
+        </div>`;
+                    }).join('');
+                } catch (err) {
+                    container.innerHTML = `<p class="text-danger text-center">❌ Lỗi khi tải dữ liệu</p>`;
+                    console.error("❌ Lỗi load logs:", err);
+                }
+            }
 
         </script>
 </body>

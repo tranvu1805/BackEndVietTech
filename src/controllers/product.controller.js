@@ -11,86 +11,96 @@ const productModel = require("../models/product.model");
 const detailsVariantModel = require("../models/detailsVariant.model");
 const attributeModel = require("../models/attribute.model");
 const { billRepo } = require("../models/bill.model");
+const logModel = require("../models/log.model");
+const Image = require("../models/image.model");
+
+const hasBeenOrdered = async (productId) => {
+    const bill = await billRepo.findOne({
+        "products.productId": productId
+    });
+    return !!bill;
+};
+
+
+
+const calculateTotalStock = async (productId) => {
+    const variants = await detailsVariantModel.find({ productId });
+    console.log("check ton tai variants:", variants);
+
+    return variants.reduce((sum, variant) => sum + (variant.stock || 0), 0);
+};
 
 
 
 // 🟢 1. Tạo sản phẩm mới
 const createProduct = async (req, res) => {
     try {
-        let {
+        const {
             product_name,
             product_description,
             product_price,
-            product_stock,
             category,
-            combinations,
-            variant_prices,
-            variant_stocks
+            product_stock
         } = req.body;
 
-        const product_thumbnail = req.file ? req.file.path : null;
+        let combinations = req.body.combinations || [];
+        let variant_prices = req.body.variant_prices || [];
+        let variant_stocks = req.body.variant_stocks || [];
 
-        console.log('req.body:', req.body);
-        console.log('req.file:', req.file);
-        console.log('combinations:', combinations);
+        const thumbnailFile = req.files?.['product_thumbnail']?.[0];
+        const product_thumbnail = thumbnailFile ? thumbnailFile.path : null;
 
-
-
-        try {
-            // Parse lại từng combination và map giá, kho vào
-            combinations = combinations.map((c, index) => {
-                const parsedCombination = JSON.parse(c);
-
-                return {
-                    combination: parsedCombination,
-                    price: Number(variant_prices[index]),
-                    stock: Number(variant_stocks[index])
-                };
-            });
-        } catch (err) {
+        // ✅ Nếu schema yêu cầu thumbnail bắt buộc
+        if (!product_thumbnail) {
             return res.status(400).json({
                 success: false,
-                message: "Dữ liệu combinations hoặc giá/kho không hợp lệ."
+                message: "Thiếu ảnh đại diện."
             });
         }
-        const attributeMap = {};
-        combinations.forEach(combo => {
-            Object.entries(combo.combination).forEach(([key, value]) => {
-                if (!attributeMap[key]) attributeMap[key] = new Set();
-                attributeMap[key].add(value);
-            });
-        });
 
-        const variant_attributes = Object.entries(attributeMap).map(([key, valueSet]) => ({
-            variantName: key,
-            values: Array.from(valueSet)
-        }));
+        // ✅ Parse combinations nếu có
+        let parsedCombinations = [];
+        if (combinations && combinations.length > 0) {
+            try {
+                parsedCombinations = combinations.map((c, index) => {
+                    const parsed = typeof c === 'string' ? JSON.parse(c) : c;
+                    const price = variant_prices?.[index];
+                    const stock = variant_stocks?.[index];
 
-
-
-        // if (!product_name || !product_price || !product_stock || !category) {
-        //     return res.status(400).json({ message: 'Thiếu trường bắt buộc!' });
-        // }
-
-
-        // if (!product_thumbnail) {
-        //     return res.status(400).json({ success: false, message: "Thiếu ảnh đại diện." });
-        // }
-
-        // Parse JSON nếu gửi từ form-data
-        try {
-            if (typeof variant_attributes === 'string') {
-                variant_attributes = JSON.parse(variant_attributes);
+                    return {
+                        combination: parsed,
+                        price: price === '' || price === undefined ? Number(product_price) : Number(price),
+                        stock: stock === '' || stock === undefined ? 0 : Number(stock)
+                    };
+                });
+            } catch (err) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Dữ liệu tổ hợp không hợp lệ."
+                });
             }
+        }
 
-            if (typeof combinations === 'string') {
-                combinations = JSON.parse(combinations);
-            }
-        } catch (err) {
-            return res.status(400).json({
-                success: false,
-                message: "variant_attributes hoặc combinations không đúng định dạng JSON."
+        // ✅ Chuẩn bị variant_attributes nếu có tổ hợp
+        let variant_attributes = [];
+        if (parsedCombinations.length > 0) {
+            const attributeMap = {};
+            parsedCombinations.forEach(combo => {
+                Object.entries(combo.combination).forEach(([key, value]) => {
+                    if (!attributeMap[key]) attributeMap[key] = new Set();
+                    attributeMap[key].add(value);
+                });
             });
+            variant_attributes = Object.entries(attributeMap).map(([key, valueSet]) => ({
+                variantName: key,
+                values: Array.from(valueSet)
+            }));
+        }
+
+        // ✅ Nếu không có combinations → lấy product_stock
+        let final_stock = 0;
+        if (parsedCombinations.length === 0 && product_stock) {
+            final_stock = Number(product_stock);
         }
 
         // ✅ Tạo sản phẩm chính
@@ -98,32 +108,52 @@ const createProduct = async (req, res) => {
             product_name,
             product_description,
             product_price,
-            product_stock,
+            product_stock: final_stock,
             category,
             product_thumbnail
         });
 
-        try {
-            // ✅ Gọi service để tạo biến thể và tổ hợp (có check trùng)
-            const { skipped, createdCount, attributeIds } =
-                await ProductService.createVariantsAndCombinations(
-                    product._id,
-                    variant_attributes,
-                    combinations,
-                    product_name
-                );
-            console.log("check attributeIds: ", attributeIds);
+        // ✅ Ghi log
+        await logModel.create({
+            action: 'create',
+            target_type: 'Product',
+            target_id: product._id,
+            after: product,
+            changed_by: req.user?.userId,
+            note: `Tạo sản phẩm: ${product.product_name}`
+        });
 
+        // ✅ Tạo tổ hợp nếu có
+        if (parsedCombinations.length > 0) {
+            const { attributeIds } = await ProductService.createVariantsAndCombinations(
+                product._id,
+                variant_attributes,
+                parsedCombinations,
+                product_name,
+                req.user?._id
+            );
             product.attributeIds = attributeIds;
-            await product.save();
-        } catch (variantError) {
-            // ❌ Nếu lỗi → rollback: xóa sản phẩm vừa tạo
-            await Product.findByIdAndDelete(product._id);
-            return res.status(400).json({
-                success: false,
-                message: variantError.message || "Lỗi khi tạo biến thể sản phẩm."
-            });
+            product.product_stock = await calculateTotalStock(product._id);
         }
+
+        // ✅ Xử lý ảnh gallery
+        const galleryFiles = req.files?.['gallery_uploads[]'] || [];
+        if (galleryFiles.length > 0) {
+            const imageIds = [];
+            for (const file of galleryFiles) {
+                const img = await Image.create({
+                    file_name: file.originalname,
+                    file_path: file.path,
+                    file_size: file.size,
+                    file_type: file.mimetype,
+                    url: `${req.protocol}://${req.get('host')}/uploads/${file.filename}`
+                });
+                imageIds.push(img._id);
+            }
+            product.image_ids = imageIds;
+        }
+
+        await product.save();
 
         return res.status(201).json({
             success: true,
@@ -136,6 +166,7 @@ const createProduct = async (req, res) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
+
 
 
 
@@ -320,6 +351,7 @@ const getAllProducts_Admin = async (req, res) => {
             .sort(sortOption) // 👈 thêm dòng này
             .populate("category")
             .populate("attributeIds")
+            .populate("image_ids")
             .skip((page - 1) * limit)
             .limit(Number(limit));
 
@@ -348,7 +380,10 @@ const getAllProducts_Admin = async (req, res) => {
 // 🟢 3. Lấy chi tiết sản phẩm
 const getProductById = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id).populate("category");
+        const product = await Product.findById(req.params.id)
+            .populate("category")
+            .populate("image_ids"); // ✅ Bổ sung để có gallery ảnh
+
 
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
@@ -381,8 +416,17 @@ const getProductById = async (req, res) => {
 
 const getProductById_Admin = async (id) => {
     try {
-        const product = await Product.findById(id).populate("category");
-        return product || null;
+        const product = await Product.findById(id)
+            .populate("category")
+            .populate("image_ids"); // ✅ Thêm dòng này
+
+
+        const ordered = await hasBeenOrdered(product._id);
+        const productObj = product.toObject();
+        productObj.hasBeenOrdered = ordered;
+
+
+        return productObj || null;
     } catch (error) {
         console.error("Error fetching product:", error.message);
         return null;
@@ -406,6 +450,19 @@ const toggleProductStatus_Admin = async (req, res) => {
 
         await product.save();
 
+
+
+        await logModel.create({
+            action: 'status_change',
+            target_type: 'Product',
+            target_id: product._id,
+            before: { isDraft: !product.isDraft },
+            after: { isDraft: product.isDraft },
+            changed_by: req.user?.userId,
+            note: `Chuyển trạng thái sản phẩm: ${product.product_name} → ${product.isDraft ? 'Bản nháp' : 'Công khai'}`
+        });
+
+
         return res.status(200).json({
             success: true,
             message: product.isDraft ? "Đã chuyển sang Bản nháp" : "Đã chuyển sang Hiển thị",
@@ -416,18 +473,13 @@ const toggleProductStatus_Admin = async (req, res) => {
     }
 };
 
-const hasBeenOrdered = async (productId) => {
-    const bill = await billRepo.findOne({
-        "products.productId": productId
-    });
-    return !!bill;
-};
 
 
 // 🟢 4. Cập nhật sản phẩm
+// 🟢 4. Cập nhật sản phẩm
 const updateProduct = async (req, res) => {
     try {
-        let {
+        const {
             product_name,
             product_description,
             product_price,
@@ -437,136 +489,193 @@ const updateProduct = async (req, res) => {
             variant_prices,
             variant_stocks,
             isDraft,
-            isPulished,
+            isPulished
         } = req.body;
 
-        console.log("req.body:", JSON.stringify(req.body, null, 2));
         const product_thumbnail = req.file ? req.file.path : undefined;
-
         const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(404).json({ success: false, message: "Product not found" });
-        }
+        if (!product) return res.status(404).json({ success: false, message: "Product not found" });
 
-        // 👉 Kiểm tra xem đã từng có đơn hàng chưa
         const isOrdered = await hasBeenOrdered(product._id);
+        console.log("isOrdered:", isOrdered, "productId:", product._id);
+        console.log("check product 1: ", product, product_stock, combinations, variant_prices, variant_stocks);
 
+        // ✅ Giới hạn cập nhật nếu đã bán
         if (isOrdered) {
             if (product_name && product_name !== product.product_name) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Không thể thay đổi tên sản phẩm đã từng bán",
-                });
+                return res.status(400).json({ success: false, message: "Không thể đổi tên sản phẩm đã bán" });
             }
-
             if (product_price && product_price != product.product_price) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Không thể thay đổi giá sản phẩm đã từng bán",
-                });
+                return res.status(400).json({ success: false, message: "Không thể đổi giá sản phẩm đã bán" });
             }
-
-            // ✅ Kiểm tra chặt chẽ combinations và variant_prices
-            if (
-                (combinations && combinations.length > 0) ||
-                (variant_prices && variant_prices.length > 0)
-            ) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Không thể cập nhật biến thể hoặc giá biến thể sản phẩm đã từng bán",
-                });
-            }
-
-            // ✅ Cho phép cập nhật variant_stocks nếu có
-            if (variant_stocks && variant_stocks.length > 0) {
-                try {
-                    const variants = await detailsVariantModel.find({ productId: product._id });
-                    if (variants.length !== variant_stocks.length) {
-                        return res.status(400).json({
-                            success: false,
-                            message: "Số lượng stock không khớp với số lượng biến thể",
-                        });
-                    }
-
-                    // Cập nhật stock cho từng biến thể
-                    for (let i = 0; i < variants.length; i++) {
-                        variants[i].stock = Number(variant_stocks[i]);
-                        await variants[i].save();
-                    }
-                } catch (err) {
-                    return res.status(400).json({
-                        success: false,
-                        message: "Lỗi khi cập nhật stock biến thể: " + err.message,
-                    });
-                }
+            if ((combinations?.length || 0) > 0 || (variant_prices?.length || 0) > 0) {
+                return res.status(400).json({ success: false, message: "Không thể cập nhật tổ hợp hoặc giá sản phẩm đã bán" });
             }
         }
 
-        // ✅ Cập nhật các trường được phép
+        // ✅ Cho phép cập nhật riêng stock biến thể (nếu truyền variant_stocks)
+        if (variant_stocks && variant_stocks.length > 0 && (!combinations || combinations.length === 0)) {
+            const variants = await detailsVariantModel.find({ productId: product._id });
+
+            if (variants.length !== variant_stocks.length) {
+                return res.status(400).json({ success: false, message: "Số lượng biến thể không khớp" });
+            }
+
+            const sanitizedStocks = variant_stocks.map(s =>
+                s === '' || s === undefined || isNaN(s) ? 0 : Number(s)
+            );
+
+            const bills = await billRepo.find({ "products.productId": product._id });
+
+            const soldMap = {};
+            bills.forEach(bill => {
+                bill.products.forEach(p => {
+                    const variantId = p.detailsVariantId?.toString();
+                    if (variantId) {
+                        soldMap[variantId] = (soldMap[variantId] || 0) + p.quantity;
+                    }
+                });
+            });
+
+            console.log("🧾 Tổng số đã bán theo biến thể:", soldMap);
+
+
+            for (let i = 0; i < variants.length; i++) {
+                const variant = variants[i];
+                const variantId = variant._id.toString();
+                const currentStock = variant.stock;
+                const newStock = sanitizedStocks[i];
+
+                if (newStock < currentStock) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Chỉ được tăng tồn kho. Không thể giảm từ ${currentStock} xuống ${newStock} cho biến thể #${i + 1}`
+                    });
+                }
+
+                variant.stock = newStock;
+                await variant.save();
+            }
+
+
+
+
+            product.product_stock = await calculateTotalStock(product._id);
+            await product.save();
+            console.log("check req", req.body, "check user: ", req.user);
+
+            await logModel.create({
+                action: 'update',
+                target_type: 'Product',
+                target_id: product._id,
+                before: { ...product.toObject() },
+                after: { ...product.toObject() },
+                changed_by: req.user?.userId || req.user?._id,
+                note: `Cập nhật sản phẩm: ${product.product_name} (ID: ${product._id})`
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "Cập nhật tồn kho biến thể thành công!!",
+                product
+            });
+        }
+
+        // ✅ Cập nhật các trường cơ bản nếu chưa từng bán
+        if (!isOrdered) {
+            product.product_name = product_name || product.product_name;
+            product.product_price = product_price || product.product_price;
+        }
         product.product_description = product_description || product.product_description;
-        product.product_stock = product_stock || product.product_stock;
         product.category = category || product.category;
         if (product_thumbnail) product.product_thumbnail = product_thumbnail;
 
-        // ✅ Nếu chưa từng bán thì cho phép cập nhật biến thể đầy đủ
-        if (!isOrdered && combinations && variant_prices && variant_stocks) {
-            try {
-                combinations = combinations.map((c, index) => {
-                    const parsedCombination = JSON.parse(c);
-                    return {
-                        combination: parsedCombination,
-                        price: Number(variant_prices[index]),
-                        stock: Number(variant_stocks[index]),
-                    };
-                });
-
-                const attributeMap = {};
-                combinations.forEach(combo => {
-                    Object.entries(combo.combination).forEach(([key, value]) => {
-                        if (!attributeMap[key]) attributeMap[key] = new Set();
-                        attributeMap[key].add(value);
-                    });
-                });
-
-                const variant_attributes = Object.entries(attributeMap).map(([key, valueSet]) => ({
-                    variantName: key,
-                    values: Array.from(valueSet),
-                }));
-
-                await detailsVariantModel.deleteMany({ productId: product._id });
-
-                const { attributeIds } = await ProductService.createVariantsAndCombinations(
-                    product._id,
-                    variant_attributes,
-                    combinations,
-                    product.product_name
-                );
-
-                product.attributeIds = attributeIds;
-            } catch (err) {
+        // ✅ Nếu sản phẩm không có biến thể, cho phép cập nhật product_stock
+        const variantCount = await detailsVariantModel.countDocuments({ productId: product._id });
+        if (variantCount === 0 && product_stock !== undefined) {
+            if (Number(product_stock) < product.product_stock) {
                 return res.status(400).json({
                     success: false,
-                    message: "Lỗi khi cập nhật biến thể: " + err.message,
+                    message: `Chỉ được tăng tồn kho. Không thể giảm từ ${product.product_stock} xuống ${product_stock}`
                 });
             }
+            product.product_stock = Number(product_stock);
         }
 
+
+
+
+        // ✅ Nếu chưa từng bán và có đủ thông tin → cập nhật tổ hợp
+        if (!isOrdered && combinations && variant_prices && variant_stocks) {
+            const parsedCombinations = combinations.map((c, i) => {
+                const combo = typeof c === 'string' ? JSON.parse(c) : c;
+                const price = variant_prices?.[i];
+                const stock = variant_stocks?.[i];
+
+                return {
+                    combination: combo,
+                    price: price === '' || price === undefined ? Number(product_price) : Number(price),
+                    stock: stock === '' || stock === undefined ? 0 : Number(stock)
+                };
+            });
+
+            const attributeMap = {};
+            parsedCombinations.forEach(combo => {
+                Object.entries(combo.combination).forEach(([k, v]) => {
+                    if (!attributeMap[k]) attributeMap[k] = new Set();
+                    attributeMap[k].add(v);
+                });
+            });
+
+            const variant_attributes = Object.entries(attributeMap).map(([key, valueSet]) => ({
+                variantName: key,
+                values: Array.from(valueSet)
+            }));
+
+            await detailsVariantModel.deleteMany({ productId: product._id });
+            const { attributeIds } = await ProductService.createVariantsAndCombinations(
+                product._id,
+                variant_attributes,
+                parsedCombinations,
+                product.product_name
+            );
+
+            console.log("check product 2: ", product);
+
+            product.attributeIds = attributeIds;
+            product.product_stock = await calculateTotalStock(product._id);
+        }
+
+        // ✅ Cập nhật trạng thái
         product.isDraft = isDraft === 'on';
         product.isPulished = isPulished === 'on';
 
         await product.save();
+        console.log("check req", req.body, "check user: ", req.user);
+
+        await logModel.create({
+            action: 'update',
+            target_type: 'Product',
+            target_id: product._id,
+            before: { ...product.toObject() },
+            after: { ...product.toObject() },
+            changed_by: req.user?.userId,
+            note: `Cập nhật sản phẩm: ${product.product_name} (ID: ${product._id})`
+        });
+
         return res.status(200).json({
             success: true,
             message: isOrdered
-                ? "Cập nhật giới hạn: sản phẩm đã từng bán chỉ có thể cập nhật stock biến thể và các trường cho phép"
-                : "Cập nhật sản phẩm thành công",
-            product,
+                ? "Cập nhật giới hạn: chỉ được sửa số lượng tồn kho biến thể và các trường cho phép"
+                : "Cập nhật sản phẩm thành côn rr",
+            product
         });
     } catch (error) {
         console.error("❌ Lỗi updateProduct:", error);
         return res.status(500).json({ success: false, message: error.message });
     }
 };
+
 
 
 
@@ -824,6 +933,24 @@ const getTopSellingProducts = async (req, res) => {
     }
 };
 
+
+const getTopSellingList = async (req, res) => {
+    try {
+        const { month, page, limit, search } = req.query;
+        const result = await ProductService.getListTopSellingProducts({
+            month: Number(month),
+            page: Number(page),
+            limit: Number(limit),
+            search
+        });
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error("🔥 Lỗi khi lấy top sản phẩm bán chạy:", error);
+        return res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+
+};
+
 // 🟢 8. Tìm biến thể khớp với thuộc tính đã chọn
 const matchVariant = async (req, res) => {
     try {
@@ -904,5 +1031,6 @@ module.exports = {
     getProductsByCategory,
     getTopSellingProducts,
     toggleProductStatus_Admin,
-    matchVariant
+    matchVariant,
+    getTopSellingList
 };

@@ -10,6 +10,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet 22" href="/css/style.css">
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+
+
         body {
             background-color: #f5f5f7;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,11 +29,7 @@
         /* Sidebar styling */
 
         /* Main content area */
-        .main-content {
-            padding: 25px;
-            min-height: 100vh;
-            transition: var(--transition);
-        }
+  
 
         /* Card styling */
         .card {
@@ -180,7 +187,7 @@
             border-radius: 50%;
             border: none;
             background-color: #f0f0f0;
-            color: var(--secondary-color);
+            color: var(--primary-color);
             transition: var(--transition);
         }
 
@@ -242,10 +249,11 @@
                                 </button>
                             </div>
                             <div class="dropdown">
-                                <button class="user-dropdown border-0" type="button" id="userDropdown"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <div class="user-avatar me-2">A</div>
-                                    <span class="d-none d-md-inline">Admin</span>
+                                <button class="user-dropdown border-0 d-flex align-items-center" type="button"
+                                    id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img id="user-avatar" src="https://via.placeholder.com/40?text=U" alt="Avatar"
+                                        class="rounded-circle me-2" width="36" height="36" style="object-fit: cover;">
+                                    <span class="d-none d-md-inline" id="user-fullname">Admin</span>
                                     <i class="fas fa-chevron-down ms-2 small"></i>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -279,7 +287,7 @@
                                 <div class="input-group">
                                     <input type="text" name="search" class="form-control" value="<%= search %>"
                                         placeholder="Tên người dùng">
-                                    <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                                    <button class="btn btn-success"><i class="fas fa-search"></i></button>
                                 </div>
                             </div>
 
@@ -310,7 +318,7 @@
                             </div>
 
                             <div class="col-md-2">
-                                <button class="btn btn-primary w-100">
+                                <button class="btn btn-success w-100">
                                     <i class="fas fa-filter me-1"></i> Lọc
                                 </button>
                             </div>
@@ -321,7 +329,7 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h6 class="mb-0 fw-bold">Danh sách người dùng</h6>
-                            <span class="badge bg-primary">
+                            <span class="badge bg-success">
                                 <%= users.length %> người dùng
                             </span>
                         </div>
@@ -528,7 +536,7 @@
                                     </div>
 
                                     <div class="modal-footer">
-                                        <button type="submit" class="btn btn-primary">
+                                        <button type="submit" class="btn btn-success">
                                             <i class="fas fa-save me-1"></i> Lưu thay đổi
                                         </button>
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -575,16 +583,17 @@
                                 <% } %>
                         </ul>
                     </nav>
-
+                    <%- include('partials/footer') %>
                 </div>
         </div>
         <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
     <script>
         // Xử lý nút Lọc
-        document.querySelector('.btn-primary.w-100').addEventListener('click', function (e) {
+        document.querySelector('.btn-success.w-100').addEventListener('click', function (e) {
             e.preventDefault();
             const search = document.querySelector('input[name="search"]').value;
             const role = document.querySelector('select[name="role"]').value;

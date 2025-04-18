@@ -730,7 +730,7 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-user"></i></span>
                                         <input type="text" class="form-control" id="email" name="email"
-                                            placeholder="Nhập tên đăng nhập" required>
+                                            placeholder="Nhập tên đăng nhập">
                                     </div>
                                 </div>
 
@@ -739,7 +739,7 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                         <input type="password" class="form-control" id="password" name="password"
-                                            placeholder="Nhập mật khẩu" required>
+                                            placeholder="Nhập mật khẩu">
                                         <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
                                             <i class="fas fa-eye"></i>
                                         </span>
@@ -884,21 +884,38 @@
         document.getElementById('loginForm').addEventListener('submit', function (event) {
             event.preventDefault();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorMessageBox = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
 
-            // Hiển thị hiệu ứng loading
+            // Reset lỗi
+            errorMessageBox.style.display = 'none';
+            errorText.textContent = '';
+
+            // Custom validate
+            if (!email) {
+                errorMessageBox.style.display = 'block';
+                errorText.textContent = 'Vui lòng nhập tên đăng nhập.';
+                return;
+            }
+
+            if (!password) {
+                errorMessageBox.style.display = 'block';
+                errorText.textContent = 'Vui lòng nhập mật khẩu.';
+                return;
+            }
+
+            // Xử lý loading
             const loginButton = document.querySelector('.btn-viettech');
             const originalText = loginButton.innerHTML;
             loginButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Đang xử lý...';
             loginButton.disabled = true;
 
-            // Gửi yêu cầu POST đến API login
+            // Gửi yêu cầu đăng nhập
             fetch('/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email,
                     password,
@@ -907,46 +924,32 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Khôi phục trạng thái nút
                     loginButton.innerHTML = originalText;
                     loginButton.disabled = false;
 
-
-
                     if (data.status === "error") {
-                        // Nếu có lỗi, hiển thị thông báo lỗi
-                        document.getElementById('errorMessage').style.display = 'block';
-                        document.getElementById('errorText').textContent = data.message;
+                        errorMessageBox.style.display = 'block';
+                        errorText.textContent = data.message;
                     } else {
                         localStorage.setItem('accessToken', data.result.metadata.tokens.accessToken);
                         localStorage.setItem('userId', data.result.metadata.account._id);
                         localStorage.setItem('refreshToken', data.result.metadata.tokens.refreshToken);
-                        localStorage.setItem('role', data.result.metadata.account.role); // <== Thêm dòng này
+                        localStorage.setItem('role', data.result.metadata.account.role);
+                        localStorage.setItem('full_name', data.result.metadata.account.full_name);
+                        localStorage.setItem('account', JSON.stringify(data.result.metadata.account));
 
-
-                        console.log("data", data.result.metadata.account._id);
-                        console.log("data 2", data.result.metadata.tokens.accessToken);
-                        console.log("Refresh Token:", data.result.metadata.tokens.refreshToken);
-                        console.log("Role:", data.result.metadata.account.role); // <== Thêm dòng này
-
-                        // Nếu đăng nhập thành công, chuyển hướng đến trang dashboard
-
-                        setTimeout(() => {
-                            window.location.href = data.redirectUrl;
-                        }, 1800);// Đảm bảo rằng API trả về trường redirectUrl
+                        window.location.href = data.redirectUrl;
                     }
                 })
                 .catch(error => {
-                    // Khôi phục trạng thái nút
                     loginButton.innerHTML = originalText;
                     loginButton.disabled = false;
-
-                    // Hiển thị lỗi kết nối
-                    document.getElementById('errorMessage').style.display = 'block';
-                    document.getElementById('errorText').textContent = 'Lỗi kết nối máy chủ. Vui lòng thử lại sau.';
+                    errorMessageBox.style.display = 'block';
+                    errorText.textContent = 'Lỗi kết nối máy chủ. Vui lòng thử lại sau.';
                     console.error('Error:', error);
                 });
         });
+
     </script>
     <div id="splashScreen">
         <div class="particles-container" id="particles-container"></div>

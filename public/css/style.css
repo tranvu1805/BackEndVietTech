@@ -162,12 +162,16 @@ body {
     border: 1px solid #ced4da;
 }
 
+
 .nav-link.active {
     background-color: rgba(255, 255, 255, 0.15);
     color: #fff !important;
     font-weight: bold;
 }
 
+.admin-only {
+    display: none;
+  }
 
 .search-box i {
     position: absolute;
@@ -408,7 +412,7 @@ body {
 /* Main Content Styles - Improved */
 .main-content {
     margin-left: 250px;
-    padding: 25px;
+    padding: 25px 25px 0 25px;
     min-height: 100vh;
 }
 

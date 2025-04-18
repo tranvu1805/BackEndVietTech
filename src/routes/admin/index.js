@@ -22,6 +22,7 @@ router.use("/discounts", require("./discount.admin"));
 router.use("/posts", require("./post.admin"));
 router.use("/reviews", require("./review.admin"));
 router.use("/onesignal", require("./onesignal"));
+router.use("/attributes", require("./attribute.admin"));
 
 
 router.get('/dashboard', (req, res) => {

@@ -2,9 +2,39 @@
 const express = require('express');
 const router = express.Router();
 const notificationModel = require('../../models/notification.model');
-const { authentication } = require('../../auth/authUtils');
+const { authentication: apiAuth } = require('../../auth/authUtils');
+const { authentication: webbAuth } = require('../../auth/middlewares/authMiddleware')
 
-router.use(authentication)
+
+router.get('/get-all', webbAuth, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const totalCount = await notificationModel.countDocuments({ receiverId: userId });
+        const totalPages = Math.ceil(totalCount / limit);
+
+        const notifications = await notificationModel.find({ receiverId: userId })
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        res.render('notifications/list', {
+            title: 'Tất cả thông báo',
+            notifications,
+            currentPage: page,
+            totalPages
+        });
+    } catch (error) {
+        console.error('Lỗi lấy thông báo:', error);
+        res.status(500).send('Lỗi server');
+    }
+});
+
+
+
+router.use(apiAuth)
 
 // Lấy danh sách thông báo của người dùng
 router.get('/', async (req, res) => {
@@ -17,6 +47,9 @@ router.get('/', async (req, res) => {
         const notifications = await notificationModel.find({ receiverId: userId })
             .sort({ createdAt: -1 })
             .limit(30);
+
+        console.log("Notifications:", userId); // Kiểm tra xem notifications có đúng không
+
 
         res.status(200).json({ notifications });
     } catch (err) {

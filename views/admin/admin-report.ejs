@@ -1159,6 +1159,9 @@
                             userData
                         } = result.data;
 
+                        console.log("result", result.data);
+                        
+
                         // Update biểu đồ doanh thu theo ngày
                         revenueByDayChart.data.labels = revenueByDay.map(d => {
                             const day = String(d._id.day).padStart(2, '0');
@@ -1229,7 +1232,7 @@
           <td>${c.userId || 'Khách hàng'}</td>
           <td>${c.email}</td>
           <td>${c.orderCount}</td>
-          <td>${(c.totalSpent).toLocaleString('vi-VN')} ₫</td>
+          <td>${(c.totalSpent).toLocaleString('vi-VN',{ maximumFractionDigits: 0 })} ₫</td>
         `;
                             customerTable.appendChild(tr);
                         });

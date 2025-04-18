@@ -5,6 +5,7 @@ const {
 } = require("../../controllers/bill.controller");
 const BillController = require("../../controllers/bill.controller");
 const asyncHandler = require("../../helpers/asyncHandler");
+const billModel = require("../../models/bill.model");
 const router = express.Router();
 
 
@@ -46,6 +47,24 @@ router.get("/", async (req, res) => {
 });
 
 
+router.get('/all-bills', async (req, res) => {
+    try {
+        const orders = await billModel.billRepo
+            .find({})
+            .sort({ createdAt: -1 })
+            .populate('user_id')
+            .lean();
+
+        res.render('admin/dashboard/order-list', {
+            title: "Tất cả đơn hàng",
+            orders
+        });
+    } catch (err) {
+        res.status(500).send("Lỗi server khi load đơn hàng");
+    }
+});
+
+
 router.get('/export', async (req, res, next) => {
     try {
         await exportBillsToExcel(req, res, next);  // Gọi phương thức xuất Excel
@@ -57,6 +76,8 @@ router.get('/export', async (req, res, next) => {
 
 router.get("/:billId", asyncHandler(BillController.renderInvoicePage));
 router.get('/:id/invoice/download', BillController.downloadInvoice);
+
+
 
 
 module.exports = router;
