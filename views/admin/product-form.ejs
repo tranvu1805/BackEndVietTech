@@ -487,10 +487,13 @@
                                                             class="badge bg-danger badge-required">Bắt
                                                             buộc</span>
                                                     </label>
-                                                    <input type="number" class="form-control shadow-sm"
+                                                    <input type="number" class="form-control shadow-sm bg-light"
                                                         id="product_stock" name="product_stock"
                                                         value="<%= product ? product.product_stock : '' %>"
-                                                        placeholder="Nhập số lượng" required>
+                                                        placeholder="Nhập số lượng" <%=product && product.variants &&
+                                                        product.variants.length> 0 ? 'readonly disabled' : '' %>>
+                                                    <small class="text-muted">Tự động tính từ các biến thể</small>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -701,28 +704,41 @@
 
                 // Lấy dữ liệu từ form
                 const formData = new FormData(form);
+                if (product && product.variants && product.variants.length > 0) {
+                    formData.delete('product_stock');
+                }
+
+
+                console.log("Form data before submit:", product.hasBeenOrdered);
 
                 if (isEdit) {
-                    // Xóa các trường combinations và variant_prices để tránh gửi dữ liệu không cần thiết
-                    const variantStocks = [];
+                    // Luôn xóa trước để tránh dư thừa
+                    formData.delete('combinations[]');
+                    formData.delete('variant_prices[]');
+                    formData.delete('variant_stocks[]');
+
+                    // Duyệt qua từng hàng biến thể
                     const variantRows = document.querySelectorAll('.variation-row');
                     variantRows.forEach(row => {
-                        const stockField = row.querySelector('.variant-stock');
                         const combinationInput = row.querySelector('input[name="combinations[]"]');
-                        if (stockField.value && combinationInput) {
-                            // Lưu stock và ánh xạ với combination
-                            variantStocks.push(stockField.value);
-                            // Xóa combination và price khỏi formData
-                            formData.delete('combinations[]');
-                            formData.delete('variant_prices[]');
+                        const priceField = row.querySelector('.variant-price');
+                        const stockField = row.querySelector('.variant-stock');
+
+                        // Luôn cho phép cập nhật số lượng
+                        formData.append('variant_stocks[]', stockField.value || '');
+
+                        // ✅ Nếu sản phẩm chưa từng bán → cho phép cập nhật giá và combinations
+                        console.log("Appending combination and price for new product 1:", combinationInput, priceField);
+                        if (!product.hasBeenOrdered && combinationInput && priceField) {
+                            console.log("Appending combination and price for new product:", combinationInput.value, priceField.value);
+
+                            formData.append('combinations[]', combinationInput.value);
+                            formData.append('variant_prices[]', priceField.value || '');
                         }
                     });
 
-                    // Thêm variant_stocks vào formData
-                    variantStocks.forEach(stock => {
-                        formData.append('variant_stocks[]', stock);
-                    });
                 }
+
 
 
 
@@ -1238,7 +1254,7 @@
                             <label class="form-label">Giá (VNĐ)</label>
                             <input type="number" class="form-control shadow-sm variant-price"
                                 value="${existingVariant?.price || ''}" placeholder="Để trống nếu dùng giá mặc định"
-                                ${isEdit ? 'disabled' : ''}>
+                                ${isEdit && product?.hasBeenOrdered ? 'disabled readonly' : ''}>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Số lượng</label>
@@ -1274,11 +1290,15 @@
                     });
 
                     // Chỉ thêm combination và price trong chế độ tạo mới
-                    if (!isEdit) {
-                        variantRow.appendChild(combinationInput);
-                        variantRow.appendChild(priceInput);
-                    }
+                    variantRow.appendChild(combinationInput);
+                    variantRow.appendChild(priceInput);
                     variantRow.appendChild(stockInput);
+
+                    // ✅ Nếu sản phẩm đã từng đặt hàng, disable input giá
+                    if (isEdit && product?.hasBeenOrdered) {
+                        priceInput.disabled = true;
+                        combinationInput.disabled = true;
+                    }
 
                     variantListContainer.appendChild(variantRow);
                 });

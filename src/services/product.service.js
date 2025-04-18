@@ -18,6 +18,13 @@ const generateSKU = (productName, combination) => {
     return `${productSlug}-${variantsSlug}`;
 };
 
+const updateProductStock = async (productId) => {
+    const variants = await detailsVariantModel.find({ productId });
+    const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+    await Product.findByIdAndUpdate(productId, { product_stock: totalStock });
+};
+
+
 class ProductService {
     static async createProduct() {
         // Kiểm tra danh mục có tồn tại không
@@ -117,6 +124,7 @@ class ProductService {
             }
         ]);
 
+        
         console.log("🔥 Top selling result:", result);
         return result;
     }
@@ -131,9 +139,13 @@ class ProductService {
             match.createdAt = { $gte: start, $lte: end };
         }
 
+        console.log("🔥 Match pro:", match);
+        
+        match.status = 'completed'; // Đảm bảo chỉ lấy đơn đã hoàn thành
+
         const pipeline = [
+            { $match: match }, // ✅ Đặt trước $unwind!
             { $unwind: "$products" },
-            { $match: match },
             {
                 $addFields: {
                     "products.productId": {
@@ -180,11 +192,16 @@ class ProductService {
             }
         ];
 
+
         const result = await billModel.billRepo.aggregate(pipeline);
 
         const products = result[0].data;
         const totalCount = result[0].totalCount[0]?.count || 0;
         const totalPages = Math.ceil(totalCount / limit);
+
+        console.log("🔥 Top selling products result:", products);
+        console.log("🔥 Total count:", totalCount);
+
 
         return { products, totalCount, totalPages };
     }
@@ -250,6 +267,7 @@ class ProductService {
                 sku
             });
 
+
             await logModel.create({
                 action: 'create',
                 target_type: 'DetailsVariant',
@@ -262,7 +280,7 @@ class ProductService {
 
 
         }
-
+        await updateProductStock(productId);
         return {
             skipped: 0,
             createdCount: combinations.length,

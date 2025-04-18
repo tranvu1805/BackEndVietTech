@@ -372,6 +372,11 @@ class ReportService {
             matchCondition.createdAt = { $gte: fromDate, $lt: toDate };
         }
 
+        console.log("Match Condition:", matchCondition);
+        console.log("From Date:", fromDate);
+        console.log("To Date:", toDate);
+
+
         const [
             revenueByDay,
             revenueByHour,
@@ -405,6 +410,17 @@ class ReportService {
                 { $match: { ...matchCondition, status: 'completed' } },
                 { $unwind: "$products" },
                 {
+                    $addFields: {
+                        "products.productId": {
+                            $cond: [
+                                { $not: [{ $eq: [{ $type: "$products.productId" }, "objectId"] }] },
+                                { $toObjectId: "$products.productId" },
+                                "$products.productId"
+                            ]
+                        }
+                    }
+                },
+                {
                     $group: {
                         _id: "$products.productId",
                         quantity: { $sum: "$products.quantity" }
@@ -414,7 +430,7 @@ class ReportService {
                 { $limit: 5 },
                 {
                     $lookup: {
-                        from: "Products", // Tên collection (viết thường) bạn dùng trong MongoDB
+                        from: "Products",
                         localField: "_id",
                         foreignField: "_id",
                         as: "productInfo"
@@ -426,7 +442,7 @@ class ReportService {
                         _id: 0,
                         productId: "$_id",
                         quantity: 1,
-                        productName: "$productInfo.product_name" // hoặc đổi tên trường cho phù hợp
+                        productName: "$productInfo.product_name"
                     }
                 }
             ]),
@@ -510,6 +526,8 @@ class ReportService {
         ]);
 
         const { revenueData, orderData, userData } = await this.getBasicChartData(filter, startDate, endDate);
+
+        console.log("selling product", topProducts);
 
         console.log("revenue", revenueData);
 

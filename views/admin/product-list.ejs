@@ -65,7 +65,8 @@
                                     </div>
 
                                     <div class="card-footer text-center">
-                                        <a href="/v1/api/notification/get-all" class="view-all-link">Xem tất cả thông báo</a>
+                                        <a href="/v1/api/notification/get-all" class="view-all-link">Xem tất cả thông
+                                            báo</a>
                                     </div>
                                 </div>
                             </div>
@@ -74,8 +75,10 @@
                             <div class="dropdown">
                                 <button class="user-dropdown border-0 d-flex align-items-center" type="button"
                                     id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <img id="user-avatar" src="https://i.pinimg.com/236x/5e/e0/82/5ee082781b8c41406a2a50a0f32d6aa6.jpg" alt="Avatar"
-                                        class="rounded-circle me-2" width="36" height="36" style="object-fit: cover;">
+                                    <img id="user-avatar"
+                                        src="https://i.pinimg.com/236x/5e/e0/82/5ee082781b8c41406a2a50a0f32d6aa6.jpg"
+                                        alt="Avatar" class="rounded-circle me-2" width="36" height="36"
+                                        style="object-fit: cover;">
                                     <span class="d-none d-md-inline" id="user-fullname">Admin</span>
                                     <i class="fas fa-chevron-down ms-2 small"></i>
                                 </button>
@@ -97,9 +100,14 @@
                     <!-- Page Header -->
                     <div class="page-header">
 
-                        <a href="/v1/api/admin/products/create" class="btn btn-success">
-                            <i class="fas fa-plus me-1"></i> Thêm sản phẩm mới
-                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="/v1/api/admin/attributes/list" class="btn btn-outline-primary">
+                                <i class="fas fa-sliders-h me-1"></i> Quản lý thuộc tính
+                            </a>
+                            <a href="/v1/api/admin/products/create" class="btn btn-success">
+                                <i class="fas fa-plus me-1"></i> Thêm sản phẩm mới
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Search and Filter -->
@@ -408,17 +416,17 @@
                                                                                         <span class="ms-1">
                                                                                             <%= Array.isArray(attr.values)
                                                                                                 ? attr.values.join(", ") : '[Không có giá trị]' %>
-                                                                                          </span>
-                                                                      </div>
-                                                                    <% }) %>
-                                                                  <% } %>
+                                                                                                </span>
+                                                                            </div>
+                                                                            <% }) %>
+                                                                        <% } %>
+                                                                        </div>
+                                                                    </div>
+                                                                    </div>
                                                                 </div>
-                                                              </div>
-                                                            </div>
-                                                          </div>
 
-                                                
-                                                        <div class=" col-md-5">
+                                                        
+                                                                <div class=" col-md-5">
                                                                                                 <div
                                                                                                     class="product-variations">
                                                                                                     <h6 class="mb-3"><i
@@ -490,7 +498,7 @@
                     <%- include('partials/footer') %>
                 </div>
         </div>
-  
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -1110,6 +1110,8 @@
             async function fetchTopSellingModal(page = 1) {
                 const month = document.getElementById("filter-month").value;
                 const search = document.getElementById("searchInput").value;
+                console.log("check month", month);
+                
 
                 try {
                     const res = await fetch(`/v1/api/shop/products/top-selling-list?month=${month}&page=${page}&limit=5&search=${search}`);
