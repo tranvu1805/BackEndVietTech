@@ -27,9 +27,24 @@ router.post("/:productId/match-variant", asyncHandler(matchVariant));
 router.use(authentication)
 
 
-router.post("/", upload.single('product_thumbnail'), createProduct);
+router.post(
+  "/",
+  upload.fields([
+    { name: 'product_thumbnail', maxCount: 1 },
+    { name: 'gallery_uploads[]', maxCount: 10 }
+  ]),
+  createProduct
+);
 
-router.put("/:id", upload.single('product_thumbnail'), updateProduct);
+router.put(
+  "/:id",
+  upload.fields([
+    { name: 'product_thumbnail', maxCount: 1 },
+    { name: 'gallery_uploads[]', maxCount: 10 }
+  ]),
+  updateProduct
+);
+
 router.delete("/:id", deleteProduct);
 
 module.exports = router;

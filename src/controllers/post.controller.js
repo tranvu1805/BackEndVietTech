@@ -52,11 +52,11 @@ class PostController {
       if (req.files?.gallery_uploads?.length > 0) {
         const galleryImages = await Promise.all(req.files.gallery_uploads.map(file => {
           return new Image({
-            file_name: file.originalname,
+           file_name: file.originalname,
             file_path: file.path,
             file_size: file.size,
             file_type: file.mimetype,
-            url: `${req.protocol}://${req.get('host')}/uploads/${file.filename}`
+            url: `${req.protocol}://${req.get('host')}/uploads/${file.filename}` 
           }).save();
         }));
 

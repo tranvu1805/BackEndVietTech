@@ -25,6 +25,50 @@
             --transition-speed: 0.3s;
         }
 
+        .gallery-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 0.25rem;
+            overflow: hidden;
+            border: 2px solid #e3e6f0;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .remove-image {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e74a3b;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .gallery-upload {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed #d1d3e2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #888;
+        }
+
+
         body {
             background-color: #f8f9fc;
             font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -587,6 +631,40 @@
                                     </div>
                                 </div>
 
+                                <!-- Bộ sưu tập ảnh -->
+                                <div class="card animate-in" style="animation-delay: 0.25s;">
+                                    <div class="card-header">
+                                        <i class="fas fa-images"></i> Bộ sưu tập ảnh
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="gallery-container d-flex flex-wrap gap-3"
+                                            id="product-gallery-preview">
+                                            <% if (product && product.image_ids && product.image_ids.length> 0) { %>
+                                                <% product.image_ids.forEach(image=> { %>
+                                                    <div class="gallery-item">
+                                                        <img src="/<%= image.file_path %>" alt="Gallery image">
+                                                        <input type="hidden" name="images[]" value="<%= image._id %>">
+                                                        <div class="remove-image" data-image-id="<%= image._id %>">
+                                                            <i class="fas fa-times"></i>
+                                                        </div>
+                                                    </div>
+                                                    <% }); %>
+                                                        <% } %>
+                                                            <label for="gallery_uploads" class="gallery-upload">
+                                                                <i class="fas fa-plus"></i>
+                                                                <span>Thêm ảnh</span>
+                                                            </label>
+                                                            <input type="file" id="gallery_uploads" name="gallery_uploads[]" multiple accept="image/*">
+
+                                        </div>
+                                        <small class="form-text text-muted mt-2">Chọn nhiều ảnh để upload. Có thể xóa
+                                            ảnh đã chọn.</small>
+                                    </div>
+                                </div>
+
+
+
+
                                 <!-- Trạng thái và hành động -->
                                 <div class="card animate-in" style="animation-delay: 0.3s;">
                                     <div class="card-header">
@@ -708,6 +786,9 @@
                     formData.delete('product_stock');
                 }
 
+                galleryFiles.forEach(file => {
+                    formData.append("gallery_uploads[]", file);
+                });
 
                 console.log("Form data before submit:", product.hasBeenOrdered);
 
@@ -783,7 +864,7 @@
                             console.log("Success:", data);
                             showToast('Thành công!', 'Sản phẩm đã được ' + (isEdit ? 'cập nhật' : 'thêm') + ' thành công!', 'success');
                             setTimeout(() => {
-                                window.location.href = '/v1/api/admin/products/list';
+                                // window.location.href = '/v1/api/admin/products/list';
                             }, 1500);
                         } else {
                             console.log("Error:", data.success);
@@ -849,6 +930,8 @@
 
                 this.remove();
             }
+
+
 
             // Tạo mới thuộc tính
             document.getElementById('create-attribute-form').addEventListener('submit', async function (e) {
@@ -1151,6 +1234,41 @@
                     generateVariants();
                 }
             }
+
+            let galleryFiles = [];
+
+            document.getElementById("gallery_uploads")?.addEventListener("change", function () {
+                const files = Array.from(this.files);
+                galleryFiles = [...galleryFiles, ...files];
+
+                const previewContainer = document.getElementById("product-gallery-preview");
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const item = document.createElement("div");
+                        item.className = "gallery-item temp-item";
+                        item.innerHTML = `
+        <img src="${e.target.result}" alt="Gallery image">
+        <div class="remove-image"><i class="fas fa-times"></i></div>
+      `;
+                        previewContainer.insertBefore(item, previewContainer.querySelector(".gallery-upload"));
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                this.value = '';
+            });
+
+            // Xóa ảnh vừa thêm (chưa gửi)
+            document.addEventListener("click", function (e) {
+                if (e.target.closest(".gallery-item .remove-image")) {
+                    const item = e.target.closest(".gallery-item");
+                    const index = Array.from(document.querySelectorAll(".gallery-item.temp-item")).indexOf(item);
+                    if (index >= 0) galleryFiles.splice(index, 1);
+                    item.remove();
+                }
+            });
+
 
             // Xử lý khi click "Sinh tổ hợp biến thể"
             document.getElementById('generate-variants').addEventListener('click', function () {
