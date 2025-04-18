@@ -9,6 +9,8 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const { VNPay } = require('vnpay');
 const { billRepo } = require('../models/bill.model');
+const PendingPayment = require('../models/pendingPayment.model');
+const { discountRepo } = require("../models/disscount.model");
 
 
 const { sendPushNotification } = require("../helpers/onesignal.helper");
@@ -367,6 +369,60 @@ class BillController {
     }
   }
 
+  // static async handleVnpayReturn(req, res, next) {
+  //   try {
+  //     const vnpay = new VNPay({
+  //       tmnCode: 'HMC4RYL1',
+  //       secureSecret: 'GP6FEUU3UDKCOXM1P5OE3AU1AJN5CDP4',
+  //       vnpayHost: 'https://sandbox.vnpayment.vn',
+  //       testMode: true,
+  //       hashAlgorithm: 'SHA512',
+  //     });
+
+  //     const isValid = vnpay.verifyReturnUrl(req.query);
+
+  //     if (!isValid) {
+  //       return res.status(400).json({
+  //         code: 400,
+  //         message: 'Checksum không hợp lệ!',
+  //         status: 'error',
+  //       });
+  //     }
+
+  //     const { vnp_ResponseCode, vnp_TxnRef } = req.query;
+
+  //     if (vnp_ResponseCode !== '00') {
+  //       return res.redirect(`http://localhost:3056/payment-failure?reason=${vnp_ResponseCode}&orderCode=${vnp_TxnRef}`);
+  //     }
+
+  //     const bill = await billRepo.findOne({ order_code: vnp_TxnRef });
+
+  //     if (!bill) {
+  //       return res.status(404).json({
+  //         code: 404,
+  //         message: 'Không tìm thấy đơn hàng!',
+  //         status: 'error',
+  //       });
+  //     }
+
+  //     if (!bill.isPay) {
+  //       bill.isPay = true;
+  //       await bill.save();
+       
+  //     }
+
+
+  //     return res.redirect(`http://localhost:3056/payment-success?orderCode=${bill.order_code}&receiverName=${encodeURIComponent(bill.receiver_name)}&phoneNumber=${bill.phone_number}&address=${encodeURIComponent(bill.address)}`);
+  //   } catch (error) {
+  //     console.error('Lỗi xử lý VNPay Return:', error);
+  //     return res.status(500).json({
+  //       code: 500,
+  //       message: 'Lỗi máy chủ khi xử lý thanh toán!',
+  //       status: 'error',
+  //     });
+  //   }
+  // }
+
   static async handleVnpayReturn(req, res, next) {
     try {
       const vnpay = new VNPay({
@@ -376,9 +432,9 @@ class BillController {
         testMode: true,
         hashAlgorithm: 'SHA512',
       });
-
+  
       const isValid = vnpay.verifyReturnUrl(req.query);
-
+  
       if (!isValid) {
         return res.status(400).json({
           code: 400,
@@ -386,34 +442,65 @@ class BillController {
           status: 'error',
         });
       }
-
+  
       const { vnp_ResponseCode, vnp_TxnRef } = req.query;
-
+  
       if (vnp_ResponseCode !== '00') {
-        return res.redirect(`https://www.viettech.store/payment-failure?reason=${vnp_ResponseCode}&orderCode=${vnp_TxnRef}`);
+        return res.redirect(`http://localhost:3056/payment-failure?reason=${vnp_ResponseCode}&orderCode=${vnp_TxnRef}`);
       }
-
-      const bill = await billRepo.findOne({ order_code: vnp_TxnRef });
-
-      if (!bill) {
+  
+      // 1. Tìm trong PendingPayment
+      const pending = await PendingPayment.findOne({ order_code: vnp_TxnRef });
+  
+      if (!pending) {
         return res.status(404).json({
           code: 404,
-          message: 'Không tìm thấy đơn hàng!',
+          message: 'Không tìm thấy đơn hàng chờ xử lý!',
           status: 'error',
         });
       }
-
-      if (!bill.isPay) {
-        bill.isPay = true;
-        await bill.save();
-        console.log(`Cập nhật trạng thái isPay=true cho đơn hàng___ ${bill.order_code}`);
-        console.log(`Cập nhật trạng thái người nhận ${bill.receiver_name}`);
-        console.log(`Cập nhật trạng thái người nhận ${bill.phone_number}`);
-        console.log(`Cập nhật trạng thái người nhận ${bill.address}`);
+  
+      // 2. Tạo đơn hàng chính thức
+      const bill = await billRepo.create({
+        user_id: pending.user_id,
+        products: pending.products,
+        order_code: pending.order_code,
+        address: pending.address,
+        total: pending.total,
+        shipping_fee: pending.shipping_fee,
+        phone_number: pending.phone_number,
+        receiver_name: pending.receiver_name,
+        status: 'pending',
+        payment_method: 'vnpay',
+        isPay: true,
+        discount_code: pending.discount_code,
+        discount_amount: pending.discount_amount,
+      });
+  
+      // 3. Nếu có discount code, tăng lượt sử dụng
+      if (pending.discount_code) {
+        await discountRepo.updateOne(
+          { code: pending.discount_code },
+          { $inc: { usageCount: 1 } }
+        );
       }
-
-
-      return res.redirect(`https://www.viettech.store/payment-success?orderCode=${bill.order_code}&receiverName=${encodeURIComponent(bill.receiver_name)}&phoneNumber=${bill.phone_number}&address=${encodeURIComponent(bill.address)}`);
+  
+      // 4. Xoá khỏi PendingPayment
+      await pending.deleteOne();
+  
+      // 5. Gửi thông báo (nếu cần)
+      await sendPushNotification({
+        titleAdmin: "🧾 Đơn hàng VNPay mới!",
+        messageAdmin: `Đơn hàng #${pending.order_code} đã thanh toán thành công.`,
+        url: "/v1/api/admin/bills",
+        userId: pending.user_id.toString(),
+        targets: "admin",
+        data: { orderCode: pending.order_code }
+      });
+  
+      return res.redirect(
+        `http://localhost:3056/payment-success?orderCode=${bill.order_code}&receiverName=${encodeURIComponent(bill.receiver_name)}&phoneNumber=${bill.phone_number}&address=${encodeURIComponent(bill.address)}`
+      );
     } catch (error) {
       console.error('Lỗi xử lý VNPay Return:', error);
       return res.status(500).json({
@@ -423,6 +510,7 @@ class BillController {
       });
     }
   }
+  
 
 }
 

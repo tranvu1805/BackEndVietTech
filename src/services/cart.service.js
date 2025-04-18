@@ -19,6 +19,8 @@ const detailsVariantModel = require("../models/detailsVariant.model");
 const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
 const { log } = require("console");
 const { sendPushNotification } = require("../helpers/onesignal.helper");
+const PendingPayment = require('../models/pendingPayment.model');
+
 
 
 class CartService {
@@ -522,13 +524,70 @@ class CartService {
 
     const orderCode = Math.floor(10000 + Math.random() * 90000);
 
-    // Tạo đơn hàng trước
-    const newBill = await billRepo.create({
+   
+   
+
+    // Nếu là VNPay thì trả về link thanh toán
+    // Nếu là thanh toán qua VNPay: chỉ lưu tạm vào PendingPayment
+
+    if (payment_method === "vnpay") {
+
+      
+    await PendingPayment.create({
+      order_code: orderCode,
+      user_id: currentCart.cart_userId,
+      products: selectedProducts,
+      address,
+      total,
+      shipping_fee: shippingFee,
+      phone_number,
+      receiver_name,
+      discount_code: discount_code || null,
+      discount_amount: discountAmount || 0,
+      cart_id: currentCart._id,
+    });
+
+      const vnpay = new VNPay({
+        tmnCode: 'HMC4RYL1',
+        secureSecret: 'GP6FEUU3UDKCOXM1P5OE3AU1AJN5CDP4',
+        vnpayHost: 'https://sandbox.vnpayment.vn',
+        testMode: true,
+        hashAlgorithm: 'SHA512',
+        loggerFn: ignoreLogger,
+      });
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      console.log('client id_____:', clientIp);
+
+      const vnpayResponse = await vnpay.buildPaymentUrl({
+        vnp_Amount: total,
+        vnp_IpAddr: clientIp,
+        vnp_TxnRef: orderCode.toString(),
+        vnp_OrderInfo: `Thanh toán đơn hàng #${orderCode}`,
+        vnp_OrderType: ProductCode.Other,
+        vnp_ReturnUrl: `http://localhost:3056/v1/api/bill/vnpay-return`,
+        vnp_Locale: VnpLocale.VN,
+        vnp_CreateDate: dateFormat(new Date()),
+        vnp_ExpireDate: dateFormat(tomorrow),
+      });
+
+      return {
+        code: 200,
+        message: "Redirect to VNPay",
+        paymentUrl: vnpayResponse,
+        orderCode, // dùng orderCode để đối chiếu khi VNPay trả về
+      };
+      
+    }
+
+     // Tạo đơn hàng trước
+     const newBill = await billRepo.create({
       user_id: currentCart.cart_userId,
       products: selectedProducts,
       order_code: orderCode,
       address: address,
-      total: total * 100,
+      total: total,
       shipping_fee: shippingFee,
       phone_number: phone_number,
       receiver_name: receiver_name,
@@ -554,40 +613,6 @@ class CartService {
       await currentCart.save();
     }
 
-    // Nếu là VNPay thì trả về link thanh toán
-    if (payment_method === "vnpay") {
-      const vnpay = new VNPay({
-        tmnCode: 'HMC4RYL1',
-        secureSecret: 'GP6FEUU3UDKCOXM1P5OE3AU1AJN5CDP4',
-        vnpayHost: 'https://sandbox.vnpayment.vn',
-        testMode: true,
-        hashAlgorithm: 'SHA512',
-        loggerFn: ignoreLogger,
-      });
-
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      console.log('client id_____:', clientIp);
-      
-      const vnpayResponse = await vnpay.buildPaymentUrl({
-        vnp_Amount: total,
-        vnp_IpAddr: clientIp,
-        vnp_TxnRef: orderCode.toString(),
-        vnp_OrderInfo: `Thanh toán đơn hàng #${orderCode}`,
-        vnp_OrderType: ProductCode.Other,
-        vnp_ReturnUrl: `https://www.viettech.store/v1/api/bill/vnpay-return`,
-        vnp_Locale: VnpLocale.VN,
-        vnp_CreateDate: dateFormat(new Date()),
-        vnp_ExpireDate: dateFormat(tomorrow),
-      });
-
-      return {
-        code: 200,
-        message: "Redirect to VNPay",
-        paymentUrl: vnpayResponse,
-        billId: newBill._id,
-      };
-    }
 
     // Nếu là COD hoặc thanh toán khác
     await sendPushNotification({
@@ -605,7 +630,7 @@ class CartService {
     return newBill;
   }
 
-  
+
   static async checkoutNow({
     userId,
     productId,
@@ -622,7 +647,7 @@ class CartService {
       req.headers['x-forwarded-for']?.toString().split(',')[0] ||
       req.socket?.remoteAddress ||
       '127.0.0.1';
-  
+
     const product = await productModel.findById(productId);
     if (!product) {
       return {
@@ -631,7 +656,7 @@ class CartService {
         status: "error",
       };
     }
-  
+
     if (product.product_stock < quantity) {
       return {
         code: 400,
@@ -639,10 +664,10 @@ class CartService {
         status: "error",
       };
     }
-  
+
     let price = product.product_price;
     let variant = null;
-  
+
     if (detailsVariantId) {
       variant = await detailsVariantModel.findById(detailsVariantId);
       if (!variant) {
@@ -665,19 +690,19 @@ class CartService {
       );
       price = variant.price || price;
     }
-  
+
     await productModel.updateOne(
       { _id: productId },
       { $inc: { product_stock: -quantity } }
     );
-  
+
     let total = price * quantity;
     const shippingFee = 35000;
     total += shippingFee;
-  
+
     let discountAmount = 0;
     let discount = null;
-  
+
     if (discount_code) {
       discount = await discountRepo.findOne({
         code: discount_code,
@@ -685,7 +710,7 @@ class CartService {
         startDate: { $lte: new Date() },
         endDate: { $gte: new Date() },
       }).lean();
-  
+
       if (discount) {
         if (discount.minOrderValue && total < discount.minOrderValue) {
           return {
@@ -694,7 +719,7 @@ class CartService {
             status: "error",
           };
         }
-  
+
         if (discount.usageLimit && discount.usageCount >= discount.usageLimit) {
           return {
             code: 400,
@@ -702,7 +727,7 @@ class CartService {
             status: "error",
           };
         }
-  
+
         if (discount.discountType === "percentage") {
           discountAmount = (discount.discountValue / 100) * total;
           if (discount.maxDiscountAmount) {
@@ -715,10 +740,10 @@ class CartService {
         }
       }
     }
-  
+
     total -= discountAmount;
     const orderCode = Math.floor(10000 + Math.random() * 90000);
-  
+
     const selectedProducts = [
       {
         productId,
@@ -728,29 +753,9 @@ class CartService {
         isSelected: true,
       }
     ];
-  
-    const newBill = await billRepo.create({
-      user_id: userId,
-      products: selectedProducts,
-      order_code: orderCode,
-      address,
-      total: total * 100,
-      shipping_fee: shippingFee,
-      phone_number,
-      receiver_name,
-      status: "pending",
-      payment_method: payment_method || "tm",
-      discount_code: discount_code || null,
-      discount_amount: discountAmount || 0,
-    });
-  
-    if (discount) {
-      await discountRepo.updateOne(
-        { _id: discount._id },
-        { $inc: { usageCount: 1 } }
-      );
-    }
-  
+
+    
+
     if (payment_method === "vnpay") {
       const vnpay = new VNPay({
         tmnCode: 'HMC4RYL1',
@@ -760,30 +765,66 @@ class CartService {
         hashAlgorithm: 'SHA512',
         loggerFn: ignoreLogger,
       });
-  
+
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-  
+
+      await PendingPayment.create({
+        order_code: orderCode,
+        user_id: userId,
+        products: selectedProducts,
+        address,
+        total,
+        shipping_fee: shippingFee,
+        phone_number,
+        receiver_name,
+        discount_code: discount_code || null,
+        discount_amount: discountAmount || 0,
+        cart_id: null,
+      });
+
       const vnpayResponse = await vnpay.buildPaymentUrl({
         vnp_Amount: total,
         vnp_IpAddr: clientIp,
         vnp_TxnRef: orderCode.toString(),
         vnp_OrderInfo: `Thanh toán đơn hàng #${orderCode}`,
         vnp_OrderType: ProductCode.Other,
-        vnp_ReturnUrl: `https://www.viettech.store/v1/api/bill/vnpay-return`,
+        vnp_ReturnUrl: `http://localhost:3056/v1/api/bill/vnpay-return`,
         vnp_Locale: VnpLocale.VN,
         vnp_CreateDate: dateFormat(new Date()),
         vnp_ExpireDate: dateFormat(tomorrow),
       });
-  
+
       return {
         code: 200,
         message: "Redirect to VNPay",
         paymentUrl: vnpayResponse,
-        billId: newBill._id,
+        billId: orderCode,
       };
     }
-  
+
+    const newBill = await billRepo.create({
+      user_id: userId,
+      products: selectedProducts,
+      order_code: orderCode,
+      address,
+      total: total,
+      shipping_fee: shippingFee,
+      phone_number,
+      receiver_name,
+      status: "pending",
+      payment_method: payment_method || "tm",
+      discount_code: discount_code || null,
+      discount_amount: discountAmount || 0,
+    });
+
+    if (discount) {
+      await discountRepo.updateOne(
+        { _id: discount._id },
+        { $inc: { usageCount: 1 } }
+      );
+    }
+
     await sendPushNotification({
       titleAdmin: "🧾 Đơn hàng mới!",
       messageAdmin: `Đơn hàng có mã #${orderCode} đã được đặt thành công.`,
@@ -792,10 +833,10 @@ class CartService {
       targets: "admin",
       data: { orderCode }
     });
-  
+
     return newBill;
   }
-  
+
 
   static async updateIsSelected({
     userId,
