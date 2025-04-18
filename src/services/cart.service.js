@@ -747,12 +747,15 @@ class CartService {
     const selectedProducts = [
       {
         productId,
+        name: product.product_name,
+        image: product.product_thumbnail,
         detailsVariantId: detailsVariantId || null,
         quantity,
         price,
         isSelected: true,
       }
     ];
+    
 
     
 
